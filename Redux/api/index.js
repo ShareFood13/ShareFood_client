@@ -2,7 +2,7 @@ import axios from "axios"
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API = axios.create({ baseURL: 'https://9378-77-124-24-116.eu.ngrok.io' })
+const API = axios.create({ baseURL: 'https://e766-77-124-24-116.eu.ngrok.io' })
 
 API.interceptors.request.use(async (req) => {
     if (await AsyncStorage.getItem('profile')) {

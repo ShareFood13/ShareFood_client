@@ -5,28 +5,28 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 
 
-import { AuthContext } from "./context";
+import { AuthContext } from "../context";
 
-import Home from "./screens/Footer/Home";
-import Search from "./screens/Footer/Search";
-import NewRecipe from "./screens/Footer/NewRecipe";
-import LovedOnes from "./screens/Footer/LovedOnes";
-import MyBook from "./screens/Footer/MyBook";
+import Home from "../screens/Footer/Home";
+import Search from "../screens/Footer/Search";
+import NewRecipe from "../screens/Footer/NewRecipe";
+import LovedOnes from "../screens/Footer/LovedOnes";
+import MyBook from "../screens/Footer/MyBook";
 
-import MyProfile from "./screens/Drawer/MyProfile";
-import MySettings from "./screens/Drawer/MySettings";
-import MyCallendar from "./screens/Drawer/MyCallendar";
+import MyProfile from "../screens/Drawer/MyProfile";
+import MySettings from "../screens/Drawer/MySettings";
+import MyCallendar from "../screens/Drawer/MyCallendar";
 import MyActivities from "./screens/Drawer/MyActivity";
-import MyMeals from "./screens/Drawer/MyMeals";
-import MyFriends from "./screens/Drawer/MyFriends";
-import ContactUs from "./screens/Drawer/ContactUs";
-import Donations from "./screens/Drawer/Donations";
+import MyMeals from "../screens/Drawer/MyMeals";
+import MyFriends from "../screens/Drawer/MyFriends";
+import ContactUs from "../screens/Drawer/ContactUs";
+import Donations from "../screens/Drawer/Donations";
 
-import LogOut from "./screens/Logs/LogOut";
+import LogOut from "../screens/Logs/LogOut";
 import SignIn from "./screens/Logs/SignIn"
-import LogIn from "./screens/Logs/LogIn";
+import LogIn from "../screens/Logs/LogIn";
 
-import Loading from "./screens/Loading";
+import Loading from "../screens/Loading";
 import { Text } from "react-native";
 
 const AuthStack = createNativeStackNavigator();

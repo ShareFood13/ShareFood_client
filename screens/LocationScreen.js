@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet, Text, View, Alert } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View, Alert, ImagePickerIOS } from 'react-native';
 
 import * as Location from 'expo-location';
 
@@ -14,6 +14,7 @@ export default function LocationScreen({ navigation }) {
 
     async function load() {
         let { status } = await Location.requestForegroundPermissionsAsync();
+
 
         if (status !== 'granted') {
             setErrorMsg('Permission to access location was denied');
