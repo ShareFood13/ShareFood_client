@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
     View,
@@ -38,6 +38,8 @@ const initialIngredients = {
 }
 
 const initialValue = {
+    creatorId: '',
+    creator: '',
     recipeName: '',
     recipePicture: [],
     prepTime: '',
@@ -47,7 +49,9 @@ const initialValue = {
     specialDiet: [],
     tags: [],
     ingredients: [],
-    preparation: []
+    preparation: [],
+    likes: [],
+    donwloads: [],
 }
 
 const difficulty = [
@@ -88,6 +92,11 @@ const units = [
     "cups"
 ]
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { useDispatch } from 'react-redux';
+
+import { createRecipe } from '../../Redux/actions/recipes';
 
 export default function NewRecipe({ navigation }) {
     const [recipeForm, setRecipeForm] = useState(initialValue)
@@ -99,12 +108,25 @@ export default function NewRecipe({ navigation }) {
     const [modalVisible3, setModalVisible3] = useState(false);
     const [difficultyColor, setDifficultyColor] = useState("#F194FF")
     const [tagsValue, setTagsValue] = useState("")
-    const [image, setImage] = useState(null);
-    const [recipeStep, setRecipeStep] = useState(1)
+    const [user, setUser] = useState("");
+    // const [recipeStep, setRecipeStep] = useState(1)
+    const [showImage, setShowImage] = useState(1)
+
+    const dispatch = useDispatch();
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
 
+    // console.log('====================================');
+    // console.log(windowWidth, windowHeight);
+    // console.log('====================================');
+    useEffect(() => {
+        getData()
+    }, [])
+
+    const getData = async () => {
+        setUser(JSON.parse(await AsyncStorage.getItem('profile')))
+    }
 
     const handleOnChange = (name, text) => {
         if (name === "tags") {
@@ -118,7 +140,7 @@ export default function NewRecipe({ navigation }) {
                 setTagsValue("")
             }
         } else {
-            setRecipeForm({ ...recipeForm, [name]: text })
+            setRecipeForm({ ...recipeForm, [name]: text, creatorId: user.result._id, creator: user.result.userName })
         }
     }
 
@@ -165,7 +187,7 @@ export default function NewRecipe({ navigation }) {
     const addIngredient = () => {
         if (ingredients.product === "" || ingredients.quantity === "" || ingredients.units === "") return
         setRecipeForm({ ...recipeForm, ingredients: [...recipeForm.ingredients, ingredients] })
-        setIngredients(initialIngredients)
+        // setIngredients(initialIngredients)
     }
 
     const editIngredient = (product) => {
@@ -180,8 +202,12 @@ export default function NewRecipe({ navigation }) {
             setRecipeForm({ ...recipeForm, ingredients: result })
         }
         if (name === "picture") {
-            const result2 = recipeForm.recipePicture.filter(item => item.base64 !== product)
+            console.log('====================================');
+            console.log("index:", product);
+            console.log('====================================');
+            const result2 = recipeForm.recipePicture.filter((item, index) => index !== product)
             setRecipeForm({ ...recipeForm, recipePicture: result2 })
+            setShowImage(0)
         }
     }
 
@@ -233,9 +259,8 @@ export default function NewRecipe({ navigation }) {
     }
 
     const handleAdd = () => {
-        console.log('====================================');
-        console.log("recipeForm", recipeForm);
-        console.log('====================================');
+        dispatch(createRecipe(recipeForm, navigation));
+        // clearForm()
     }
 
     const clearForm = () => {
@@ -266,18 +291,32 @@ export default function NewRecipe({ navigation }) {
                 ])
         }
     };
-
+    // console.log("showImage:", showImage);
     return (
 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <ScrollView style={styles.scrollView}
                 showsVerticalScrollIndicator={false}
             >
-                <KeyboardAvoidingView style={styles.container}
+                <KeyboardAvoidingView
+                    style={styles.container}
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                 >
-                    {recipeStep === 1 &&
-                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', minHeight: windowHeight - 200 }}>
+                    {/* {recipeStep === 1 && */}
+                    <ScrollView
+                        // scrollView das 3 paginas
+                        pagingEnabled
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        style={{
+                            width: windowWidth, minHeight: windowHeight - 140,
+                            borderStyle: 'solid',
+                            borderWidth: 1,
+                            borderColor: 'black',
+
+                        }}
+                    >
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', width: windowWidth, position: 'relative' }}>
                             <Text style={styles.banner}>New Recipe</Text>
 
                             <View style={styles.inputLogo}>
@@ -289,20 +328,74 @@ export default function NewRecipe({ navigation }) {
                                 />
                             </View>
 
-                            <View style={{ flex: 0.05, alignItems: 'center', justifyContent: 'center', }}>
-                                {recipeForm.recipePicture.length > 0 && <ScrollView
-                                    pagingEnabled
-                                    horizontal
-                                    showsHorizontalScrollIndicator={false}
-                                    style={{ width: windowWidth * 0.9, height: windowWidth * 0.54, marginBottom: 10 }}>
-                                    {recipeForm.recipePicture.map((image, index) =>
-                                        <View key={uuid.v4()} style={{ position: 'relative' }}>
-                                            <Image key={uuid.v4()} source={{ uri: image.base64 }} style={{ width: windowWidth * 0.9, height: windowWidth * 0.54, resizeMode: "cover", marginVertical: 10 }} />
-                                            <TouchableOpacity style={styles.delImg} key={uuid.v4()} onPress={() => delIngredient(image.base64, "picture")}>
-                                                <AntDesign name="delete" size={24} color="black" />
-                                            </TouchableOpacity>
-                                        </View>)}
-                                </ScrollView>}
+                            <View style={{
+                                flex: 0.05, alignItems: 'center', justifyContent: 'center', width: windowWidth * 0.9, height: windowWidth * 0.54, marginBottom: 10, borderStyle: 'solid',
+                                borderWidth: 1,
+                                borderColor: 'black',
+                                marginVertical: 10,
+                                position: "relative", zIndex: 5
+                            }}>
+                                {recipeForm.recipePicture.length !== 0 &&
+                                    <ScrollView
+                                        // nestedScrollEnabled={true}
+                                        pagingEnabled
+                                        horizontal
+                                        // disableScrollViewPanResponder
+                                        showsHorizontalScrollIndicator={false}
+                                        style={{
+                                            width: windowWidth * 0.9,
+                                            height: windowWidth * 0.59,
+                                            marginBottom: 10,
+                                            position: 'absolute'
+                                        }}>
+                                        {recipeForm.recipePicture.map((image, index) =>
+                                            <View key={uuid.v4()}>
+                                                <Image source={{ uri: image.base64 }}
+                                                    style={{
+                                                        width: windowWidth * 0.9,
+                                                        height: windowWidth * 0.54,
+                                                        left: -windowWidth * 0.9 * showImage,
+                                                        resizeMode: "cover",
+                                                        marginVertical: 10,
+                                                        borderStyle: 'solid',
+                                                        borderWidth: 1,
+                                                        borderColor: 'black',
+                                                    }} />
+                                                <TouchableOpacity style={styles.delImg} onPress={() => delIngredient(showImage, "picture")}>
+                                                    <AntDesign name="delete" size={24} color="black" />
+                                                </TouchableOpacity>
+
+                                                {recipeForm.recipePicture.length > 1 &&
+                                                    <View style={{ width: "100%", top: 10, left: 0, position: "absolute", zIndex: 5, elevation: 5, flexDirection: "row", justifyContent: 'space-between', alignSelf: 'center' }}>
+                                                        <View style={{ width: "50%", height: "100%" }}>
+                                                            {showImage > 0 &&
+                                                                <TouchableOpacity onPress={() => setShowImage(showImage => showImage - 1)}
+                                                                    style={{
+                                                                        width: "100%",
+                                                                        height: windowWidth * 0.54,
+                                                                        // flexDirection: "row", justifyContent: 'flex-start',
+                                                                    }}>
+                                                                    {/* <AntDesign name="leftcircleo" size={24} color="orange" style={{ top: "55%", left: "5%" }} /> */}
+                                                                </TouchableOpacity>}
+                                                        </View>
+                                                        <View style={{ width: "50%", height: "100%" }}>
+                                                            {showImage < (recipeForm.recipePicture.length - 1) &&
+                                                                <TouchableOpacity onPress={() => setShowImage(showImage => showImage + 1)}
+                                                                    style={{
+                                                                        width: "100%",
+                                                                        height: windowWidth * 0.54,
+                                                                        // flexDirection: "row", justifyContent: 'flex-end',
+                                                                    }}>
+                                                                    {/* <AntDesign name="rightcircleo" size={24} color="orange" style={{ top: "55%", right: -60 }} /> */}
+                                                                </TouchableOpacity>}
+                                                        </View>
+                                                    </View>
+                                                }
+                                            </View>)}
+                                    </ScrollView>}
+                            </View>
+
+                            <View style={{ marginBottom: 10 }}>
                                 {recipeForm.recipePicture.length < 3 &&
                                     <TouchableOpacity>
                                         <Text onPress={pickImage}>Add an image. {recipeForm.recipePicture.length}/3</Text>
@@ -337,7 +430,6 @@ export default function NewRecipe({ navigation }) {
                                     </View>
                                 </View>
 
-
                                 <View style={styles.cookItem}>
                                     <Text style={styles.cookText}>Difficulty</Text>
                                     <View style={styles.logoInput}>
@@ -357,8 +449,8 @@ export default function NewRecipe({ navigation }) {
                                                                 style={[styles.button, styles.buttonClose]}
                                                             >
                                                                 <Text style={styles.textStyle}
-                                                                    onPress={(text) => handleDifficulty(text)}>
-                                                                    {level}</Text>
+                                                                    onPress={(text) => handleDifficulty(text)}
+                                                                >{level}</Text>
                                                             </Pressable>
                                                         )}
                                                     </View>
@@ -448,12 +540,13 @@ export default function NewRecipe({ navigation }) {
                                 />
                             </View>
                             <Text style={styles.outputTags} >
-                                {recipeForm.tags.map(item => <Text key={item} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
+                                {recipeForm.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
                             </Text>
-                        </View>}
+                        </View>
+                        {/* } */}
 
-                    {recipeStep === 2 &&
-                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', minHeight: windowHeight - 200 }}>
+                        {/* {recipeStep === 2 && */}
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', height: windowHeight - 140, width: windowWidth }}>
 
                             <Text style={styles.banner}>Ingredients</Text>
 
@@ -514,24 +607,25 @@ export default function NewRecipe({ navigation }) {
 
                             {recipeForm.ingredients.map(item =>
                                 <View style={styles.outputIngredients} key={uuid.v4()}>
-                                    <Text style={styles.quantity} key={uuid.v4()}>{item.quantity}</Text>
-                                    <Text style={styles.units} key={uuid.v4()}>{item.units}</Text>
-                                    <Text style={styles.product} key={uuid.v4()}>{item.product}</Text>
-                                    <Text style={styles.remarks} key={uuid.v4()}>{item.remarks}</Text>
-                                    <View style={styles.buttons} key={uuid.v4()}>
-                                        <TouchableOpacity style={styles.validation} key={uuid.v4()} onPress={() => editIngredient(item.product)}>
+                                    <Text style={styles.quantity}>{item.quantity}</Text>
+                                    <Text style={styles.units}>{item.units}</Text>
+                                    <Text style={styles.product}>{item.product}</Text>
+                                    <Text style={styles.remarks}>{item.remarks}</Text>
+                                    <View style={styles.buttons}>
+                                        <TouchableOpacity key={uuid.v4()} style={styles.validation} onPress={() => editIngredient(item.product)}>
                                             <Feather name="edit-3" size={24} color="black" />
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={styles.validation} key={uuid.v4()} onPress={() => delIngredient(item.product, "ingredient")}>
+                                        <TouchableOpacity key={uuid.v4()} style={styles.validation} onPress={() => delIngredient(item.product, "ingredient")}>
                                             <AntDesign name="delete" size={24} color="black" />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
                             )}
-                        </View>}
+                        </View>
+                        {/* } */}
 
-                    {recipeStep === 3 &&
-                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', minHeight: windowHeight - 200 }}>
+                        {/* {recipeStep === 3 && */}
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', minHeight: windowHeight - 400, width: windowWidth }}>
 
                             <View>
                                 <Text style={styles.banner}>Preparation</Text>
@@ -571,21 +665,26 @@ export default function NewRecipe({ navigation }) {
                                 <Button title='Clear Form' onPress={clearForm} />
                                 <Button title='Add' onPress={handleAdd} />
                             </View>
-                        </View>}
 
-                    <View style={{ flex: 0.1, justifyContent: 'center', alignItems: 'center', width: "100%" }}>
-                        <View style={{
-                            flexDirection: 'row', width: "90%", justifyContent: 'space-between'
-                        }}>
-                            <View style={{ justifyContent: 'flex-start' }}>
-                                {recipeStep !== 1 && <Button title={'Previous Step'} onPress={() => setRecipeStep(recipeStep => recipeStep - 1)} />}
-                            </View>
-                            <View style={{ justifyContent: 'flex-end' }}>
-                                {recipeStep !== 3 && <Button title={'Next Step'} onPress={() => setRecipeStep(recipeStep => recipeStep + 1)} />}
-                            </View>
+
+                        </View>
+                        {/* } */}
+
+
+
+                        {/* <View style={{ flex: 0.1, justifyContent: 'center', alignItems: 'center', width: "100%" }}>
+                    <View style={{
+                        flexDirection: 'row', width: "90%", justifyContent: 'space-between'
+                    }}>
+                        <View style={{ justifyContent: 'flex-start' }}>
+                            {recipeStep !== 1 && <Button title={'Previous Step'} onPress={() => setRecipeStep(recipeStep => recipeStep - 1)} />}
+                        </View>
+                        <View style={{ justifyContent: 'flex-end' }}>
+                            {recipeStep !== 3 && <Button title={'Next Step'} onPress={() => setRecipeStep(recipeStep => recipeStep + 1)} />}
                         </View>
                     </View>
-
+                </View> */}
+                    </ScrollView>
                 </KeyboardAvoidingView>
             </ScrollView >
         </TouchableWithoutFeedback >
@@ -593,9 +692,9 @@ export default function NewRecipe({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scrollView: {
-        flex: 1,
-    },
+    // scrollView: {
+    //     flex: 1,
+    // },
     banner: {
         width: 350,
         height: 40,
@@ -649,8 +748,9 @@ const styles = StyleSheet.create({
     },
     delImg: {
         position: 'absolute',
-        bottom: 5,
-        right: 5
+        bottom: 15,
+        right: 10,
+        zIndex: 10, elevation: 10,
     },
     logoInput: {
         flexDirection: "row",

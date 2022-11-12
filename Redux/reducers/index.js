@@ -1,8 +1,8 @@
 import { combineReducers } from "redux";
 
 import auth from "./auth"
-import playlist from "./playlist"
+import recipe from "./recipe"
 
 export default combineReducers({
-    auth, playlist
+    auth, recipe
 })

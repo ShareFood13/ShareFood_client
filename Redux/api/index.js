@@ -2,7 +2,7 @@ import axios from "axios"
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API = axios.create({ baseURL: 'https://e766-77-124-24-116.eu.ngrok.io' })
+const API = axios.create({ baseURL: 'https://6533-77-124-24-116.eu.ngrok.io' })
 
 API.interceptors.request.use(async (req) => {
     if (await AsyncStorage.getItem('profile')) {
@@ -24,8 +24,9 @@ export const changePassword = (formData) => API.put(`/api/user/changepassword`, 
 // const API = axios.create({baseURL: 'https://musicplyr13.herokuapp.com/'})
 // const API = axios.create({baseURL: 'https://music-plyr-server.vercel.app/'})
 
-// export const createPlaylist = (playlistName) => API.post(`/api/playlists`, playlistName)
+export const createRecipe = (recipeForm) => API.post(`/api/recipes`, recipeForm)
+export const fetchMyRecipes = (_id) => API.get(`/api/recipes/${_id}`)
+
 // export const fetchPlaylistsByCreator = (id) => API.get(`/api/playlists/creator/${id}`)
-// export const fetchPlaylist = (_id) => API.get(`/api/playlists/${_id}`)
 // export const updatePlaylist = (_id, playlist) => API.patch(`/api/playlists/${_id}`, playlist)
 // export const deletePlaylist = (id) => API.delete(`/api/playlists/${id}`)

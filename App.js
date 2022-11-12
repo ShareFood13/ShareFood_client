@@ -7,6 +7,7 @@ import Wellcome from "./screens/Wellcome"
 import SignUp from "./screens/Logs/SignUp"
 import LogIn from "./screens/Logs/LogIn";
 import Home from './screens/Footer/Home';
+import RecipeDetail from "./screens/RecipeDetail"
 
 
 import MyDrawer from './routes/DrawerNavigator';
@@ -26,6 +27,8 @@ import TermsConditions from './screens/Logs/TermsConditions';
 
 
 const store = legacy_createStore(reducers, compose(applyMiddleware(thunk)))
+
+// console.log(store.getState());
 
 const AuthStack = createNativeStackNavigator();
 const AuthStackScreen = () => (
@@ -55,6 +58,11 @@ const AuthStackScreen = () => (
       options={{ title: "SignUp " }}
     />
     <AuthStack.Screen
+      name="RecipeDetail"
+      component={RecipeDetail}
+      options={{ title: "RecipeDetail " }}
+    />
+    <AuthStack.Screen
       name="Home3"
       component={MyDrawer}
       options={{ title: "SignUp " }}
@@ -63,11 +71,11 @@ const AuthStackScreen = () => (
 );
 ////////////////////////////
 
-// const HomeStack = createNativeStackNavigator();
-// const HomeStackScreen = () => (
-//   <HomeStack.Navigator>
-//     <HomeStack.Screen name="Home" component={Home} />
-//   </HomeStack.Navigator>
+// const NewRecipe = createNativeStackNavigator();
+// const NewRecipeScreen = () => (
+//   <NewRecipe.Navigator>
+//     <NewRecipe.Screen name="NewRecipe" component={NewRecipe} />
+//   </NewRecipe.Navigator>
 // );
 
 ////////////////////////from app copy 2
@@ -103,47 +111,47 @@ export default function App() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [userToken, setUserToken] = React.useState(null);
 
-  const authContext = React.useMemo(() => {
-    return {
-      logIn: () => {
-        setIsLoading(false);
-        setUserToken("asdf");
-      },
-      signUp: () => {
-        setIsLoading(false);
-        setUserToken("asdf");
-      },
-      signOut: () => {
-        setIsLoading(false);
-        setUserToken(null);
-      }
-    };
-  }, []);
+  // const authContext = React.useMemo(() => {
+  //   return {
+  //     logIn: () => {
+  //       setIsLoading(false);
+  //       setUserToken("asdf");
+  //     },
+  //     signUp: () => {
+  //       setIsLoading(false);
+  //       setUserToken("asdf");
+  //     },
+  //     signOut: () => {
+  //       setIsLoading(false);
+  //       setUserToken(null);
+  //     }
+  //   };
+  // }, []);
 
   React.useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 2000);
   }, []);
 
-  // useEffect(() => {
-  //   async () => { setUserToken(JSON.parse(await AsyncStorage.getItem('profile'))) }
-  // }, [])
+  useEffect(() => {
+    async () => { setUserToken(JSON.parse(await AsyncStorage.getItem('profile'))) }
+  }, [])
 
   if (isLoading) {
     return <Wellcome />;
   }
 
-  // console.log('====================================');
-  // console.log("userToken", userToken);
-  // console.log('====================================');
+  console.log('====================================');
+  console.log("App.js 146 userToken", userToken);
+  console.log('====================================');
   return (
     <Provider store={store}>
-      <AuthContext.Provider value={authContext}>
-        <NavigationContainer>
-          <RootStackScreen userToken={userToken} />
-        </NavigationContainer>
-      </AuthContext.Provider>
+      {/* <AuthContext.Provider value={authContext}> */}
+      <NavigationContainer>
+        <RootStackScreen userToken={userToken} />
+      </NavigationContainer>
+      {/* </AuthContext.Provider> */}
     </Provider>
   )
 }

@@ -118,6 +118,7 @@ export default function LogIn({ navigation }) {
                         style={styles.input}
                         placeholder='User Name'
                         keyboardType="ascii-capable"
+                        defaultValue='Shlepe'
                         onChangeText={text => handleOnChange('userName', text)} />
                 </View>
 
@@ -134,6 +135,7 @@ export default function LogIn({ navigation }) {
                         style={styles.input}
                         placeholder='E-mail'
                         keyboardType="email-address"
+                        defaultValue='solyattie13@gmail.co'
                         onChangeText={text => handleOnChange('email', text)} />
                 </View>
 
@@ -150,6 +152,7 @@ export default function LogIn({ navigation }) {
                         style={styles.input}
                         placeholder='Password'
                         secureTextEntry={!showPassword}
+                        defaultValue='Soly198'
                         onChangeText={text => handleOnChange('password', text)} />
                     <TouchableOpacity onPress={() => setShowPassword(!showPassword)} >
                         {showPassword ? <Ionicons name="eye-off-outline" size={24} color="black" />
