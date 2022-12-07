@@ -21,7 +21,18 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 import { AntDesign, MaterialIcons, Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
-const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '', userName: '', isPermission: false };
+const initialState = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    userName: '',
+    isPermission: false,
+    mealsId: [],
+    eventsId: [],
+    recipesId: [],
+};
 
 export default function SignUp({ navigation }) {
     const [form, setForm] = useState(initialState);
@@ -81,10 +92,6 @@ export default function SignUp({ navigation }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('====================================');
-        console.log(form);
-        console.log('====================================');
-
         dispatch(signup(form, navigation));
     };
 

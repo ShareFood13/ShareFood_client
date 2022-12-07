@@ -12,7 +12,7 @@ const reducer = (state = { recipe: [] }, action) => {
             return { ...state, recipe: action.payload.recipe }
 
         case UPDATE:
-            return { ...state, recipe: state.recipe.songs.push(action.payload) }
+            return { ...state, recipe: state.recipe.push(action.payload) }
 
         case DELETE:
             return { ...state, recipes: state.recipe.filter(recipe => recipe.id !== action.payload) }

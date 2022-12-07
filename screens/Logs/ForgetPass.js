@@ -16,9 +16,6 @@ import React, { useEffect, useState } from 'react'
 
 import { MaterialIcons, Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
-import qs from 'qs';
-import { Linking } from 'react-native';
-
 import { useDispatch } from 'react-redux';
 import { sendPassword, changePassword } from '../../Redux/actions/auth';
 

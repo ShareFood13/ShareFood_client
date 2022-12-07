@@ -1,4 +1,4 @@
-import { AUTH, SENDPASS } from "../constants/constantsTypes"
+import { AUTH, SENDPASS, USER_INFO, SEND_TO_US } from "../constants/constantsTypes"
 import * as api from "../api"
 
 export const signin = (formData, navigation) => async (dispatch) => {
@@ -64,6 +64,34 @@ export const changePassword = (formData, navigation) => async (dispatch) => {
     } catch (error) {
 
         console.log("changePassword", error)
+
+    }
+}
+
+export const getUserInfo = (_id) => async (dispatch) => {
+
+    try {
+        const { data } = await api.getUserInfo(_id)
+
+        dispatch({ type: USER_INFO, data })
+
+    } catch (error) {
+
+        console.log("getUserInfo", error)
+
+    }
+}
+
+export const sendToSharedFood = (contactUsForm) => async (dispatch) => {
+
+    try {
+        const { data } = await api.sendToSharedFood(contactUsForm)
+        console.log("Actions auth sendToSharedFood", data)
+        dispatch({ type: SEND_TO_US, data })
+
+    } catch (error) {
+
+        console.log("sendToSharedFood", error)
 
     }
 }

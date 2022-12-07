@@ -7,7 +7,8 @@ import Wellcome from "./screens/Wellcome"
 import SignUp from "./screens/Logs/SignUp"
 import LogIn from "./screens/Logs/LogIn";
 import Home from './screens/Footer/Home';
-import RecipeDetail from "./screens/RecipeDetail"
+import RecipeDetail from "./screens/pages/RecipeDetail.js"
+import ShowEventDetail from "./screens/pages/ShowEventDetail"
 
 
 import MyDrawer from './routes/DrawerNavigator';
@@ -61,6 +62,11 @@ const AuthStackScreen = () => (
       name="RecipeDetail"
       component={RecipeDetail}
       options={{ title: "RecipeDetail " }}
+    />
+    <AuthStack.Screen
+      name="ShowEventDetail"
+      component={ShowEventDetail}
+      options={{ title: "ShowEventDetail " }}
     />
     <AuthStack.Screen
       name="Home3"
@@ -142,9 +148,9 @@ export default function App() {
     return <Wellcome />;
   }
 
-  console.log('====================================');
-  console.log("App.js 146 userToken", userToken);
-  console.log('====================================');
+  // console.log('====================================');
+  // console.log("App.js 146 userToken", userToken);
+  // console.log('====================================');
   return (
     <Provider store={store}>
       {/* <AuthContext.Provider value={authContext}> */}

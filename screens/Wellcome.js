@@ -5,11 +5,10 @@ import Loading from './Loading'
 
 export default function Wellcome({ navigation }) {
 
-
     return (
         <View style={styles.container}>
             <Image source={require("../assets/images/favicon.png")} />
-            <Text>ShareFood</Text>
+            <Text style={{ fontSize: 24, fontWeight: 'bold' }}>ShareFood</Text>
         </View>
     )
 }

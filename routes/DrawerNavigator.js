@@ -16,11 +16,12 @@ import MyFriends from '../screens/Drawer/MyFriends';
 import MyMeals from '../screens/Drawer/MyMeals';
 import MyProfile from '../screens/Drawer/MyProfile';
 import MySettings from '../screens/Drawer/MySettings';
+import Conversions from '../screens/Drawer/Conversions';
 import LogOut from '../screens/Logs/LogOut'
 
 import HomeScreen from "./FooterNavigator";
 
-import { AntDesign, MaterialIcons, Feather, FontAwesome5 } from '@expo/vector-icons';
+import { AntDesign, MaterialIcons, Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -98,7 +99,7 @@ export default function MyDrawer() {
                     </View>
                 ),
             }} />
-            <Drawer.Screen name="MyProfile" component={MyProfile} options={{
+            <Drawer.Screen name="My Profile" component={MyProfile} options={{
                 drawerIcon: ({ focused }) => (
                     <View style={{ justifyContent: 'flex-start', alignItems: 'center', flexDirection: "row" }}>
                         <AntDesign
@@ -109,7 +110,7 @@ export default function MyDrawer() {
                     </View>
                 ),
             }} />
-            <Drawer.Screen name="MySettings" component={MySettings} options={{
+            <Drawer.Screen name="My Settings" component={MySettings} options={{
                 drawerIcon: ({ focused }) => (
                     <View style={{ justifyContent: "flex-start", alignItems: 'center', flexDirection: "row" }}>
                         <Feather
@@ -120,7 +121,18 @@ export default function MyDrawer() {
                     </View>
                 ),
             }} />
-            <Drawer.Screen name="MyCallendar" component={MyCallendar} options={{
+            <Drawer.Screen name="Units Converter" component={Conversions} options={{
+                drawerIcon: ({ focused }) => (
+                    <View style={{ justifyContent: "flex-start", alignItems: 'center', flexDirection: "row" }}>
+                        <MaterialCommunityIcons
+                            name="scale-balance"
+                            size={20}
+                            style={{ color: focused ? "#e32f45" : "#748c94" }} />
+                        <Text style={{ color: focused ? "#e32f45" : "#748c94", fontSize: 12, marginLeft: 20 }}>Units Converter</Text>
+                    </View>
+                ),
+            }} />
+            <Drawer.Screen name="My Callendar" component={MyCallendar} options={{
                 drawerIcon: ({ focused }) => (
                     <View style={{ justifyContent: "flex-start", alignItems: 'center', flexDirection: "row" }}>
                         <AntDesign
@@ -131,7 +143,7 @@ export default function MyDrawer() {
                     </View>
                 ),
             }} />
-            <Drawer.Screen name="MyMeals" component={MyMeals} options={{
+            <Drawer.Screen name="My Meals" component={MyMeals} options={{
                 drawerIcon: ({ focused }) => (
                     <View style={{ justifyContent: "flex-start", alignItems: 'center', flexDirection: "row" }}>
                         <MaterialIcons
@@ -142,7 +154,7 @@ export default function MyDrawer() {
                     </View>
                 ),
             }} />
-            <Drawer.Screen name="MyFriends" component={MyFriends} options={{
+            <Drawer.Screen name="My Friends" component={MyFriends} options={{
                 drawerIcon: ({ focused }) => (
                     <View style={{ justifyContent: "flex-start", alignItems: 'center', flexDirection: "row" }}>
                         <FontAwesome5
@@ -153,7 +165,7 @@ export default function MyDrawer() {
                     </View>
                 ),
             }} />
-            <Drawer.Screen name="ContactUs" component={ContactUs} options={{
+            <Drawer.Screen name="Contact Us" component={ContactUs} options={{
                 drawerIcon: ({ focused }) => (
                     <View style={{ justifyContent: "flex-start", alignItems: 'center', flexDirection: "row" }}>
                         <MaterialIcons
@@ -164,7 +176,7 @@ export default function MyDrawer() {
                     </View>
                 ),
             }} />
-            <Drawer.Screen name="DonateMeal" component={Donations} options={{
+            <Drawer.Screen name="Donate a Meal" component={Donations} options={{
                 drawerIcon: ({ focused }) => (
                     <View style={{ justifyContent: "flex-start", alignItems: 'center', flexDirection: "row" }}>
                         <FontAwesome5

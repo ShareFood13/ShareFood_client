@@ -7,7 +7,7 @@ import CarouselCardItem, { SLIDER_WIDTH, ITEM_WIDTH } from './CarouselCardItem'
 const CarouselCards = ({ data }) => {
     const isCarousel = React.useRef(null)
 
-    console.log("data:", data[0]?.base64.slice(0, 50));
+    // console.log("data:", data[0]?.base64.slice(0, 50));
 
     return (
         <View>

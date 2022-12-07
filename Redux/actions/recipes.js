@@ -1,8 +1,7 @@
-import { CREATE, FETCH_MY_RECIPES, FETCH_RECIPE, UPDATE, DELETE } from "../constants/constantsTypes";
+import { CREATE, FETCH_MY_RECIPES, UPDATE, FETCH_RECIPE, DELETE } from "../constants/constantsTypes";
 import * as api from "../api"
 
 export const createRecipe = (recipeForm) => async (dispatch) => {
-    // console.log("createRecipe", recipeForm);
     try {
 
         const { data } = await api.createRecipe(recipeForm)
@@ -18,13 +17,24 @@ export const getMyRecipes = (_id) => async (dispatch) => {
     try {
 
         const { data } = await api.fetchMyRecipes(_id)
-        // console.log(data);
 
         dispatch({ type: FETCH_MY_RECIPES, payload: { recipe: data } })
 
     } catch (error) {
         console.log(error)
 
+    }
+}
+
+export const updateRecipe = (_id, recipe) => async (dispatch) => {
+    try {
+
+        const { data } = await api.updateRecipe(_id, recipe)
+
+        dispatch({ type: UPDATE, payload: data })
+
+    } catch (error) {
+        console.log(error)
     }
 }
 
@@ -42,27 +52,16 @@ export const getMyRecipes = (_id) => async (dispatch) => {
 // }
 
 
-// export const updateRecipe = (_id, recipe) => async (dispatch) => {
-//     try {
 
-//         const { data } = await api.updateRecipe(_id, recipe)
+export const deleteRecipe = (_id) => async (dispatch) => {
+    try {
 
-//         dispatch({ type: UPDATE, payload: data })
+        await api.deleteRecipe(_id)
 
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
-
-// export const deleteRecipe = (_id) => async (dispatch) => {
-//     try {
-
-//         await api.deleteRecipe(_id)
-
-//         dispatch({ type: DELETE, payload: _id })
+        dispatch({ type: DELETE, payload: _id })
 
 
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
+    } catch (error) {
+        console.log(error)
+    }
+}
