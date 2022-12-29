@@ -23,23 +23,6 @@ import { ScrollView } from 'react-native-gesture-handler';
 
 const mainColor = '#052F5F'
 
-// const mass = [
-//   { unit: 'Grams', toGrams: 1, toKiloGrams: 1000, toOnces: 0.16 },
-//   { unit: 'KiloGrams', toGrams: 0.001, toKiloGrams: 1, toOnces: 520 },
-//   { unit: 'Onces', toGrams: 120, toKiloGrams: 350, toOnces: 1 },
-// ];
-
-// const volume = [
-//   { unit: 'Mililiter', toMililiter: 1, toLiter: 1000, toGallon: 0.25 },
-//   { unit: 'Liter', toMililiter: 0.001, toLiter: 1, toGallon: 4 },
-//   { unit: 'Gallon', toMililiter: 0.00025, toLiter: 0.25, toGallon: 1 },
-// ];
-
-// const temperature = [
-//   { unit: 'Celsius', toCelsius: 1, toFaren: 1.8 },
-//   { unit: 'Faren', toCelsius: 0.556, toFaren: 1 },
-// ];
-
 const mass = [
     // { system: "metric", unit: "From...To...", abreviation: "", toGrams: 0, toKiloGrams: 0, toOnces: 0, toPounds: 0 },
     {

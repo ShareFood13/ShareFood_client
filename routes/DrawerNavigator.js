@@ -9,6 +9,7 @@ import {
 } from '@react-navigation/drawer';
 
 import ContactUs from '../screens/Drawer/ContactUs';
+import MyMails from '../screens/Drawer/MyMails';
 import Donations from "../screens/Drawer/Donations";
 import Share from "../screens/Drawer/Share";
 import MyCallendar from '../screens/Drawer/MyCallendar';
@@ -21,7 +22,7 @@ import LogOut from '../screens/Logs/LogOut'
 
 import HomeScreen from "./FooterNavigator";
 
-import { AntDesign, MaterialIcons, Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, MaterialIcons, Feather, FontAwesome5, MaterialCommunityIcons, Fontisto } from '@expo/vector-icons';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -74,7 +75,11 @@ export default function MyDrawer() {
 
             screenOptions={{
 
-                drawerLabelStyle: { display: "none" }
+                drawerLabelStyle: { display: "none" },
+                headerTitle: 'Share Food',
+                headerLeftContainerStyle: { paddingLeft: 10 },
+                headerTitleStyle: { paddingLeft: 65 }
+                // headerStatusBarHeight: 100,
                 // headerShown: false,
                 // drawerActiveBackgroundColor: '#aa18ea',
                 // drawerActiveTintColor: '#fff',
@@ -107,6 +112,17 @@ export default function MyDrawer() {
                             size={20}
                             style={{ color: focused ? "#e32f45" : "#748c94" }} />
                         <Text style={{ color: focused ? "#e32f45" : "#748c94", fontSize: 12, marginLeft: 20 }}>My Profile</Text>
+                    </View>
+                ),
+            }} />
+            <Drawer.Screen name="My Mails" component={MyMails} options={{
+                drawerIcon: ({ focused }) => (
+                    <View style={{ justifyContent: 'flex-start', alignItems: 'center', flexDirection: "row" }}>
+                        <Fontisto
+                            name="email"
+                            size={20}
+                            style={{ color: focused ? "#e32f45" : "#748c94" }} />
+                        <Text style={{ color: focused ? "#e32f45" : "#748c94", fontSize: 12, marginLeft: 20 }}>My Mails</Text>
                     </View>
                 ),
             }} />

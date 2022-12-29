@@ -36,9 +36,9 @@ const ShowEventDetail = (navigation) => {
     return (
         <View style={styles.container}>
             <Text>Event Detail</Text>
-            <Text>Event date: {eventData.item.date}</Text>
-            <Text>Event time: {eventData.item.time}</Text>
-            <Text>Event name: {eventData.item.name}</Text>
+            <Text>Event date: {eventData.item.eventDate}</Text>
+            <Text>Event time: {eventData.item.eventTime}</Text>
+            <Text>Event name: {eventData.item.eventName}</Text>
             <Text>Occasion: {eventData.item.occasion}</Text>
             <Text>Guests: {eventData.item.howManyGuests}</Text>
 

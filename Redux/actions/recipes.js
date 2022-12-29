@@ -9,7 +9,7 @@ export const createRecipe = (recipeForm) => async (dispatch) => {
         dispatch({ type: CREATE, payload: data })
 
     } catch (error) {
-        console.log(error)
+        dispatch({ type: CREATE, payload: error })
     }
 }
 
@@ -18,7 +18,7 @@ export const getMyRecipes = (_id) => async (dispatch) => {
 
         const { data } = await api.fetchMyRecipes(_id)
 
-        dispatch({ type: FETCH_MY_RECIPES, payload: { recipe: data } })
+        dispatch({ type: FETCH_MY_RECIPES, payload: data })
 
     } catch (error) {
         console.log(error)

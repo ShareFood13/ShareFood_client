@@ -22,3 +22,8 @@ export const UPDATE_MEAL = "UPDATE_MEAL"
 export const DEL_MEAL = "DEL_MEAL"
 
 export const SEND_TO_US = "SEND_TO_US"
+
+export const CREATE_MY_MAIL = "CREATE_MY_MAIL"
+export const GET_MY_MAILS = "GET_MY_MAILS"
+export const GET_SENDED_MAILS = "GET_SENDED_MAILS"
+export const DEL_MY_MAIL = "DEL_MY_MAIL"

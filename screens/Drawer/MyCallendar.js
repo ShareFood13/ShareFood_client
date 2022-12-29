@@ -36,6 +36,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createEvent, updateEvent, fetchEvents, deleteEvent } from '../../Redux/actions/events';
 
 import SwitchButton from '../../components/SwitchButton'
+import DatePicker2 from '../../components/DatePicker';
+
+import SpSheet from '../../components/SpSheet';
+import ShowShopList from "../../screens/pages/ShopList2"
+
 
 const timeToString = (time) => {
     const date = new Date(time);
@@ -48,13 +53,14 @@ const initialValue = {
         alarmDate: "",
         alarmTime: "",
     },
-    date: "",
+    eventDate: "",
     freeText: "",
     howManyGuests: 0,
-    name: "",
+    eventName: "",
     occasion: "",
     status: "Public",
-    time: "",
+    eventTime: "",
+    creatorId: "",
 }
 
 const Mycallendar = ({ navigation }) => {
@@ -70,11 +76,45 @@ const Mycallendar = ({ navigation }) => {
     const [mode, setMode] = useState('date');
     const [refreshing, setRefreshing] = useState(false);
     const [show, setShow] = useState("Public")
-    const [showPicker, setShowPicker] = useState(false);
-    const [showPicker2, setShowPicker2] = useState(false);
+    const [showPicker, setShowPicker] = useState(true);
+    // const [showPicker2, setShowPicker2] = useState(false);
+    // const [showPicker3, setShowPicker3] = useState(false);
     const [type, setType] = useState()
+    const [type2, setType2] = useState()
     const [user, setUser] = useState()
-    // const [eventList, setEventList] = useState()
+
+    ////////////
+    // const [infoPicked, setInfoPicked] = useState();
+    // const [showPickedInfo, setShowPickedInfo] = useState();
+    // const [eventForm, setEventForm] = useState([]);
+    const [fromToForm, setFromToForm] = useState({ fromDate: "", toDate: "" })
+
+    const infoPickerFunction = (pickerType, selectedDate, formTypeInput) => {
+        // console.log(pickerType, selectedDate, formTypeInput)
+        // setShowPickedInfo(selectedDate)
+        // setShowPickedInfo(
+        //     pickerType === 'date'
+        //         ? selectedDate.toISOString().split('T')[0]
+        //         : selectedDate.toLocaleTimeString('he-IL')
+        // );
+
+        const info =
+            pickerType === 'date'
+                ? selectedDate.toISOString().split('T')[0]
+                : selectedDate.toLocaleTimeString('he-IL');
+
+        if (formTypeInput === "fromDate" || formTypeInput === "toDate") {
+            setFromToForm({ ...fromToForm, [formTypeInput]: info })
+
+        } else if (formTypeInput.includes("alarm")) {
+            setEventForm({ ...eventForm, alarm: { ...eventForm.alarm, [formTypeInput]: info } });
+
+        } else {
+            setEventForm({ ...eventForm, [formTypeInput]: info, creatorId: user });
+        }
+
+    };
+    ////////////////////
 
     const dispatch = useDispatch();
 
@@ -88,6 +128,8 @@ const Mycallendar = ({ navigation }) => {
     }
 
     const eventList = useSelector((state) => state.event.events)
+    console.log(eventList)
+    // console.log(user)
 
     useEffect(() => {
         dispatch(fetchEvents(user))
@@ -102,57 +144,14 @@ const Mycallendar = ({ navigation }) => {
     }, [show])
 
     useEffect(() => {
-        alarm2 ?
-            setEventForm({
-                ...eventForm, date: date.toISOString().split("T")[0], time: date.toLocaleTimeString('he-IL').slice(0, 5), creatorId: user,
-                alarm: { isAlarm: alarm2, alarmDate: alarmDate.toISOString().split("T")[0], alarmTime: alarmDate.toLocaleTimeString('he-IL').slice(0, 5) }
-            })
-            : setEventForm({
-                ...eventForm, date: date.toISOString().split("T")[0], time: date.toLocaleTimeString('he-IL').slice(0, 5), creatorId: user,
-                alarm: { isAlarm: alarm2, alarmDate: "", alarmTime: "" }
-            })
-    }, [date, alarmDate, alarm2])
-
-
-    const onChange = (event, selectedDate) => {
-        const currentDate = selectedDate;
-        if (type === "event") {
-            setDate(currentDate)
-        } else {
-            setAlarmDate(currentDate)
-        }
-        setType("")
-        console.log('====================================');
-        console.log("onChangeFn");
-        console.log('====================================');
-        setShowPicker(false);
-        setShowPicker2(false);
-    };
-
-    const showMode = (currentMode) => {
-        if (Platform.OS === 'android') {
-            setShowPicker(false);
-            // for iOS, add a button that closes the picker
-        }
-        setMode(currentMode);
-    };
-
-    const showDatepicker = (event) => {
-        setType(event)
-        showMode('date');
-        event === "event" ? setShowPicker(true) : setShowPicker2(true)
-    };
-
-    const showTimepicker = (event) => {
-        setType(event)
-        showMode('time');
-        event === "event" ? setShowPicker(true) : setShowPicker2(true)
-    };
+        setEventForm({ ...eventForm, alarm: { ...eventForm.alarm, isAlarm: alarm2 } });
+    }, [alarm2])
 
     const handleOnChange = (name, text) => {
         setEventForm({ ...eventForm, [name]: text })
     }
 
+    // CRUD EVENT /////////////////////////////////////////////////
     const addNewEvent = () => {
         dispatch(createEvent(eventForm))
         setModalVisible(false)
@@ -166,7 +165,7 @@ const Mycallendar = ({ navigation }) => {
     }
 
     const updatEvent = () => {
-        console.log(eventForm);
+        // console.log(eventForm);
         dispatch(updateEvent(eventForm))
         dispatch(fetchEvents(user))
         setModalFromEdit(false)
@@ -180,11 +179,8 @@ const Mycallendar = ({ navigation }) => {
         dispatch(fetchEvents(user))
     }
 
-    const closeModal = () => {
-        // setEventForm(initialValue)
-        setModalVisible(false)
-    }
-
+    ///////////////////////////////////////////////////////////////
+    // REFRESH FUNCTIONS //////////////////////////////////////////
     const wait = (timeout) => {
         return new Promise(resolve => setTimeout(resolve, timeout));
     }
@@ -194,6 +190,11 @@ const Mycallendar = ({ navigation }) => {
         setRefreshing(true);
         wait(2000).then(() => setRefreshing(false));
     }, []);
+    /////////////////////////////////////////////////////////////////
+    const closeModal = () => {
+        // setEventForm(initialValue)
+        setModalVisible(false)
+    }
 
     const openShowEventDetail = (item) => {
         navigation.push('ShowEventDetail', { item: item })
@@ -204,7 +205,7 @@ const Mycallendar = ({ navigation }) => {
         var date = new Date();
         var timestamp = date.getTime();
         setTimeout(() => {
-            for (let i = -15; i < 15; i++) {
+            for (let i = -30; i < 30; i++) {
 
                 // const time = day.timestamp + (i + 30) * 24 * 60 * 60 * 1000;
                 const time = timestamp + i * 24 * 60 * 60 * 1000;
@@ -214,7 +215,7 @@ const Mycallendar = ({ navigation }) => {
                 items[strTime] = [];
 
                 // eventList?.map(item => console.log(item.date === strTime))
-                eventList?.map(item => (item.date === strTime) &&
+                eventList?.map(item => (item.eventDate === strTime) &&
                     items[strTime].push({ ...item, day: strTime }))
                 // }
             }
@@ -226,9 +227,6 @@ const Mycallendar = ({ navigation }) => {
         }, 3000);
     }
 
-    // console.log("eventForm", eventForm);
-    // console.log("alarmDate", alarmDate);
-
     const renderItem = (item) => {
         return (
             <TouchableOpacity style={styles.item} onPress={() => openShowEventDetail(item)}>
@@ -236,9 +234,9 @@ const Mycallendar = ({ navigation }) => {
                     <Card.Content>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <View>
-                                <Text>{item.name}</Text>
+                                <Text>{item.eventName}</Text>
                                 <Text>{item.occasion}</Text>
-                                <Text>{item.time}</Text>
+                                <Text>{item.eventTime}</Text>
                             </View>
                             <View style={{ height: 55, alignContent: 'center', justifyContent: 'space-between' }}>
                                 <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => editEvent(item)}>
@@ -261,10 +259,58 @@ const Mycallendar = ({ navigation }) => {
         );
     }
 
+    const createShopList = () => {
+        var filter = [];
+
+        eventList.map((event) =>
+            event.eventDate >= fromToForm.fromDate && event.eventDate <= fromToForm.toDate
+                ? filter.push(event.recipesId[0])
+                // ? console.log(event.date)
+                : null
+        );
+
+        var newMyRecipes = [];
+        filter.map((myEvent) => {
+            myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
+        });
+        // console.log("newMyRecipes", newMyRecipes)
+
+        navigation.navigate('ShowShopList', { recipe: filter, showType: "events" })
+    }
+
     return (
 
         < View style={styles.container} >
-            <Button title='Add new Event' onPress={() => setModalVisible(true)} />
+            < View style={{ alignItems: 'center' }} >
+                <View style={{ width: '100%', marginBottom: 10 }}>
+                    <Button title='Add new Event' onPress={() => setModalVisible(true)} />
+                </View>
+
+                <SpSheet text={"Create Shop List"} heightValue={370} style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: '100%' }}>
+                    <View style={{ alignItems: 'center' }}>
+                        <Text>From Date:</Text>
+                        <DatePicker2
+                            pickerType="date"
+                            // setInfoPicked={setInfoPicked}
+                            infoPickerFunction={infoPickerFunction}
+                            formTypeInput="fromDate"
+                        />
+                        <Text>To Date:</Text>
+                        <DatePicker2
+                            pickerType="date"
+                            // setInfoPicked={setInfoPicked}
+                            infoPickerFunction={infoPickerFunction}
+                            formTypeInput="toDate"
+                        />
+                        <TouchableOpacity
+                            style={[styles.genericButton, { width: 180 }]}
+                            onPress={() => createShopList()}>
+                            <Text>Create Shop List</Text>
+                        </TouchableOpacity>
+                    </View>
+                </SpSheet>
+            </View>
+
             <Agenda
                 items={items}
                 loadItemsForMonth={loadItems}
@@ -275,9 +321,22 @@ const Mycallendar = ({ navigation }) => {
                         refreshing={refreshing}
                         onRefresh={() => onRefresh()}
                     />}
-                showClosingKnob={false}
+                showClosingKnob={true}
                 refreshing={true}
                 renderItem={renderItem}
+                renderKnob={() => {
+                    return <View style={{ borderColor: "red", borderStyle: 'solid', borderWidth: 2, width: 50, marginTop: 8, height: 10, backgroundColor: 'red', borderRadius: 10 }} />;
+                }}
+                calendarStyle={{ maxHeight: 650, }}
+            // Agenda theme
+            // theme={{
+            //     agendaDayTextColor: 'yellow',
+            //     agendaDayNumColor: 'green',
+            //     agendaTodayColor: 'red',
+            //     agendaKnobColor: 'blue'
+            // }}
+            // Agenda container style
+            // style={{ height: 350, }}
             />
 
             <Modal
@@ -302,32 +361,21 @@ const Mycallendar = ({ navigation }) => {
                         <TextInput
                             style={styles.outPuts}
                             placeholder="Event Name"
-                            value={eventForm.name}
-                            onChangeText={text => handleOnChange('name', text)} />
+                            value={eventForm.eventName}
+                            onChangeText={text => handleOnChange('eventName', text)} />
 
-                        <View style={styles.outPuts}>
-                            <Text style={{ width: "80%" }}>
-                                Event day: {date?.toISOString().split("T")[0]}
-                            </Text>
-                            <TouchableOpacity style={{ width: "20%", alignItems: 'center', justifyContent: 'center' }} onPress={() => showDatepicker("event")}>
-                                <Ionicons name="calendar-outline" size={30} color="black" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.outPuts}>
-                            <Text style={{ width: "80%" }}>
-                                Event time: {date?.toLocaleTimeString('he-IL')}
-                            </Text>
-                            <TouchableOpacity
-                                style={{
-                                    width: "20%",
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                                onPress={() => showTimepicker("event")}>
-                                <MaterialCommunityIcons name="clock-time-three-outline" size={30} color="black" />
-                            </TouchableOpacity>
-                        </View>
+                        <DatePicker2
+                            pickerType="date"
+                            // setInfoPicked={setInfoPicked}
+                            infoPickerFunction={infoPickerFunction}
+                            formTypeInput="eventDate"
+                        />
+                        <DatePicker2
+                            pickerType="time"
+                            // setInfoPicked={setInfoPicked}
+                            infoPickerFunction={infoPickerFunction}
+                            formTypeInput="eventTime"
+                        />
 
                         <TextInput
                             style={styles.outPuts}
@@ -356,32 +404,23 @@ const Mycallendar = ({ navigation }) => {
                             </View>
                             <Text>Set Alarm</Text>
                         </Pressable>
-                        {alarm2 && <View>
-                            <View style={styles.outPuts}>
-                                <Text style={{ width: "80%" }}>
-                                    Alert day: {alarmDate?.toISOString().split("T")[0]}
-                                </Text>
-                                <TouchableOpacity style={{ width: "20%", alignItems: 'center', justifyContent: 'center' }} onPress={() => showDatepicker("alarm")}>
-                                    <Ionicons name="calendar-outline" size={30} color="black" />
-                                </TouchableOpacity>
-                            </View>
 
-                            <View style={styles.outPuts}>
-                                <Text style={{ width: "80%" }}>
-                                    Alert time: {alarmDate?.toLocaleTimeString('he-IL')}
-                                </Text>
-                                <TouchableOpacity
-                                    style={{
-                                        width: "20%",
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}
-                                    onPress={() => showTimepicker("alarm")}>
-                                    <MaterialCommunityIcons name="clock-time-three-outline" size={30} color="black" />
-                                </TouchableOpacity>
-                            </View>
+                        {alarm2 && <View style={{ width: "100%", alignItems: 'center' }}>
+                            <DatePicker2
+                                pickerType="date"
+                                // setInfoPicked={setInfoPicked}
+                                infoPickerFunction={infoPickerFunction}
+                                formTypeInput="alarmDate"
+                            />
+                            <DatePicker2
+                                pickerType="time"
+                                // setInfoPicked={setInfoPicked}
+                                infoPickerFunction={infoPickerFunction}
+                                formTypeInput="alarmTime"
+                            />
                         </View>
                         }
+
                         {!modalFromEdit ?
                             <TouchableOpacity
                                 style={styles.genericButton}
@@ -392,28 +431,9 @@ const Mycallendar = ({ navigation }) => {
                                 style={styles.genericButton}
                                 onPress={() => updatEvent()}>
                                 <Text style={{ color: 'white', fontWeight: '700' }}>Update</Text>
-                            </TouchableOpacity>}
+                            </TouchableOpacity>
+                        }
 
-                        {showPicker && (
-                            <DateTimePicker
-                                testID="dateTimePicker"
-                                value={date}
-                                mode={mode}
-                                is24Hour={true}
-                                onChange={onChange}
-                            // display='spinner'
-                            />
-                        )}
-                        {showPicker2 && (
-                            <DateTimePicker
-                                testID="dateTimePicker"
-                                value={alarmDate}
-                                mode={mode}
-                                is24Hour={true}
-                                onChange={onChange}
-                            // display='spinner'
-                            />
-                        )}
                     </View>
                 </View>
             </Modal>
@@ -433,7 +453,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     genericButton: {
-        marginVertical: 30,
+        marginTop: 15,
+        marginBottom: 30,
         width: 100,
         height: 40,
         alignItems: 'center',

@@ -17,14 +17,15 @@ export default function HomeScreen() {
     return (
         <Tab.Navigator
             screenOptions={{
-                headerShown: false,
+                headerShown: true,
                 tabBarShowLabel: false,
                 tabBarStyle: {
                     height: 80,
                     headerShown: false,
-                }
+                },
+                headerLeftLabelVisibler: false,
             }}>
-            < Tab.Screen name="Home2" component={Home} options={{
+            < Tab.Screen name="Home2" component={Home} options={{ //Home2
                 tabBarIcon: ({ focused }) => (
                     <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                         <AntDesign

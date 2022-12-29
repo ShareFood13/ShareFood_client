@@ -19,10 +19,10 @@ import {
     Alert,
     StatusBar,
     RefreshControl,
-    ImageBackground
+    ImageBackground,
 } from 'react-native'
 
-import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons } from '@expo/vector-icons';
+import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons, FontAwesome } from '@expo/vector-icons';
 
 import uuid from 'react-native-uuid';
 
@@ -101,6 +101,7 @@ export default function MyMeals({ navigation }) {
     const [tagsValue, setTagsValue] = useState("")
     const [update, setUpdate] = useState(false)
     const [user, setUser] = useState()
+    const [sDietMeal, setSDietMeal] = useState()
     // const [modalVisible2, setModalVisible2] = useState(false)
 
     const dispatch = useDispatch();
@@ -112,13 +113,13 @@ export default function MyMeals({ navigation }) {
     const myRecipes = useSelector((state) => state.recipe.recipes)
     const userInfo = useSelector((state) => state.auth._3.authData)
 
-    console.log("userInfo:", userInfo);
+    console.log("userInfo:", userInfo?.result);
 
     // console.log("mealForm:", mealForm);
     // console.log("mealForm:", mealForm.specialDiet);
 
     // console.log("user:", user);
-    // console.log("mealList:", user?.mealsId);
+    console.log("mealList:", mealList);
     // console.log("myEvents:", user?.eventsId);
     // console.log("myRecipes:", user?.recipesId);
 
@@ -163,7 +164,7 @@ export default function MyMeals({ navigation }) {
                 setTagsValue("")
             }
         } else {
-            setMealForm({ ...mealForm, [name]: text, creatorId: userInfo.result._id })
+            setMealForm({ ...mealForm, [name]: text, creatorId: userInfo?.result._id })
         }
     }
 
@@ -186,9 +187,21 @@ export default function MyMeals({ navigation }) {
     }
 
     const openMeal = (mealItem) => {
+        const array = []
+        console.log("mealItem", userInfo?.result)
+        // dispatch(getMeals(user?.result._id))
         // dispatch(getMyRecipes(user?.result._id))
         setModalVisible3(true)
         setMeal(mealItem)
+        mealItem?.recipesId.map(recipeId =>
+            userInfo?.result.recipesId.map(item => {
+                if (item._id === recipeId && item.isDeleted === false) {
+                    item.specialDiet.map(sDiet => !array.includes(sDiet) && array.push(sDiet))
+                }
+            })
+        )
+        setSDietMeal(array)
+
     }
 
     const editMeal = (meal) => {
@@ -210,6 +223,19 @@ export default function MyMeals({ navigation }) {
         console.log("deleteMeal", meal);
         dispatch(deleteMeal(meal._id))
         dispatch(getUserInfo(userInfo?.result._id))
+    }
+
+    const createShopList = () => {
+        const mealToShopList = []
+        meal?.recipesId.map(recipeId =>
+            userInfo?.result.recipesId.map(item => {
+                if (item._id === recipeId && item.isDeleted === false) {
+                    mealToShopList.push(item)
+                }
+            })
+        )
+        // console.log("mealToShopList", mealToShopList);
+        navigation.navigate('ShowShopList', { recipe: mealToShopList, showType: "meals" })
     }
 
     return (
@@ -423,23 +449,18 @@ export default function MyMeals({ navigation }) {
                                 </TouchableOpacity>
                                 <View style={styles.mealShow}>
                                     <Text style={{ fontSize: 20, marginBottom: 18 }}>{meal?.mealName}</Text>
-                                    <Text style={{ fontSize: 12 }}>{meal?.specialDiet}</Text>
-                                    {/* {meal.specialDiet.map(item => {
-                                            return logos.map(logo =>
-                                                (logo.name === item)
-                                                && <Image
-                                                    key={uuid.v4()}
-                                                    resizeMode='contain'
-                                                    source={logo.image}
-                                                    style={{
-                                                        height: 35, width: 35, margin: 5, alignSelf: 'center',
-                                                    }} />
+                                    <View style={{ height: 150, width: '90%', justifyContent: 'space-around', alignItems: 'center' }}>
+                                        {meal?.recipesId.map(recipeId =>
+                                            userInfo?.result.recipesId.map(item => {
+                                                if (item._id === recipeId && item.isDeleted === false) {
+                                                    return <Text key={uuid.v4()} style={{ fontSize: 16 }}>{item.recipeName}</Text>
+                                                }
+                                            })
+                                        )}
+                                    </View>
 
-                                            )
-                                        })} */}
-                                    {/* </View> */}
 
-                                    {meal?.recipesId?.map(recipe =>
+                                    {/* {meal?.recipesId?.map(recipe =>
                                         <View style={{
                                             width: '90%',
                                             height: 40,
@@ -448,10 +469,31 @@ export default function MyMeals({ navigation }) {
                                             alignItems: 'center'
                                         }} key={uuid.v4()}>
                                             <Text>{recipe.recipeName}</Text>
-                                        </View>)}
+                                        </View>)} */}
                                 </View>
                             </ImageBackground>
                         </View>
+                        <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+                            {sDietMeal?.map(item => {
+                                return logos.map(logo =>
+                                    (logo.name === item)
+                                    && <Image
+                                        key={uuid.v4()}
+                                        resizeMode='contain'
+                                        source={logo.image}
+                                        style={{
+                                            height: 45, width: 45, margin: 5, alignSelf: 'center',
+                                        }} />
+
+                                )
+                            })}
+                        </View>
+                    </View>
+
+                    <View style={styles.button}>
+                        <TouchableOpacity onPress={createShopList}>
+                            <FontAwesome name="list" size={25} color="red" />
+                        </TouchableOpacity>
                     </View>
                 </Modal>
             </ScrollView>
@@ -475,6 +517,24 @@ const styles = StyleSheet.create({
         marginBottom: 30,
         backgroundColor: "orange",
         // color: 'white',
+    },
+    button: {
+        position: 'absolute',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        alignItems: 'center',
+        alignSelf: 'center',
+        justifyContent: 'center',
+        shadowRadius: 60,
+        shadowColor: '#F02A4B',
+        shadowOpacity: 0.3,
+        shadowOffset: { height: 3, width: 0 },
+        elevation: 10,
+        zIndex: 10,
+        bottom: 50,
+        backgroundColor: 'white',
+        borderColor: 'black', borderStyle: 'solid', borderWidth: 0.2,
     },
     centeredView: {
         flex: 1,
@@ -532,6 +592,7 @@ const styles = StyleSheet.create({
         elevation: 5
     },
     mealShow: {
+        justifyContent: 'space-between',
         width: '80%',
         height: 320,
         borderStyle: 'solid',

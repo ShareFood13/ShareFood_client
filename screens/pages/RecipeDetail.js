@@ -21,6 +21,9 @@ import {
     StatusBar
 } from 'react-native'
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons } from '@expo/vector-icons';
 
 import uuid from 'react-native-uuid';
@@ -32,6 +35,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createEvent, updateEvent, fetchEvents, deleteEvent, addRecipeTo } from '../../Redux/actions/events';
 import { getMeals, createMeal, updateMeal, deleteMeal } from '../../Redux/actions/meals';
 import { deleteRecipe } from '../../Redux/actions/recipes'
+
+import FloatingButton from '../../components/FloatingButton'
 
 const logos = [
     { name: "Vegan", image: require('../../assets/images/logo/vegan.png') },
@@ -99,7 +104,8 @@ export default function RecipeDetail(navigation) {
 
     const delRecipe = () => {
         dispatch(deleteRecipe(recipeData.recipe._id))
-        navigation.navigation.navigate('NewRecipe')
+        navigation.navigation.goBack('MyBook')
+        // console.log(navigation.navigation)
     }
 
     const addToMeal = () => {
@@ -112,7 +118,7 @@ export default function RecipeDetail(navigation) {
         setModalVisible(true)
         dispatch(fetchEvents(user))
         dispatch(getMeals(user))
-        console.log("openAddTo");
+        // console.log("openAddTo");
     }
 
     const closeModal = () => {
@@ -121,9 +127,9 @@ export default function RecipeDetail(navigation) {
     }
 
     const addRecipeToFc = (item) => { //item can be a meal or event
-        console.log(recipeData.recipe._id);
-        console.log(item.recipesId);
-        console.log(!item.recipesId.includes(recipeData.recipe._id));
+        // console.log(recipeData.recipe._id);
+        // console.log(item.recipesId);
+        // console.log(!item.recipesId.includes(recipeData.recipe._id));
         if (!item.recipesId.includes(recipeData.recipe._id)) {
             item.recipesId.push(recipeData.recipe._id)
             // console.log("item", item);
@@ -132,14 +138,29 @@ export default function RecipeDetail(navigation) {
         closeModal()
     }
 
+    const deleteAlert = () => {
+        Alert.alert(
+            'Are you sure???',
+            'You are permantly deleting this recipe from your book!!!',
+            [
+                { text: "Cancel", },
+                { text: "Delete", onPress: () => delRecipe() }
+            ]
+        )
+    }
+
+    const createShopList = () => {
+        navigation.navigation.navigate('ShowShopList', { recipe: recipeData.recipe, showType: "recipe" })
+    }
+
 
     return (
         <ScrollView style={styles.scrollView}
             showsVerticalScrollIndicator={false}
         >
-            <SafeAreaView style={styles.container}>
-                <View style={{ height: 30 }}>
-                    <Text>{recipeData.recipe.recipeName}</Text>
+            <View style={styles.container}>
+                <View style={{ height: 45 }}>
+                    <Text style={{ fontSize: 30 }}>{recipeData.recipe.recipeName}</Text>
                 </View>
                 <View style={{ height: 30, width: "90%", alignItems: "flex-end" }}>
                     <Text>by_{recipeData.recipe.creator}</Text>
@@ -180,6 +201,13 @@ export default function RecipeDetail(navigation) {
                                 </View>)}
                         </ScrollView>
                     }
+                    <FloatingButton style={{ bottom: -10, zIndex: 10, elevation: 10 }}
+                        openAddTo={openAddTo}
+                        editRecipe={editRecipe}
+                        deleteAlert={deleteAlert}
+                        createShopList={createShopList}
+                    />
+
                 </View>
                 <View style={{
                     flexDirection: 'row',
@@ -190,7 +218,7 @@ export default function RecipeDetail(navigation) {
                 }}>
                     <Text><AntDesign name="like2" size={24} color="black" /> {recipeData.recipe.likes.length}</Text>
                     <Text><AntDesign name="hearto" size={24} color="black" /> {recipeData.recipe.downloads.length} </Text>
-                    <TouchableOpacity onPress={() => openAddTo()}>
+                    {/* <TouchableOpacity onPress={() => openAddTo()}>
                         <Text><AntDesign name="pluscircleo" size={24} color="black" /> to...</Text>
                     </TouchableOpacity>
                     <TouchableOpacity key={uuid.v4()} style={styles.validation} onPress={() => editRecipe()}>
@@ -204,7 +232,7 @@ export default function RecipeDetail(navigation) {
                             { text: "Delete", onPress: () => delRecipe() }
                         ])}>
                         <AntDesign name="delete" size={24} color="black" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
 
                 <View style={styles.cookInfo}>
@@ -316,7 +344,7 @@ export default function RecipeDetail(navigation) {
                 </View>
 
                 {show === "ingredients"
-                    ? <View style={{ width: windowWidth, alignItems: 'center' }}>
+                    ? <View style={{ width: windowWidth, alignItems: 'center', minHeight: 200 }}>
                         {recipeData.recipe.ingredients.map(item =>
                             <View style={styles.outputIngredients} key={uuid.v4()}>
                                 <Text style={styles.quantity}>{item.quantity}</Text>
@@ -326,7 +354,7 @@ export default function RecipeDetail(navigation) {
                             </View>
                         )}
                     </View>
-                    : <View style={{ width: windowWidth, alignItems: 'center' }}>
+                    : <View style={{ width: windowWidth, alignItems: 'center', minHeight: 200 }}>
                         {recipeData.recipe.preparation.map(item =>
                             <View style={styles.outputPreparation} key={uuid.v4()}>
                                 <Text style={styles.step} key={uuid.v4()}>Step {item.step}</Text>
@@ -369,7 +397,7 @@ export default function RecipeDetail(navigation) {
                                     <View style={{ marginVertical: 20 }}>
                                         <Text style={styles.banner}>Meals</Text>
                                         {mealList?.map(item =>
-                                            <TouchableOpacity
+                                            !item.isDeleted && <TouchableOpacity
                                                 key={uuid.v4()}
                                                 style={styles.genericButton}
                                                 onPress={() => addRecipeToFc(item)}>
@@ -394,7 +422,8 @@ export default function RecipeDetail(navigation) {
                     </View>
                 </Modal>
 
-            </SafeAreaView>
+
+            </View>
         </ScrollView>
     )
 }
@@ -404,7 +433,9 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: StatusBar.currentHeight + 20,
         justifyContent: 'flex-start',
-        alignItems: 'center'
+        alignItems: 'center',
+        height: windowHeight,
+        position: 'relative'
     },
     cookInfo: {
         flexDirection: 'row',

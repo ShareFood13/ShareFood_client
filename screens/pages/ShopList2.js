@@ -1,50 +1,7 @@
-// import React, { useState, useEffect } from 'react'
-// import { View, Text, Button, StyleSheet } from 'react-native'
-
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// import PopUp from '../../components/PopUp';
-// import ToastComp from '../../components/ToastComp.js';
-// import SpSheet from '../../components/SpSheet';
-
-// export default function Home({ navigation }) {
-
-//     const [user, setUser] = useState()
-//     const [show, setShow] = useState(false)
-
-//     useEffect(() => {
-//         getUser()
-//     }, [])
-
-//     const getUser = async () => {
-//         setUser(JSON.parse(await AsyncStorage.getItem('profile')))
-//     }
-
-//     // console.log(user);
-
-//     return (
-//         <View style={styles.container}>
-//             <Text>{user?.result?.name}</Text>
-//             {show && <PopUp show={true} />}
-//             {show && <SpSheet show={true} />}
-//             {show && <ToastComp show={true} />}
-//             <Button title='Click Me' onPress={() => setShow(true)} />
-//         </View>
-//     )
-// }
-
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         justifyContent: 'center',
-//         alignItems: 'center'
-//     }
-// })
-
-import React, { useState } from 'react';
-
 import { Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
-
+import Constants from 'expo-constants';
+import React, { useState, useEffect } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {
     Entypo,
     Ionicons,
@@ -54,12 +11,6 @@ import {
     FontAwesome5,
     EvilIcons,
 } from '@expo/vector-icons';
-
-import Constants from 'expo-constants';
-
-import DateTimePicker from '@react-native-community/datetimepicker';
-
-import uuid from 'react-native-uuid';
 
 const products = [
     {
@@ -462,7 +413,7 @@ const myEvents = [
     {
         _id: ' 123',
         eventName: 'test01',
-        date: '2022-12-02',
+        date: '2022-12-01',
         recipesId: [
             {
                 _id: '123',
@@ -516,7 +467,7 @@ const myEvents = [
     {
         _id: ' 124',
         eventName: 'test02',
-        date: '2022-12-04',
+        date: '2022-12-02',
         recipesId: [
             {
                 _id: '123',
@@ -563,66 +514,66 @@ const myEvents = [
                         remark: 'text',
                         _id: 'aar',
                     },
-                ]
-            },
-            {
-                _id: '124',
-                ingredients: [
                     {
-                        product: 'tomato',
-                        quantity: 400,
-                        units: 'Grams',
-                        remark: 'text',
-                        _id: 'aa4',
-                    },
-                    {
-                        product: 'chives',
-                        quantity: 1,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aaa5',
-                    },
-                    {
-                        product: 'water',
-                        quantity: 2,
-                        units: 'Pint',
-                        remark: 'text',
-                        _id: 'aaa5',
-                    },
-                    {
-                        product: 'Soup',
-                        quantity: 2,
-                        units: 'Gallon',
-                        remark: 'text',
-                        _id: 'aaa5',
-                    },
-                    {
-                        product: 'cumcumber',
-                        quantity: 5,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aaa5r',
-                    },
-                    {
-                        product: 'garlic',
-                        quantity: 5,
-                        units: 'TableSpoon',
-                        remark: 'text',
-                        _id: 'aaa5r',
-                    },
-                    {
-                        product: 'garlic',
-                        quantity: 5,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aaa5r',
-                    },
-                    {
-                        product: 'pepper',
-                        quantity: 3,
-                        units: 'Pint',
-                        remark: 'text',
-                        _id: 'aaa5y',
+                        _id: '124',
+                        ingredients: [
+                            {
+                                product: 'tomato',
+                                quantity: 400,
+                                units: 'Grams',
+                                remark: 'text',
+                                _id: 'aa4',
+                            },
+                            {
+                                product: 'chives',
+                                quantity: 1,
+                                units: 'units',
+                                remark: 'text',
+                                _id: 'aaa5',
+                            },
+                            {
+                                product: 'water',
+                                quantity: 2,
+                                units: 'Pint',
+                                remark: 'text',
+                                _id: 'aaa5',
+                            },
+                            {
+                                product: 'Soup',
+                                quantity: 2,
+                                units: 'Gallon',
+                                remark: 'text',
+                                _id: 'aaa5',
+                            },
+                            {
+                                product: 'cumcumber',
+                                quantity: 5,
+                                units: 'units',
+                                remark: 'text',
+                                _id: 'aaa5r',
+                            },
+                            {
+                                product: 'garlic',
+                                quantity: 5,
+                                units: 'TableSpoon',
+                                remark: 'text',
+                                _id: 'aaa5r',
+                            },
+                            {
+                                product: 'garlic',
+                                quantity: 5,
+                                units: 'units',
+                                remark: 'text',
+                                _id: 'aaa5r',
+                            },
+                            {
+                                product: 'pepper',
+                                quantity: 3,
+                                units: 'Pint',
+                                remark: 'text',
+                                _id: 'aaa5y',
+                            },
+                        ],
                     },
                 ],
             },
@@ -631,7 +582,7 @@ const myEvents = [
     {
         _id: ' 125',
         eventName: 'test03',
-        date: '2022-12-10',
+        date: '2022-12-05',
         recipesId: [
             {
                 _id: '123',
@@ -771,40 +722,56 @@ const myMeals = [
     }
 ]
 
-export default function App() {
+export default function ShopList2(navigation) {
     const todayDate = new Date();
 
+    const recipeData = navigation.route.params
+    console.log("RecipeDetail ShopList2:", recipeData);
+
+    const [system, setSystem] = useState('metric');
     const [showPicker, setShowPicker] = useState(false);
     const [date, setDate] = useState(todayDate);
     const [fromDate, setFromDate] = useState(todayDate);
     const [toDate, setToDate] = useState(todayDate);
     const [type, setType] = useState();
     const [answer, setAnswer] = useState();
-    const [system, setSystem] = useState('metric');
     const [mealNameForShow, setMealNameForShow] = useState("Meal01");
+
+    useEffect(() => {
+        createShopList()
+    }, [])
 
     const createShopList = (shopType) => {
         var filter = [];
-
-        if (shopType === "events") {
-            myEvents.map((event) =>
-                event.date >= fromDate.toISOString().split('T')[0] && event.date <= toDate.toISOString().split('T')[0]
-                    ? filter.push(event.recipesId[0])
-                    // ? console.log(event.date)
-                    : null
-            );
-        } else {
-            myMeals.map((meal) =>
-                meal.mealName === mealNameForShow
-                    ? filter.push(meal.recipesId[0])
-                    : null
-            );
+        // if (shopType === "events") {
+        //     myEvents.map((event) =>
+        //         event.date >= fromDate.toISOString().split('T')[0] && event.date <= toDate.toISOString().split('T')[0]
+        //             ? filter.push(event.recipesId[0])
+        //             : null
+        //     );
+        // } else if (shopType === "meals") {
+        //     myMeals.map((meal) =>
+        //         meal.mealName === mealNameForShow
+        //             ? filter.push(meal.recipesId[0])
+        //             : null
+        //     );
+        // }
+        if (recipeData.showType === "recipe") {
+            filter = [recipeData?.recipe]
         }
+        if (recipeData.showType === "meals" || recipeData.showType === "events") {
+            filter = [...recipeData?.recipe]
+        }
+
+        console.log("filter:", filter)
 
         var newMyRecipes = [];
         filter.map((myEvent) => {
             myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
         });
+
+        console.log("newMyRecipes:", newMyRecipes)
+
 
         if (system === 'metric') {
             newMyRecipes.map((item) =>
@@ -878,48 +845,41 @@ export default function App() {
         }, []);
 
         setAnswer(newArray);
-    };
+    }
 
-    const showDatepicker = (event) => {
-        setType(event);
-        setShowPicker(true);
-    };
+    // const showDatepicker = (event) => {
+    //     setType(event);
+    //     // showMode('date');
+    //     setShowPicker(true);
+    // };
 
-    const onChange = (event, selectedDate) => {
-        const date = selectedDate;
-        if (type === 'fromDate') {
-            setFromDate(date);
-        } else {
-            setToDate(date);
-        }
-        setShowPicker(false);
-    };
+    // const onChange = (event, selectedDate) => {
+    //     const date = selectedDate;
+    //     if (type === 'fromDate') {
+    //         setFromDate(date);
+    //     } else {
+    //         setToDate(date);
+    //     }
+    //     // setType('');
+    //     setShowPicker(false);
+    // };
 
     return (
         <View style={styles.container}>
-            <Button title="fromDate" onPress={() => alert(fromDate)} />
+            {/* <Button title="fromDate" onPress={() => alert(fromDate)} />
             <Button title="toDate" onPress={() => alert(toDate)} />
-            <Text></Text>
-
             <Button title="Events" onPress={() => createShopList("events")} />
-            <Text></Text>
-
             <Button title="byMeal" onPress={() => createShopList("meals")} />
-            <Text></Text>
-
-            <Button title="Clear" onPress={() => setAnswer()} />
+            <Button title="byRecipe" onPress={() => createShopList()} /> */}
 
             {answer?.map((item) => (
-                <View style={{ flexDirection: 'row' }} key={uuid.v4()}>
+                <View style={{ flexDirection: 'row' }}>
                     <Text style={{ width: 120 }}>Prod: {item.product} </Text>
                     <Text style={{ width: 90 }}>Qty: {item.quantity} </Text>
                     <Text>Un: {item.units} </Text>
                 </View>
             ))}
-            <Text></Text>
-            <Text>Save Shop List || Share Shop List || Print</Text>
-            <Text></Text>
-
+            {/* 
             <View style={{ flexDirection: 'row' }}>
                 <Text style={{ width: '80%' }}>
                     From Date: {fromDate?.toISOString().split('T')[0]}
@@ -934,7 +894,6 @@ export default function App() {
                     <Ionicons name="calendar-outline" size={30} color="black" />
                 </TouchableOpacity>
             </View>
-            <Text></Text>
 
             <View style={{ flexDirection: 'row' }}>
                 <Text style={{ width: '80%' }}>
@@ -960,7 +919,7 @@ export default function App() {
                     onChange={onChange}
                 // display='spinner'
                 />
-            )}
+            )} */}
         </View>
     );
 }

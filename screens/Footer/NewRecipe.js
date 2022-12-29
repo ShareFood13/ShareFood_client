@@ -27,6 +27,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 import SwitchButton from '../../components/SwitchButton';
 
+import PopUp from '../../components/PopUp'
+
 const initialPreparation = {
     preparation: "",
     step: "",
@@ -40,22 +42,22 @@ const initialIngredients = {
 }
 
 const initialValue = {
-    cookTime: '',
+    cookTime: 0,
     creator: '',
     creatorId: '',
     difficulty: '',
     donwloads: [],
-    forHowMany: '',
+    forHowMany: 0,
     freeText: "",
     ingredients: [],
     likes: [],
     preparation: [],
-    prepTime: '',
+    prepTime: 0,
     recipeComments: [],
     recipeName: '',
     recipePicture: [],
     specialDiet: [],
-    status: "Public",
+    status: "public",
     tags: [],
 }
 
@@ -115,21 +117,28 @@ const logos = [
 ]
 
 const units = [
-    "units",
-    "grams",
-    "kg",
-    "ml",
-    "liters",
-    "spoon",
-    "tspoon",
-    "cups"
+    { unit: 'MilliLiter', abreviation: 'ml' },
+    { unit: 'Units', abreviation: 'un' },
+    { unit: 'Grams', abreviation: 'gr' },
+    { unit: 'KiloGrams', abreviation: 'Kg' },
+    { unit: 'Liters', abreviation: 'L' },
+    { unit: 'TableSpoon', abreviation: 'Tbsp' },
+    { unit: 'TeaSpoon', abreviation: 'Tsp' },
+    { unit: 'Cups', abreviation: 'cup' },
+
 ]
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { createRecipe, updateRecipe } from '../../Redux/actions/recipes';
+
+import SpSheet from '../../components/SpSheet';
+
+import Conversions from '../Drawer/Conversions';
+
+import PopupModal from '../../components/PopupModal';
 
 export default function NewRecipe(navigation) {
     const [difficultyColor, setDifficultyColor] = useState("#F194FF")
@@ -141,11 +150,16 @@ export default function NewRecipe(navigation) {
     const [preparation, setPreparation] = useState(initialPreparation)
     const [recipeForm, setRecipeForm] = useState(initialValue)
     const [showImage, setShowImage] = useState(0)
-    const [show, setShow] = useState("Public")
+    const [show, setShow] = useState("public")
     const [tagsValue, setTagsValue] = useState("")
     const [user, setUser] = useState("");
+    const [message, setMessage] = useState("")
+    const [popupModal, setPopupModal] = useState(false)
 
     const dispatch = useDispatch();
+
+    const reduxMessage = useSelector((state) => state.recipe)
+    // console.log("reduxMessage", reduxMessage.message);
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
@@ -166,7 +180,15 @@ export default function NewRecipe(navigation) {
         setRecipeForm({ ...recipeForm, status: show })
     }, [show])
 
-    console.log(user);
+    useEffect(() => {
+        setMessage(reduxMessage.message)
+        showModal()
+    }, [reduxMessage])
+
+    const showModal = () => {
+        setPopupModal(true)
+        setTimeout(() => setPopupModal(false), 5000)
+    }
 
     const handleOnChange = (name, text) => {
         if (name === "tags") {
@@ -205,6 +227,7 @@ export default function NewRecipe(navigation) {
         setRecipeForm({ ...recipeForm, difficulty: text._dispatchInstances.pendingProps.children })
         setModalVisible(!modalVisible)
     }
+
     const handleSpecialDiet = (text) => {
         if (!recipeForm.specialDiet.includes(text._dispatchInstances.pendingProps.children)) {
             setRecipeForm({ ...recipeForm, specialDiet: [...recipeForm.specialDiet, text._dispatchInstances.pendingProps.children] })
@@ -300,13 +323,14 @@ export default function NewRecipe(navigation) {
 
     const handleAdd = () => {
         dispatch(createRecipe(recipeForm));
-        // clearForm()
+        clearForm()
         // navigation.navigation.navigate('MyBook')
     }
 
     const handleEdit = () => {
         dispatch(updateRecipe(recipeForm._id, recipeForm));
-        // clearForm()
+        clearForm()
+        navigation.route.params = undefined
         // navigation.navigation.navigate('MyBook')
     }
 
@@ -319,6 +343,7 @@ export default function NewRecipe(navigation) {
     }
 
     const pickImage = async () => {
+        // console.log("pickImageFunc")
         // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -326,18 +351,39 @@ export default function NewRecipe(navigation) {
             allowsEditing: true,
             aspect: [4, 3],
             quality: 1,
+            exif: true,
         });
-        if (!result.cancelled) {
-            setRecipeForm({ ...recipeForm, recipePicture: [...recipeForm.recipePicture, { path: result.uri, base64: `data:image/jpg;base64,${result.base64}` }] })
+        console.log("111", result.canceled)
+        // result: {
+        //     "assets": [
+        //       {
+        //         "assetId": null,
+        //         "base64": null,
+        //         "duration": null,
+        //         "exif": null,
+        //         "height": 4800,
+        //         "rotation": null,
+        //         "type": "image",
+        //         "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%username%252Fsticker-smash-47-beta/ImagePicker/77c4e56f-4ccc-4c83-8634-fc376597b6fb.jpeg",
+        //         "width": 3200
+        //       }
+        //     ],
+        //     "canceled": false,
+        //     "cancelled": false
+        //   }
+        if (!result.canceled) {
+            setRecipeForm({ ...recipeForm, recipePicture: [...recipeForm.recipePicture, { path: result.assets[0].uri, base64: `data:image/jpg;base64,${result.assets[0].base64}` }] })
         } else {
             Alert.alert(
                 'Adding pincture.',
-                'Action Canceller!!!',
+                'Action Canceled!!!',
                 [
                     { text: "OK" }
                 ])
         }
     };
+
+    // console.log(recipeForm.prepTime, recipeForm.cookTime, recipeForm.forHowMany);
 
     return (
 
@@ -380,7 +426,7 @@ export default function NewRecipe(navigation) {
                             flex: 0.05, alignItems: 'center', justifyContent: 'center', width: windowWidth * 0.9, height: windowWidth * 0.54, marginBottom: 10, borderStyle: 'solid',
                             borderWidth: 1,
                             borderColor: 'black',
-                            marginVertical: 10,
+                            marginTop: 10,
                             position: "relative", zIndex: 5
                         }}>
                             {recipeForm.recipePicture.length !== 0 &&
@@ -441,7 +487,7 @@ export default function NewRecipe(navigation) {
                                 </ScrollView>}
                         </View>
 
-                        <View style={{ marginBottom: 10 }}>
+                        <View style={[styles.genericButton, { marginTop: 0 }]}>
                             {recipeForm.recipePicture.length < 3 &&
                                 <TouchableOpacity>
                                     <Text onPress={pickImage}>Add an image. {recipeForm.recipePicture.length}/3</Text>
@@ -617,6 +663,8 @@ export default function NewRecipe(navigation) {
 
                         <Text style={styles.banner}>Ingredients</Text>
 
+                        <SpSheet text={"Open Units Convertor"} heightValue={550}><Conversions /></SpSheet>
+
                         <View style={styles.inputIngredients}>
 
                             <TextInput
@@ -641,7 +689,7 @@ export default function NewRecipe(navigation) {
 
                                                     <Text style={styles.textStyle}
                                                         onPress={(text) => handleIngredients('units', text)}>
-                                                        {unit}
+                                                        {unit.unit}
                                                     </Text>
                                                 </Pressable>
                                             )}
@@ -655,7 +703,7 @@ export default function NewRecipe(navigation) {
                                 >
                                     {(ingredients.units === "")
                                         ? <Text style={styles.textStyle}>Un.</Text>
-                                        : <Text style={styles.textStyle}>{ingredients.units}</Text>}
+                                        : <Text style={styles.textStyle}>{units.map(unit => unit.unit === ingredients.units && unit.abreviation)}</Text>}
                                 </Pressable>
                             </View>
 
@@ -739,54 +787,6 @@ export default function NewRecipe(navigation) {
                             )}
                         </View>
 
-                        {/* <View style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            width: '90%',
-                            height: 30,
-                            marginVertical: 10,
-                            borderRadius: 10,
-                            borderColor: 'orange',
-                            borderWidth: 0.5,
-                            backgroundColor: '#ffcc80',
-                            // opacity: 0.2,
-                            position: 'relative'
-                        }}>
-                            <TouchableOpacity style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                width: '50%',
-                                height: 30,
-                                borderRadius: 10,
-                                borderColor: (show === 'public') ? 'orange' : '#ffcc80',
-                                borderWidth: 0.5,
-                                backgroundColor: (show === 'public') ? 'orange' : '#ffcc80',
-                                position: 'absolute',
-                                left: 0,
-                            }}
-                                onPress={() => setShow("public")}>
-                                <Text>Public</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                width: '50%',
-                                height: 30,
-                                borderRadius: 10,
-                                borderColor: (show !== 'public') ? 'orange' : '#ffcc80',
-                                borderWidth: 0.5,
-                                backgroundColor: (show !== 'public') ? 'orange' : '#ffcc80',
-                                position: 'absolute',
-                                right: 0
-                            }}
-                                onPress={() => setShow("private")}>
-                                <Text>Private</Text>
-                            </TouchableOpacity>
-                        </View> */}
-
                         <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
 
                         < View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '90%' }} >
@@ -804,6 +804,8 @@ export default function NewRecipe(navigation) {
                         </View>
 
                     </View>
+
+                    {/* {message !== undefined && <PopupModal message={message} popupModal={popupModal} />} */}
 
                 </ScrollView>
                 {/* </KeyboardAvoidingView> */}
@@ -828,25 +830,62 @@ const styles = StyleSheet.create({
         backgroundColor: "orange",
         // color: 'white',
     },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+        width: 150
+    },
+    buttonOpen: {
+        width: 40,
+        height: 40,
+    },
+    buttonOpen2: {
+        backgroundColor: "#F194FF",
+        width: 60,
+        height: 40,
+
+    },
+    button3: {
+        width: 50,
+        height: "100%",
+        justifyContent: 'center',
+        textAlignVertical: 'center'
+    },
+    buttons: {
+        width: 50,
+        flexDirection: "row",
+        alignSelf: 'center',
+        justifyContent: 'center'
+    },
+    buttonClose: {
+        // backgroundColor: "#2196F3",
+        marginVertical: 5
+    },
+    buttonStyle: {
+        backgroundColor: '#307ecc',
+        borderWidth: 0,
+        color: '#FFFFFF',
+        borderColor: '#307ecc',
+        height: 40,
+        alignItems: 'center',
+        borderRadius: 30,
+        width: 100,
+    },
+    buttonTextStyle: {
+        color: '#FFFFFF',
+        paddingVertical: 10,
+        fontSize: 16,
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
-    },
-    inputLogo: {
-        flexDirection: "row",
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: "90%",
-        minHeight: 45,
-        borderRadius: 10,
-    },
-    input: {
-        width: "100%",
-        height: 40,
-        borderRadius: 10,
-        backgroundColor: "white",
-        paddingLeft: 10,
     },
     cookInfo: {
         flexDirection: 'row',
@@ -870,26 +909,66 @@ const styles = StyleSheet.create({
         right: 10,
         zIndex: 10, elevation: 10,
     },
+    genericButton: {
+        marginVertical: 15,
+        width: 170,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 30,
+        borderStyle: 'solid',
+        borderColor: 'black',
+        borderWidth: 1,
+        backgroundColor: '#66ccff',
+    },
+    input: {
+        width: "100%",
+        height: 40,
+        borderRadius: 10,
+        backgroundColor: "white",
+        paddingLeft: 10,
+    },
+    inputIngredients: {
+        width: "90%",
+        backgroundColor: "white",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        height: 40,
+        marginBottom: 10,
+        borderRadius: 10
+    },
+    inputLogo: {
+        flexDirection: "row",
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: "90%",
+        minHeight: 45,
+        borderRadius: 10,
+    },
+    inputPreparation: {
+        minHeight: 40
+    },
+    inputTags: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        minWidth: "90%",
+        width: "90%",
+        backgroundColor: "white",
+        height: 45,
+        borderRadius: 10,
+        paddingStart: 10,
+        fontSize: 16
+    },
     logoInput: {
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'space-between',
         width: "100%"
     },
-    numberInput: {
-        width: 30,
-        height: 40,
-        borderStyle: 'solid',
-        borderBottomWidth: 1,
-        borderBottomColor: 'black',
-        textAlign: "center"
-    },
-
-    centeredView: {
+    mainBody: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-
+        justifyContent: 'center',
+        padding: 20,
     },
     modalView: {
         margin: 20,
@@ -906,50 +985,76 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
         maxHeight: 400,
-
     },
     modalView2: {
         maxHeight: 600,
     },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-        width: 150
-    },
-    buttonOpen: {
-        width: 40,
-        height: 40,
-    },
-    buttonOpen2: {
-        backgroundColor: "#F194FF",
-        width: 60,
-        height: 40,
-
-    },
-    button3: {
-        width: 50,
-        height: "100%",
-        justifyContent: 'center',
-        textAlignVertical: 'center'
-    },
-    buttonClose: {
-        // backgroundColor: "#2196F3",
-        marginVertical: 5
-    },
-    textStyle: {
-        color: "black",
-        fontWeight: "bold",
-        textAlign: "center"
-    },
-    textStyle2: {
-        width: 50,
-        alignSelf: 'center'
-
-    },
     modalText: {
         marginBottom: 15,
         textAlign: "center"
+    },
+    numberInput: {
+        width: 30,
+        height: 40,
+        borderStyle: 'solid',
+        borderBottomWidth: 1,
+        borderBottomColor: 'black',
+        textAlign: "center"
+    },
+    outputIngredients: {
+        width: "90%",
+        backgroundColor: "white",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        height: 25,
+        marginBottom: 5,
+        borderRadius: 5,
+    },
+    outputPreparation: {
+        width: "90%",
+        backgroundColor: "white",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        minHeight: 25,
+        marginBottom: 5,
+        textAlignVertical: 'center',
+        borderRadius: 5,
+    },
+    outputTags: {
+        minWidth: "90%",
+        maxWidth: "90%",
+        backgroundColor: "white",
+        minHeight: 45,
+        borderRadius: 10,
+        marginTop: 10,
+        fontSize: 15,
+        padding: 10,
+    },
+    prep: {
+        width: 240,
+        textAlignVertical: 'center',
+        justifyContent: 'flex-start',
+    },
+    preparation: {
+        width: "88%",
+        paddingLeft: 10,
+    },
+    product: {
+        width: 110,
+        paddingLeft: 5,
+        textAlignVertical: 'center',
+
+    },
+    quantity: {
+        width: 40,
+        paddingLeft: 10,
+        justifyContent: 'center',
+        textAlignVertical: 'center'
+    },
+    remarks: {
+        width: 110,
+        textAlignVertical: 'center',
+        paddingLeft: 5
     },
     specialDiet: {
         marginVertical: 10,
@@ -978,57 +1083,21 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
         textAlignVertical: 'center'
     },
-    inputTags: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        minWidth: "90%",
-        width: "90%",
-        backgroundColor: "white",
-        height: 45,
-        borderRadius: 10,
-        paddingStart: 10,
-        fontSize: 16
-    },
-    outputTags: {
-        minWidth: "90%",
-        maxWidth: "90%",
-        backgroundColor: "white",
-        minHeight: 45,
-        borderRadius: 10,
-        marginTop: 10,
-        fontSize: 15,
-        padding: 10,
-
-    },
-    inputIngredients: {
-        width: "90%",
-        backgroundColor: "white",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        height: 40,
-        marginBottom: 10,
-        borderRadius: 10
-    },
-    outputIngredients: {
-        width: "90%",
-        backgroundColor: "white",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        height: 25,
-        marginBottom: 5,
-        borderRadius: 5,
-    },
-    product: {
-        width: 110,
-        paddingLeft: 5,
+    step: {
+        width: 60,
+        paddingLeft: 10,
         textAlignVertical: 'center',
 
     },
-    quantity: {
-        width: 40,
-        paddingLeft: 10,
-        justifyContent: 'center',
-        textAlignVertical: 'center'
+    textStyle: {
+        color: "black",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    textStyle2: {
+        width: 50,
+        alignSelf: 'center'
+
     },
     units: {
         width: 50,
@@ -1036,78 +1105,4 @@ const styles = StyleSheet.create({
         textAlign: 'center'
 
     },
-    remarks: {
-        width: 110,
-        textAlignVertical: 'center',
-        paddingLeft: 5
-
-    },
-    buttons: {
-        width: 50,
-        flexDirection: "row",
-        alignSelf: 'center',
-        justifyContent: 'center'
-    },
-    inputPreparation: {
-        minHeight: 40
-
-    },
-    preparation: {
-        width: "88%",
-        paddingLeft: 10,
-    },
-    outputPreparation: {
-        width: "90%",
-        backgroundColor: "white",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        minHeight: 25,
-        marginBottom: 5,
-        textAlignVertical: 'center',
-        borderRadius: 5,
-    },
-    step: {
-        width: 60,
-        paddingLeft: 10,
-        textAlignVertical: 'center',
-
-    },
-    prep: {
-        width: 240,
-        textAlignVertical: 'center',
-        justifyContent: 'flex-start',
-    },
-    mainBody: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 20,
-    },
-    buttonStyle: {
-        backgroundColor: '#307ecc',
-        borderWidth: 0,
-        color: '#FFFFFF',
-        borderColor: '#307ecc',
-        height: 40,
-        alignItems: 'center',
-        borderRadius: 30,
-        width: 100,
-    },
-    buttonTextStyle: {
-        color: '#FFFFFF',
-        paddingVertical: 10,
-        fontSize: 16,
-    },
-    genericButton: {
-        marginVertical: 15,
-        width: 170,
-        height: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 30,
-        borderStyle: 'solid',
-        borderColor: 'black',
-        borderWidth: 1,
-        backgroundColor: '#66ccff',
-
-    }
 })

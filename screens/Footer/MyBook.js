@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 
+import { useIsFocused } from '@react-navigation/native';
+
 import {
     View,
     Text,
@@ -21,15 +23,17 @@ import {
     ActivityIndicator
 } from 'react-native'
 
+import { useDispatch, useSelector } from 'react-redux';
+
 import uuid from 'react-native-uuid';
 
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { useDispatch, useSelector } from 'react-redux';
-
 import { getMyRecipes } from '../../Redux/actions/recipes';
+
+import PopupModal from '../../components/PopupModal';
 
 const logos = [
     { name: "Vegan", image: require('../../assets/images/logo/vegan.png') },
@@ -59,55 +63,66 @@ const logos = [
 ]
 
 export default function MyBook({ navigation }) {
-    const [user, setUser] = useState(null)
-    const [refreshing, setRefreshing] = useState(false);
-
+    const isFocused = useIsFocused();
     const dispatch = useDispatch();
 
-    const myRecipes = useSelector((state) => state.recipe.recipes)
-    console.log('====================================');
-    console.log(myRecipes);
-    console.log('====================================');
+    const [message, setMessage] = useState("")
+    const [user, setUser] = useState(null)
+    const [refreshing, setRefreshing] = useState(false);
+    const [popupModal, setPopupModal] = useState(false)
+
+    const windowWidth = Dimensions.get('window').width;
+    const windowHeight = Dimensions.get('window').height;
+
+    var myRecipes = useSelector((state) => state.recipe.recipes)
+    const reduxMessage = useSelector((state) => state.recipe)
+    // const userInfo = useSelector((state) => state.auth._3.authData)
+    // const userInfo2 = useSelector((state) => state)
+
+    console.log('user:', user);
+    // console.log('userInfo:', userInfo?.result._id);
+    // console.log('userInfo:', userInfo?.result.recipesId);
+    console.log('myRecipes:', myRecipes);
+    // console.log('reduxMessage:', reduxMessage);
 
     const wait = (timeout) => {
         return new Promise(resolve => setTimeout(resolve, timeout));
     }
 
     const onRefresh = useCallback(() => {
-        dispatch(getMyRecipes(user, navigation))
         setRefreshing(true);
-        wait(1000).then(() => setRefreshing(false));
+        wait(3000).then(() => setRefreshing(false))
     }, []);
-
-
-
-    const windowWidth = Dimensions.get('window').width;
-    const windowHeight = Dimensions.get('window').height;
-
-    // console.log('====================================');
-    // console.log(windowWidth, windowHeight);
-    // console.log('====================================');
 
     useEffect(() => {
         getUser()
-    }, [])
+        onRefresh()
+    }, [isFocused])
 
     const getUser = async () => {
         const result = JSON.parse(await AsyncStorage.getItem('profile'))
-        setUser(result.result._id)
+        setUser(result.result)
     }
 
     useEffect(() => {
-        dispatch(getMyRecipes(user, navigation))
-        // console.log('====================================');
-        // console.log("useEffect2");
-        // console.log('====================================');
+        dispatch(getMyRecipes(user?._id, navigation))
     }, [user])
 
+    useEffect(() => {
+        setMessage(reduxMessage.message)
+        showModal()
+    }, [reduxMessage])
+
+    const showModal = () => {
+        setPopupModal(true)
+        setTimeout(() => setPopupModal(false), 5000)
+    }
+
     const openRecipe = (recipe) => {
-        // console.log(recipe.recipeName);
         navigation.push('RecipeDetail', { recipe: recipe })
     }
+
+    console.log("message:", message);
 
     return (
         (myRecipes?.length === 0) ?
@@ -122,20 +137,22 @@ export default function MyBook({ navigation }) {
                     />
                 }
             >
+                {/* <Text>{isFocused ? 'focused' : 'unfocused'}</Text> */}
+
                 {myRecipes && myRecipes.map(recipe =>
-                    !recipe.isDeleted && <View style={styles.recipeCard} key={uuid.v4()}>
+                    !recipe?.isDeleted && <View style={styles.recipeCard} key={uuid.v4()}>
                         <View style={styles.subCard}>
+
                             <Pressable key={uuid.v4()} style={styles.left} onPress={() => openRecipe(recipe)}>
-                                <Text style={{ width: "100%", textAlign: 'center' }}>{recipe.recipeName}</Text>
+                                <Text style={{ width: "100%", textAlign: 'center' }}>{recipe?.recipeName}</Text>
 
                                 <View style={{
-                                    flexDirection: 'row', width: "100%", paddingLeft: 0,
-                                    // borderWidth: 1,
-                                    // borderColor: 'red',
-                                    // borderStyle: 'solid',
-                                    overflow: 'hidden'
+                                    flexDirection: 'row',
+                                    width: "100%",
+                                    paddingLeft: 0,
+                                    overflow: 'hidden',
                                 }}>
-                                    {recipe.specialDiet.map(item => {
+                                    {recipe?.specialDiet?.map(item => {
                                         return logos.map(logo =>
                                             (logo.name === item)
                                                 ? <Image
@@ -149,24 +166,30 @@ export default function MyBook({ navigation }) {
                                 </View>
 
                                 <View style={{ flexDirection: 'row', width: 170, justifyContent: 'space-between', alignSelf: 'center' }}>
-                                    <Text><AntDesign name="like2" size={24} color="black" /> {recipe.likes.length}</Text>
-                                    <Text><AntDesign name="hearto" size={24} color="black" /> {recipe.downloads.length} </Text>
-                                    <Text><Entypo name="stopwatch" size={24} color="black" /> {recipe.cookTime + recipe.prepTime} </Text>
+                                    <Text><AntDesign name="like2" size={24} color="black" /> {recipe?.likes?.length}</Text>
+                                    <Text><AntDesign name="hearto" size={24} color="black" /> {recipe?.downloads?.length} </Text>
+                                    <Text><Entypo name="stopwatch" size={24} color="black" /> {recipe?.cookTime + recipe?.prepTime} </Text>
                                 </View>
+
                             </Pressable>
+
                             <View style={styles.image}>
-                                {recipe.recipePicture.length > 0 && <ScrollView
+                                {recipe?.recipePicture?.length > 0 && <ScrollView
                                     // pagingEnabled
                                     horizontal
                                     showsHorizontalScrollIndicator={false}
                                     style={{ width: 140, height: 90 }}>
-                                    {recipe.recipePicture.map((image, index) =>
+                                    {recipe?.recipePicture?.map((image, index) =>
                                         <View key={index} style={{ position: 'relative' }}>
                                             <Image source={{ uri: image.base64 }} style={{ width: 140, height: 90, resizeMode: "cover", borderRadius: 10 }} />
                                         </View>)}
                                 </ScrollView>}
                             </View>
+
                         </View>
+
+                        {/* {message !== undefined && <PopupModal message={message} popupModal={popupModal} />} */}
+
                     </View>
 
                 )}
@@ -179,6 +202,15 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    image: {
+        borderRadius: 10,
+        borderWidth: 1,
+        borderStyle: 'solid',
+    },
+    left: {
+        justifyContent: 'space-around',
+        width: "57%"
     },
     recipeCard: {
         width: "90%",
@@ -204,13 +236,4 @@ const styles = StyleSheet.create({
         width: "95%",
         justifyContent: 'space-between'
     },
-    left: {
-        justifyContent: 'space-around',
-        width: "57%"
-    },
-    image: {
-        borderRadius: 10,
-        borderWidth: 1,
-        borderStyle: 'solid',
-    }
 })

@@ -8,6 +8,7 @@ import SignUp from "./screens/Logs/SignUp"
 import LogIn from "./screens/Logs/LogIn";
 import Home from './screens/Footer/Home';
 import RecipeDetail from "./screens/pages/RecipeDetail.js"
+import ShowShopList from "./screens/pages/ShopList2"
 import ShowEventDetail from "./screens/pages/ShowEventDetail"
 
 
@@ -67,6 +68,11 @@ const AuthStackScreen = () => (
       name="ShowEventDetail"
       component={ShowEventDetail}
       options={{ title: "ShowEventDetail " }}
+    />
+    <AuthStack.Screen
+      name="ShowShopList"
+      component={ShowShopList}
+      options={{ title: "Shop List " }}
     />
     <AuthStack.Screen
       name="Home3"

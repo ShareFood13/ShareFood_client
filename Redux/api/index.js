@@ -2,7 +2,7 @@ import axios from "axios"
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API = axios.create({ baseURL: 'https://0c1c-77-126-189-39.eu.ngrok.io' })
+const API = axios.create({ baseURL: 'https://02e9-77-124-91-113.eu.ngrok.io' })
 
 API.interceptors.request.use(async (req) => {
     if (await AsyncStorage.getItem('profile')) {
@@ -35,6 +35,11 @@ export const createMeal = (meal) => API.post(`/api/meals`, { meal })
 export const getMeals = (_id) => API.get(`/api/meals/${_id}`)
 export const updateMeal = (meal, _id) => API.patch(`/api/meals/${_id}`, meal)
 export const deleteMeal = (mealId) => API.delete(`/api/meals/${mealId}`)
+
+export const createMyMail = (mail) => API.post(`/api/mymails`, { mail })
+export const getMyMails = (_id) => API.get(`/api/mymails/${_id}`)
+export const getSendedMails = (_id) => API.patch(`/api/mymails/${_id}`)
+export const deleteMail = (mailId) => API.delete(`/api/mymails/${mailId}`)
 
 // export const userProfile = (_id, formData) => API.post(`/api/user/useprofile/${_id}`, formData)
 // export const userProfileUpdate = (_id, formData) = API.put(`api/user/userprofileupdate/${_id}`, formData)
