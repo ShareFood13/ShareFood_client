@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext, useCallback } from 'react'
 
 import {
     View,
@@ -18,7 +18,8 @@ import {
     Dimensions,
     Alert,
     SafeAreaView,
-    StatusBar
+    StatusBar,
+    FlatList
 } from 'react-native'
 
 const windowWidth = Dimensions.get('window').width;
@@ -28,15 +29,19 @@ import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAweso
 
 import uuid from 'react-native-uuid';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 import { useDispatch, useSelector } from 'react-redux';
 
-import { createEvent, updateEvent, fetchEvents, deleteEvent, addRecipeTo } from '../../Redux/actions/events';
+import { createEvent, updateEvent, fetchEvents, deleteEvent } from '../../Redux/actions/events';
 import { getMeals, createMeal, updateMeal, deleteMeal } from '../../Redux/actions/meals';
-import { deleteRecipe } from '../../Redux/actions/recipes'
+import { deleteRecipe, addRecipeTo } from '../../Redux/actions/recipes'
 
+// import { Context } from "../../context/UserContext";
 import FloatingButton from '../../components/FloatingButton'
+import PopupModal from '../../components/PopupModal';
+import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
+import { useIsFocused } from '@react-navigation/native';
 
 const logos = [
     { name: "Vegan", image: require('../../assets/images/logo/vegan.png') },
@@ -65,60 +70,81 @@ const logos = [
     // { name: "Wheat Free2", image: require('../../assets/images/logo/wheatFree2.png') },
 ]
 
-export default function RecipeDetail(navigation) {
-    const recipeData = navigation.route.params
-    console.log("RecipeDetail:", recipeData);
+export default function RecipeDetail({ navigation, route }) {
+    const { recipeData } = route.params
+    // console.log("RecipeDetail:", recipeData.creatorId);
 
     const [show, setShow] = useState('ingredients')
     const [modalVisible, setModalVisible] = useState(false)
     const [addTo, setAddTo] = useState(null)
-    const [user, setUser] = useState()
+    const [popupModal, setPopupModal] = useState(false)
+    const [userId, setUserId] = useState()
+    const [refreshing, setRefreshing] = useState(false)
+
+    var difficultyColor = ""
 
     const dispatch = useDispatch();
+    const isFocused = useIsFocused();
 
-    const eventList = useSelector((state) => state.event.events)
-    const mealList = useSelector((state) => state.meal.meals)
 
-    // console.log("mealList:", mealList);
-    const windowWidth = Dimensions.get('window').width;
-    const windowHeight = Dimensions.get('window').height;
+    // const { userContext, setUserContext } = useContext(Context)
+    // const userInfo = userContext.result
+    // console.log("userInfo", userInfo)
+
+    const redux = useSelector((state) => state)
+    console.log("RecipeDetail redux", redux);
+    const eventList = redux?.event?.events
+    const mealList = redux?.meal?.meals
+
+
+    useEffect(() => {
+        onRefresh()
+        dispatch(fetchEvents(userId))
+    }, [userId, isFocused])
+
+    const wait = (timeout) => {
+        return new Promise(resolve => setTimeout(resolve, timeout));
+    }
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        wait(3000).then(() => setRefreshing(false)).then(dispatch(getMeals(userId)))
+    }, []);
+
+    const todayDate = new Date().toJSON().slice(0, 10)
+
+    useEffect(() => {
+        // if (redux?.recipe.recipes) {
+        //     setUserContext({ result: redux.recipe.recipes[0] })
+        // }
+        if (redux?.recipe.message !== "") {
+            setPopupModal(true)
+            setTimeout(() => {
+                setPopupModal(false)
+                dispatch({ type: CLEAR_MSG })
+                navigation.navigate('MyBookStackScreen')
+            }, 2500)
+        }
+    }, [redux.recipe, isFocused])
 
     useEffect(() => {
         getUser()
     }, [])
 
     const getUser = async () => {
-        const result = JSON.parse(await AsyncStorage.getItem('profile'))
-        setUser(result.result._id)
+        setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
     }
 
-    useEffect(() => {
-        dispatch(fetchEvents(user))
-        dispatch(getMeals(user))
-    }, [user])
-
     const editRecipe = () => {
-        // dispatch(updateRecipe(recipeForm, navigation))
-        navigation.navigation.navigate('NewRecipe', { recipe: recipeData })
+        navigation.navigate('NewRecipe', { recipe: recipeData })
     }
 
     const delRecipe = () => {
-        dispatch(deleteRecipe(recipeData.recipe._id))
-        navigation.navigation.goBack('MyBook')
-        // console.log(navigation.navigation)
-    }
-
-    const addToMeal = () => {
-        // console.log('====================================');
-        // console.log("eu tenho que pensar como fazer");
-        // console.log('====================================');
+        dispatch(deleteRecipe(recipeData._id))
     }
 
     const openAddTo = () => {
         setModalVisible(true)
-        dispatch(fetchEvents(user))
-        dispatch(getMeals(user))
-        // console.log("openAddTo");
     }
 
     const closeModal = () => {
@@ -126,13 +152,9 @@ export default function RecipeDetail(navigation) {
         setAddTo(null)
     }
 
-    const addRecipeToFc = (item) => { //item can be a meal or event
-        // console.log(recipeData.recipe._id);
-        // console.log(item.recipesId);
-        // console.log(!item.recipesId.includes(recipeData.recipe._id));
-        if (!item.recipesId.includes(recipeData.recipe._id)) {
-            item.recipesId.push(recipeData.recipe._id)
-            // console.log("item", item);
+    const addRecipeToFc = (item) => {
+        if (!item.recipesId.includes(recipeData._id)) {
+            item.recipesId.push(recipeData._id)
             dispatch(addRecipeTo(addTo, item))
         }
         closeModal()
@@ -150,20 +172,39 @@ export default function RecipeDetail(navigation) {
     }
 
     const createShopList = () => {
-        navigation.navigation.navigate('ShowShopList', { recipe: recipeData.recipe, showType: "recipe" })
+        navigation.navigate('ShowShopList', { recipe: recipeData, showType: "recipe" })
     }
 
+    switch (recipeData.difficulty) {
+        case "Super Easy":
+            difficultyColor = "lime"
+            break
+        case "Easy":
+            difficultyColor = "greenyellow"
+            break
+        case "Medium":
+            difficultyColor = "orange"
+            break
+        case "Hard":
+            difficultyColor = "salmon"
+            break
+        case "Super Hard":
+            difficultyColor = "red"
+            break
+    }
 
     return (
         <ScrollView style={styles.scrollView}
             showsVerticalScrollIndicator={false}
         >
             <View style={styles.container}>
+
                 <View style={{ height: 45 }}>
-                    <Text style={{ fontSize: 30 }}>{recipeData.recipe.recipeName}</Text>
+                    <Text style={{ fontSize: 30 }}>{recipeData.recipeName}</Text>
                 </View>
+
                 <View style={{ height: 30, width: "90%", alignItems: "flex-end" }}>
-                    <Text>by_{recipeData.recipe.creator}</Text>
+                    <Text>by_{recipeData.creator}</Text>
                 </View>
 
                 <View style={{
@@ -179,7 +220,7 @@ export default function RecipeDetail(navigation) {
                     marginVertical: 10,
                     position: "relative", zIndex: 5
                 }}>
-                    {recipeData.recipe.recipePicture.length !== 0 &&
+                    {recipeData.recipePicture.length !== 0 &&
                         <ScrollView
                             // pagingEnabled
                             horizontal
@@ -189,7 +230,7 @@ export default function RecipeDetail(navigation) {
                                 height: windowWidth * 0.59,
                                 marginBottom: 10,
                             }}>
-                            {recipeData.recipe.recipePicture.map((image, index) =>
+                            {recipeData.recipePicture.map((image, index) =>
                                 <View key={uuid.v4()}>
                                     <Image source={{ uri: image.base64 }}
                                         style={{
@@ -201,14 +242,18 @@ export default function RecipeDetail(navigation) {
                                 </View>)}
                         </ScrollView>
                     }
-                    <FloatingButton style={{ bottom: -10, zIndex: 10, elevation: 10 }}
-                        openAddTo={openAddTo}
-                        editRecipe={editRecipe}
-                        deleteAlert={deleteAlert}
-                        createShopList={createShopList}
-                    />
+
 
                 </View>
+
+                <FloatingButton
+                    style={{ bottom: 10, zIndex: 10, elevation: 10 }}
+                    openAddTo={openAddTo}
+                    editRecipe={editRecipe}
+                    deleteAlert={deleteAlert}
+                    createShopList={createShopList}
+                />
+
                 <View style={{
                     flexDirection: 'row',
                     width: windowWidth * 0.66,
@@ -216,23 +261,8 @@ export default function RecipeDetail(navigation) {
                     alignSelf: 'center',
                     marginBottom: 10
                 }}>
-                    <Text><AntDesign name="like2" size={24} color="black" /> {recipeData.recipe.likes.length}</Text>
-                    <Text><AntDesign name="hearto" size={24} color="black" /> {recipeData.recipe.downloads.length} </Text>
-                    {/* <TouchableOpacity onPress={() => openAddTo()}>
-                        <Text><AntDesign name="pluscircleo" size={24} color="black" /> to...</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity key={uuid.v4()} style={styles.validation} onPress={() => editRecipe()}>
-                        <Feather name="edit-3" size={24} color="black" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => Alert.alert(
-                        'Are you sure???',
-                        'You are permantly deleting this recipe from your book!!!',
-                        [
-                            { text: "Cancel", },
-                            { text: "Delete", onPress: () => delRecipe() }
-                        ])}>
-                        <AntDesign name="delete" size={24} color="black" />
-                    </TouchableOpacity> */}
+                    <Text><AntDesign name="like2" size={24} color="black" /> {recipeData.likes.length}</Text>
+                    <Text><AntDesign name="hearto" size={24} color="black" /> {recipeData.downloads.length} </Text>
                 </View>
 
                 <View style={styles.cookInfo}>
@@ -240,7 +270,7 @@ export default function RecipeDetail(navigation) {
                         <Text>Prep.Time</Text>
                         <View style={styles.logoInput}>
                             <Entypo name="stopwatch" size={24} color="black" />
-                            <Text>{recipeData.recipe.prepTime}</Text>
+                            <Text>{recipeData.prepTime}</Text>
                             <Text>min</Text>
                         </View>
                     </View>
@@ -248,7 +278,7 @@ export default function RecipeDetail(navigation) {
                         <Text>Cook Time</Text>
                         <View style={styles.logoInput}>
                             <Entypo name="stopwatch" size={24} color="black" />
-                            <Text>{recipeData.recipe.cookTime}</Text>
+                            <Text>{recipeData.cookTime}</Text>
                             <Text>min</Text>
                         </View>
                     </View>
@@ -258,8 +288,15 @@ export default function RecipeDetail(navigation) {
                         <View style={styles.logoInput}>
                             <MaterialCommunityIcons name="chef-hat" size={24} color="black" />
 
-                            <View style={{ width: 50, paddingLeft: 5 }}>
-                                <Text style={{ textAlign: 'center' }}>{recipeData.recipe.difficulty}</Text>
+                            <View style={{
+                                backgroundColor: difficultyColor,
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                alignContent: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Text style={{ textAlign: 'center', fontWeight: '500', fontSize: 18 }}>{recipeData.difficulty.split(" ")[0].slice(0, 1)}{recipeData.difficulty.split(" ")[1]?.slice(0, 1)}</Text>
                             </View>
                         </View>
                     </View>
@@ -268,14 +305,14 @@ export default function RecipeDetail(navigation) {
                         <Text style={styles.cookText}>Serves</Text>
                         <View style={styles.logoInput}>
                             <Ionicons name="ios-people-circle-outline" size={24} color="black" />
-                            <Text>{recipeData.recipe.prepTime}</Text>
+                            <Text>{recipeData.prepTime}</Text>
                             <Text>ppl.</Text>
                         </View>
                     </View>
                 </View>
 
                 <View style={styles.specialDietLogo}>
-                    {recipeData.recipe.specialDiet.map(item => {
+                    {recipeData.specialDiet.map(item => {
                         return logos.map(logo =>
                             (logo.name === item) ?
                                 <TouchableOpacity key={uuid.v4()}
@@ -292,7 +329,7 @@ export default function RecipeDetail(navigation) {
 
                 <Text style={styles.outputTags} >
                     <FontAwesome5 name="hashtag" size={24} color="black" />
-                    {recipeData.recipe.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
+                    {recipeData.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
                 </Text>
 
                 <View style={{
@@ -345,7 +382,7 @@ export default function RecipeDetail(navigation) {
 
                 {show === "ingredients"
                     ? <View style={{ width: windowWidth, alignItems: 'center', minHeight: 200 }}>
-                        {recipeData.recipe.ingredients.map(item =>
+                        {recipeData.ingredients.map(item =>
                             <View style={styles.outputIngredients} key={uuid.v4()}>
                                 <Text style={styles.quantity}>{item.quantity}</Text>
                                 <Text style={styles.units}>{item.units}</Text>
@@ -355,7 +392,7 @@ export default function RecipeDetail(navigation) {
                         )}
                     </View>
                     : <View style={{ width: windowWidth, alignItems: 'center', minHeight: 200 }}>
-                        {recipeData.recipe.preparation.map(item =>
+                        {recipeData.preparation.map(item =>
                             <View style={styles.outputPreparation} key={uuid.v4()}>
                                 <Text style={styles.step} key={uuid.v4()}>Step {item.step}</Text>
                                 <Text style={styles.prep} key={uuid.v4()}>{item.preparation}</Text>
@@ -364,19 +401,14 @@ export default function RecipeDetail(navigation) {
                     </View>
                 }
 
-                {/* <View style={{ marginVertical: 20 }}>
-                    <TouchableOpacity onPress={() => navigation.navigation.goBack('MyBook')}>
-                        <Text> Back to My Book</Text>
-                    </TouchableOpacity>
-                </View> */}
-
+                {/* //// add to meal / event MODAL */}
                 <Modal
                     animationType="fade"
                     transparent={true}
                     visible={modalVisible}
                 >
                     <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
+                        <View style={[styles.modalView]}>
                             <TouchableOpacity style={{ width: "100%", alignItems: 'flex-end', marginTop: 20, marginRight: 40 }} onPress={() => closeModal()}>
                                 <EvilIcons name="close-o" size={30} color="black" />
                             </TouchableOpacity>
@@ -394,26 +426,39 @@ export default function RecipeDetail(navigation) {
                                     </TouchableOpacity>
                                 </View>
                                 : (addTo === "meal" ?
-                                    <View style={{ marginVertical: 20 }}>
+                                    <View style={{ marginVertical: 20, height: 500 }}>
                                         <Text style={styles.banner}>Meals</Text>
-                                        {mealList?.map(item =>
-                                            !item.isDeleted && <TouchableOpacity
-                                                key={uuid.v4()}
-                                                style={styles.genericButton}
-                                                onPress={() => addRecipeToFc(item)}>
-                                                <Text >{item.mealName}</Text>
-                                            </TouchableOpacity>)}
+                                        <FlatList
+                                            data={mealList}
+                                            showsVerticalScrollIndicator={false}
+                                            style={{ maxHeight: 250 }}
+                                            renderItem={({ item }) =>
+                                                !item.isDeleted && <TouchableOpacity
+                                                    style={styles.genericButton}
+                                                    onPress={() => addRecipeToFc(item)}>
+                                                    <Text >{item.mealName}</Text>
+                                                </TouchableOpacity>
+                                            }
+                                            keyExtractor={item => item._id}
+                                        />
                                     </View>
 
                                     : <View style={{ marginVertical: 20 }}>
                                         <Text style={styles.banner}>Events</Text>
-                                        {eventList?.map(item =>
-                                            <TouchableOpacity
-                                                key={uuid.v4()}
-                                                style={styles.genericButton}
-                                                onPress={() => addRecipeToFc(item)}>
-                                                <Text >{item.name}</Text>
-                                            </TouchableOpacity>)}
+                                        <FlatList
+                                            data={eventList}
+                                            showsVerticalScrollIndicator={false}
+                                            style={{ maxHeight: 250 }}
+                                            renderItem={({ item }) =>
+                                                // item.eventDate >= todayDate &&
+                                                <TouchableOpacity
+                                                    style={styles.genericButton}
+                                                    onPress={() => addRecipeToFc(item)}>
+                                                    <Text >{item.eventName}</Text>
+                                                </TouchableOpacity>
+                                            }
+                                            keyExtractor={item => item._id}
+                                        />
                                     </View>
                                 )
                             }
@@ -422,6 +467,9 @@ export default function RecipeDetail(navigation) {
                     </View>
                 </Modal>
 
+                {redux?.recipe?.message !== "" && <PopupModal message={redux?.recipe?.message} popupModal={popupModal} />}
+                {/* {redux?.events?.message !== "" && <PopupModal message={redux?.events?.message} popupModal={popupModal} />}
+                {redux?.meals?.message !== "" && <PopupModal message={redux?.meals?.message} popupModal={popupModal} />} */}
 
             </View>
         </ScrollView>
@@ -431,7 +479,7 @@ export default function RecipeDetail(navigation) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: StatusBar.currentHeight + 20,
+        marginTop: StatusBar.currentHeight - 10,
         justifyContent: 'flex-start',
         alignItems: 'center',
         height: windowHeight,
@@ -575,7 +623,7 @@ const styles = StyleSheet.create({
     },
     genericButton: {
         marginBottom: 10,
-        width: 100,
+        width: 250,
         height: 40,
         alignItems: 'center',
         justifyContent: 'center',

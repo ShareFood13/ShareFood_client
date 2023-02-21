@@ -1,50 +1,63 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import {
-    View,
-    Text,
-    Button,
-    TouchableOpacity,
-    StyleSheet,
-    KeyboardAvoidingView,
     Alert,
+    Button,
     Image,
-    TouchableWithoutFeedback,
+    Keyboard,
+    KeyboardAvoidingView,
     Platform,
-    Keyboard
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native'
-import { TextInput } from 'react-native-gesture-handler';
 
-import { useDispatch } from 'react-redux';
+import { Context } from "../../context/UserContext";
+
+import { useDispatch, useSelector } from 'react-redux';
 import { signin } from '../../Redux/actions/auth';
-import { LOGOUT } from "../../Redux/constants/constantsTypes.js"
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import decode from "jwt-decode"
+import { CLEAR_ERROR } from "../../Redux/constants/constantsTypes.js"
 
 import { Feather, MaterialIcons, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+
+import * as SecureStore from 'expo-secure-store';
 
 const initialState = { email: '', password: '', userName: '' };
 
 export default function LogIn({ navigation }) {
+    const { userContext, setUserContext } = useContext(Context)
+    const dispatch = useDispatch();
+    const userInfo = useSelector((state) => state)
+
     const [form, setForm] = useState(initialState);
     const [isValid, setIsValid] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
-    const [user, setUser] = useState()
+    const [userToken, setUserToken] = useState(null)
+    // const [userId, setUserId] = useState(null)
 
-    const dispatch = useDispatch();
+    // console.log('login user token ', userToken)
+    // console.log('login user Id ', userId)
+    // console.log("Login.js userInfo", userInfo)
+    console.log("Login.js userInfo", userInfo?.auth?.authData?.result)
 
-    // const { logIn } = React.useContext(AuthContext);
-
-    // console.log('====================================');
-    // console.log("login30", user);
-    // console.log('====================================');
+    setUserContext(userInfo?.auth?.authData?.result)
 
     useEffect(() => {
         setIsValid(Object.values(form).every(value => value !== ""))
     }, [form])
 
+    useEffect(() => {
+        getItem()
+    }, [userContext])
+
+    async function getItem() {
+        setUserToken(JSON.parse(await SecureStore.getItemAsync('storageData')).token)
+    }
+
     const handleOnChange = (name, text) => {
+        userInfo?.auth.auth_msg && dispatch({ type: CLEAR_ERROR })
         switch (name) {
             case "userName":
                 // Minimum 4 characters, maximum 20 characters, at least on letter
@@ -69,32 +82,18 @@ export default function LogIn({ navigation }) {
         }
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        // setUser(JSON.parse(await AsyncStorage.getItem('profile')))
-        dispatch(signin(form, navigation));
+        dispatch(signin(form))
     };
 
     const forgetPassword = () => {
-        navigation.navigate('ForgetPass')
+        dispatch({ type: CLEAR_ERROR })
+        navigation.navigate('Auth', { screen: 'ForgetPass' })
     }
 
-    // const token = user?.token
-
-    // if (token) {
-    //     const decodedToken = decode(token)
-    //     // console.log('====================================');
-    //     // console.log("decodedToken77", decodedToken);
-    //     // console.log('====================================');
-    //     if (decodedToken.id === user.result._id) {
-    //         navigation.navigate("Home3")
-    //     }
-    // }
-
-    const logOutfun = () => {
-        dispatch({ type: LOGOUT })
-        setUser(null)
-        // navigation.navigate('LogIn')
+    if (userToken) {
+        navigation.navigate('Main', { screen: 'MyDrawer', params: { screen: 'Home' } })
     }
 
     return (
@@ -102,9 +101,12 @@ export default function LogIn({ navigation }) {
             <KeyboardAvoidingView style={styles.container}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
+
                 <View style={styles.logoView}>
                     <Image style={styles.logo} source={require('../../assets/images/favicon.png')} />
+                    {/* TODO add my Logo here */}
                 </View>
+
                 <View style={styles.inputLogo}>
                     <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
                         'Validation',
@@ -119,6 +121,7 @@ export default function LogIn({ navigation }) {
                         placeholder='User Name'
                         keyboardType="ascii-capable"
                         defaultValue='Shlepe'
+                        autoCorrect={false}
                         onChangeText={text => handleOnChange('userName', text)} />
                 </View>
 
@@ -136,10 +139,12 @@ export default function LogIn({ navigation }) {
                         placeholder='E-mail'
                         keyboardType="email-address"
                         defaultValue='solyattie13@gmail.co'
+                        autoCapitalize='none'
+                        autoCorrect={false}
                         onChangeText={text => handleOnChange('email', text)} />
                 </View>
 
-                <View style={[styles.inputLogo, styles.inputMargin]}>
+                <View style={styles.inputLogo}>
                     <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
                         'Validation',
                         'Minimum eight characters, at least one uppercase letter, one lowercase letter and one number:',
@@ -153,6 +158,8 @@ export default function LogIn({ navigation }) {
                         placeholder='Password'
                         secureTextEntry={!showPassword}
                         defaultValue='Soly198'
+                        autoCapitalize='none'
+                        autoCorrect={false}
                         onChangeText={text => handleOnChange('password', text)} />
                     <TouchableOpacity onPress={() => setShowPassword(!showPassword)} >
                         {showPassword ? <Ionicons name="eye-off-outline" size={24} color="black" />
@@ -160,39 +167,48 @@ export default function LogIn({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
+                <View style={{ height: 30, color: 'red', marginVertical: 10 }}>
+                    {userInfo?.auth.auth_msg &&
+                        <Text style={{ color: 'red', fontWeight: '500', fontSize: 16 }}>{userInfo.auth.auth_msg}</Text>
+                    }
+                </View>
 
                 <View style={styles.logButton}>
                     <Button title="Login" disabled={!isValid} onPress={handleSubmit} />
                 </View>
+
                 <View style={styles.textLink}>
                     <Text>
                         Don't have an account?
-                        <TouchableOpacity onPress={() => navigation.push("SignUp")} >
+                        <TouchableOpacity onPress={() => {
+                            navigation.navigate('Auth', { screen: 'SignUp' })
+                            dispatch({ type: CLEAR_ERROR })
+                        }}>
                             <Text style={styles.link}>Sign Up</Text>
                         </TouchableOpacity>
                     </Text>
                 </View>
+
                 <View style={styles.textLink}>
                     <TouchableOpacity onPress={forgetPassword} >
                         <Text style={[styles.link, styles.link2]}>Forgot Password?</Text>
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={logOutfun} >
-                    <Text >LOG OUT</Text>
-                </TouchableOpacity>
+
             </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback >
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center'
     },
     logoView: {
         height: 100,
+        marginTop: 100
     },
     logo: {
         height: 70,
@@ -210,14 +226,9 @@ const styles = StyleSheet.create({
     },
     input: {
         width: "80%",
-        // paddingStart: 10,
-    },
-    inputMargin: {
-        marginBottom: 50
     },
     logButton: {
         width: "90%",
-        // borderRadius: 50,
     },
     textLink: {
         marginVertical: 15,
@@ -230,7 +241,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         top: 3,
-
     },
     link2: {
         width: 150,

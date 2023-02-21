@@ -41,7 +41,7 @@ const SpSheet = ({ text, children, heightValue }) => {
                     }}
                 >
 
-                    <Text style={{ color: 'white', fontWeight: '700' }}>{text}</Text>
+                    <Text style={{ color: 'black', fontWeight: '500' }}>{text}</Text>
                 </TouchableOpacity>
             </View>
         </Root>

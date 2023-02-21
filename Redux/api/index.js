@@ -1,13 +1,16 @@
 import axios from "axios"
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
-const API = axios.create({ baseURL: 'https://02e9-77-124-91-113.eu.ngrok.io' })
+const API = axios.create({ baseURL: 'https://5ca7-77-126-30-47.eu.ngrok.io' })
 
 API.interceptors.request.use(async (req) => {
-    if (await AsyncStorage.getItem('profile')) {
-        req.headers.Authorization = `Bearer ${JSON.parse(await AsyncStorage.getItem('profile')).token}`
+    if (await SecureStore.getItemAsync('storageData')) {
+        req.headers.Authorization = `Bearer ${JSON.parse(await SecureStore.getItemAsync('storageData')).token}`
     }
+    // if (await SecureStore.getItemAsync('token')) {
+    //     req.headers.Authorization = `Bearer ${JSON.parse(await SecureStore.getItemAsync('token'))}`
+    // }
     return req
 })
 
@@ -19,10 +22,15 @@ export const changePassword = (formData) => API.put(`/api/user/changepassword`, 
 export const getUserInfo = (_id) => API.get(`/api/user/getUser/${_id}`)
 export const sendToSharedFood = (contactUsForm) => API.post(`/api/user/contactus`, contactUsForm)
 
+export const getOtherUsers = (_id) => API.get(`/api/user/getotherusers/${_id}`)
+export const startFollowing = (ids) => API.put(`/api/user/startfollowing`, ids)
+export const stopFollowing = (ids) => API.put(`/api/user/stopfollowing`, ids)
+
 export const createRecipe = (recipeForm) => API.post(`/api/recipes`, recipeForm)
 export const fetchMyRecipes = (_id) => API.get(`/api/recipes/${_id}`)
 export const updateRecipe = (_id, recipe) => API.patch(`/api/recipes/${_id}`, recipe)
 export const deleteRecipe = (_id) => API.delete(`/api/recipes/${_id}`)
+export const getOtherRecipes = () => API.get(`/api/recipes/getotherrecipes`)
 
 export const createEvent = (event) => API.post(`/api/events`, event)
 export const fetchEvents = (_id) => API.get(`/api/events/${_id}`)
@@ -41,7 +49,7 @@ export const getMyMails = (_id) => API.get(`/api/mymails/${_id}`)
 export const getSendedMails = (_id) => API.patch(`/api/mymails/${_id}`)
 export const deleteMail = (mailId) => API.delete(`/api/mymails/${mailId}`)
 
-// export const userProfile = (_id, formData) => API.post(`/api/user/useprofile/${_id}`, formData)
+export const saveProfile = (_id, profileForm) => API.put(`/api/user/userprofile/${_id}`, profileForm)
 // export const userProfileUpdate = (_id, formData) = API.put(`api/user/userprofileupdate/${_id}`, formData)
 
 // const API = axios.create({baseURL: 'https://musicplyr13.herokuapp.com/'})

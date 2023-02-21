@@ -2,7 +2,7 @@ import { GET_MY_MAILS, GET_SENDED_MAILS, DEL_MY_MAIL, CREATE_MY_MAIL } from "../
 import * as api from "../api"
 
 export const createMyMail = (mail) => async (dispatch) => {
-    console.log("createMyMail", mail);
+    // console.log("createMyMail", mail);
     try {
 
         const { data } = await api.createMyMail(mail)
@@ -14,13 +14,13 @@ export const createMyMail = (mail) => async (dispatch) => {
     }
 }
 
-export const getMyMeals = (reciverId) => async (dispatch) => {
-    console.log("getMyMeals", reciverId);
+export const getMyMails = (reciverId) => async (dispatch) => {
+    // console.log("getMyMails", reciverId);
     try {
 
         const { data } = await api.getMyMails(reciverId)
 
-        // console.log("getMeals data:", data);
+        // console.log("getMyMails data:", data);
 
         dispatch({ type: GET_MY_MAILS, payload: data })
 
@@ -30,7 +30,7 @@ export const getMyMeals = (reciverId) => async (dispatch) => {
 }
 
 export const getSendedMails = (senderId) => async (dispatch) => {
-    console.log("getSendedMails", senderId);
+    // console.log("getSendedMails", senderId);
     try {
 
         const { data } = await api.getSendedMails(senderId)
@@ -45,7 +45,7 @@ export const getSendedMails = (senderId) => async (dispatch) => {
 }
 
 export const deleteMyMail = (reciverId) => async (dispatch) => {
-    console.log("deleteMyMail:", reciverId);
+    // console.log("deleteMyMail:", reciverId);
     try {
 
         const { data } = await api.delMyMail(reciverId)

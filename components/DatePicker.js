@@ -18,7 +18,9 @@ export default function DatePicker({
     pickerType,
     infoPickerFunction,
     formTypeInput,
+    birthDay
 }) {
+
     const todayDate = new Date();
 
     const [date, setDate] = useState(todayDate);
@@ -26,6 +28,8 @@ export default function DatePicker({
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
     var currentDate = '';
+
+
 
     const onChange = (event, selectedDate) => {
         currentDate = selectedDate;
@@ -55,15 +59,28 @@ export default function DatePicker({
 
     return (
         <View>
+
             {pickerType === 'date' && (
-                <View
-                    style={styles.outPuts}
-                >
-                    <Text style={{ width: "80%" }}>Date Picked: {date.toISOString().split('T')[0]}</Text>
-                    <TouchableOpacity style={{ width: "20%", alignItems: 'center', justifyContent: 'center' }} onPress={showDatepicker}>
-                        <Ionicons name="calendar-outline" size={30} color="black" />
-                    </TouchableOpacity>
-                </View>
+                (birthDay)
+                    ?
+                    <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
+                        <Text style={{ width: '30%' }}>BirthDate:</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}>
+                            <Text>{date.toISOString().split('T')[0]}</Text>
+                            <TouchableOpacity style={{ width: "20%", alignItems: 'center', justifyContent: 'center' }} onPress={showDatepicker}>
+                                <Ionicons name="calendar-outline" size={30} color="black" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    :
+                    <View
+                        style={styles.outPuts}
+                    >
+                        <Text style={{ width: "80%" }}>Date Picked: {date.toISOString().split('T')[0]}</Text>
+                        <TouchableOpacity style={{ width: "20%", alignItems: 'center', justifyContent: 'center' }} onPress={showDatepicker}>
+                            <Ionicons name="calendar-outline" size={30} color="black" />
+                        </TouchableOpacity>
+                    </View>
             )}
             {pickerType === 'time' && (
                 <View

@@ -1,976 +1,244 @@
-// import React, { useState, useEffect } from 'react'
-// import { View, Text, Button, StyleSheet } from 'react-native'
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, FlatList, RefreshControl, Dimensions } from 'react-native'
+import React, { useState, useContext, useEffect, useCallback } from 'react'
 
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from '@react-navigation/native';
 
-// import PopUp from '../../components/PopUp';
-// import ToastComp from '../../components/ToastComp.js';
-// import SpSheet from '../../components/SpSheet';
+import { Entypo, MaterialIcons, Foundation, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
-// export default function Home({ navigation }) {
+import * as SecureStore from 'expo-secure-store';
 
-//     const [user, setUser] = useState()
-//     const [show, setShow] = useState(false)
+import { useDispatch, useSelector } from 'react-redux';
 
-//     useEffect(() => {
-//         getUser()
-//     }, [])
+import { Context } from "../../context/UserContext";
+import { getUserInfo, startFollowing } from '../../Redux/actions/auth';
+import { getotherusers } from '../../Redux/actions/others';
+import { getotherrecipes } from '../../Redux/actions/recipes';
 
-//     const getUser = async () => {
-//         setUser(JSON.parse(await AsyncStorage.getItem('profile')))
-//     }
+import PopupModal from '../../components/PopupModal';
+import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
 
-//     // console.log(user);
 
-//     return (
-//         <View style={styles.container}>
-//             <Text>{user?.result?.name}</Text>
-//             {show && <PopUp show={true} />}
-//             {show && <SpSheet show={true} />}
-//             {show && <ToastComp show={true} />}
-//             <Button title='Click Me' onPress={() => setShow(true)} />
-//         </View>
-//     )
-// }
+export default function Home({ navigation }) {
+    const { userContext, setUserContext } = useContext(Context)
+    const dispatch = useDispatch()
+    const [showPictures, setShowPictures] = useState("grid")
+    const windowWidth = Dimensions.get('window').width;
 
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         justifyContent: 'center',
-//         alignItems: 'center'
-//     }
-// })
+    var countRecipe = 0
 
-import React, { useState } from 'react';
+    const [userToken, setUserToken] = useState(null)
+    const [userId, setUserId] = useState(null)
+    const [popupModal, setPopupModal] = useState(false)
+    const [refreshing, setRefreshing] = useState(false)
 
-import { Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
 
-import {
-    Entypo,
-    Ionicons,
-    MaterialCommunityIcons,
-    Feather,
-    AntDesign,
-    FontAwesome5,
-    EvilIcons,
-} from '@expo/vector-icons';
 
-import Constants from 'expo-constants';
+    const isFocused = useIsFocused();
 
-import DateTimePicker from '@react-native-community/datetimepicker';
+    const redux = useSelector((state) => state)
+    // console.log("Home redux user", redux?.auth?.authData?.result?.profile)
+    // console.log("Home redux user", redux)
 
-import uuid from 'react-native-uuid';
+    redux?.auth?.authData?.result?.recipesId?.map(recipe => !recipe.isDeleted && countRecipe++)
 
-const products = [
-    {
-        product: 'tomato',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 200,
-        metricUn: 'Grams',
-        imperialQty: 7,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'onions',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 200,
-        metricUn: 'Grams',
-        imperialQty: 7,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'garlic',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 5,
-        metricUn: 'Grams',
-        imperialQty: 0.17,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'olives',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 10,
-        metricUn: 'Grams',
-        imperialQty: 0.35,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'cumcumber',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 100,
-        metricUn: 'Grams',
-        imperialQty: 3.5,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'chives',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 50,
-        metricUn: 'Grams',
-        imperialQty: 0.175,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'pepper',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 200,
-        metricUn: 'Grams',
-        imperialQty: 7,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'flour',
-        quantity: 1,
-        units: 'units',
-        metricQty: 120,
-        metricUn: 'Grams',
-        imperialQty: 4,
-        imperialUn: 'Onces',
-    },
-];
+    // redux?.auth?.authData?.result?.recipesId?.map(recipe => !recipe.isDeleted && console.log(recipe.recipePicture[0]))
 
-const myRecipes = [
-    {
-        _id: '123',
-        ingredients: [
-            {
-                product: 'tomato',
-                quantity: 5,
-                units: 'units',
-                remark: 'text',
-                _id: 'aaa',
-            },
-            {
-                product: 'flour',
-                quantity: 1,
-                units: 'Cup',
-                remark: 'text',
-                _id: 'aaa',
-            },
-            {
-                product: 'milk',
-                quantity: 2,
-                units: 'Liter',
-                remark: 'text',
-                _id: 'aaa',
-            },
-            {
-                product: 'meat',
-                quantity: 3,
-                units: 'KiloGrams',
-                remark: 'text',
-                _id: 'aaa',
-            },
-            {
-                product: 'onions',
-                quantity: 1,
-                units: 'units',
-                remark: 'text',
-                _id: 'aab',
-            },
-            {
-                product: 'olives',
-                quantity: 20,
-                units: 'units',
-                remark: 'text',
-                _id: 'aar',
-            },
-        ],
-    },
-    {
-        _id: '124',
-        ingredients: [
-            {
-                product: 'cumcumber',
-                quantity: 2,
-                units: 'units',
-                remark: 'text',
-                _id: 'aa4',
-            },
-            {
-                product: 'chives',
-                quantity: 1,
-                units: 'units',
-                remark: 'text',
-                _id: 'aaa5',
-            },
-            {
-                product: 'salt',
-                quantity: 3,
-                units: 'TeaSpoon',
-                remark: 'text',
-                _id: 'aaa5r',
-            },
-            {
-                product: 'black pepper',
-                quantity: 1,
-                units: 'TeaSpoon',
-                remark: 'text',
-                _id: 'aaa5y',
-            },
-        ],
-    },
-    {
-        _id: '124',
-        ingredients: [
-            {
-                product: 'tomato',
-                quantity: 400,
-                units: 'Grams',
-                remark: 'text',
-                _id: 'aa4',
-            },
-            {
-                product: 'chives',
-                quantity: 1,
-                units: 'units',
-                remark: 'text',
-                _id: 'aaa5',
-            },
-            {
-                product: 'water',
-                quantity: 2,
-                units: 'Pint',
-                remark: 'text',
-                _id: 'aaa5',
-            },
-            {
-                product: 'Soup',
-                quantity: 2,
-                units: 'Gallon',
-                remark: 'text',
-                _id: 'aaa5',
-            },
-            {
-                product: 'cumcumber',
-                quantity: 5,
-                units: 'units',
-                remark: 'text',
-                _id: 'aaa5r',
-            },
-            {
-                product: 'garlic',
-                quantity: 5,
-                units: 'TableSpoon',
-                remark: 'text',
-                _id: 'aaa5r',
-            },
-            {
-                product: 'garlic',
-                quantity: 5,
-                units: 'units',
-                remark: 'text',
-                _id: 'aaa5r',
-            },
-            {
-                product: 'pepper',
-                quantity: 3,
-                units: 'Pint',
-                remark: 'text',
-                _id: 'aaa5y',
-            },
-        ],
-    },
-];
+    useEffect(() => {
+        if (redux?.auth?.message) {
+            setPopupModal(true)
+            setTimeout(() => {
+                setPopupModal(false)
+                dispatch({ type: CLEAR_MSG })
+                onRefresh()
+            }, 2500)
+        }
+    }, [redux, isFocused])
 
-const mass = [
-    // { system: "metric", unit: "From...To...", abreviation: "", toGrams: 0, toKiloGrams: 0, toOnces: 0, toPounds: 0 },
-    {
-        system: 'metric',
-        unit: 'Grams',
-        abreviation: 'g',
-        toGrams: 1,
-        toKiloGrams: 0.001,
-        toOnces: 0.0352739619,
-        toPounds: 0.00220462262,
-    },
-    {
-        system: 'metric',
-        unit: 'KiloGrams',
-        abreviation: 'Kg',
-        toGrams: 1000,
-        toKiloGrams: 1,
-        toOnces: 35.2739619,
-        toPounds: 2.20462262,
-    },
-    {
-        system: 'imperial',
-        unit: 'Onces',
-        abreviation: 'Oz',
-        toGrams: 28.3495231,
-        toKiloGrams: 0.0283495231,
-        toOnces: 1,
-        toPounds: 0.0625,
-    },
-    {
-        system: 'imperial',
-        unit: 'Pounds',
-        abreviation: 'lbs',
-        toGrams: 453.59237,
-        toKiloGrams: 0.45359237,
-        toOnces: 16,
-        toPounds: 1,
-    },
-    {
-        system: 'both',
-        unit: 'TeaSpoon',
-        abreviation: 'tsp',
-        toGrams: 5,
-        toKiloGrams: 0.005,
-        toTableSpoon: 0.3333,
-        toCup: 0.02,
-        toOnces: 0.16,
-    },
-    {
-        system: 'both',
-        unit: 'TableSpoon',
-        abreviation: 'tbs',
-        toGrams: 15,
-        toKiloGrams: 0.015,
-        toTeaSpoon: 3,
-        toCup: 0.0625,
-        toOnces: 0.5,
-    },
-    {
-        system: 'both',
-        unit: 'Cup',
-        abreviation: 'cup',
-        toGrams: 236.58,
-        toKiloGrams: 0.23,
-        toTeaSpoon: 48,
-        toTableSpoon: 16,
-        toOnces: 8,
-    },
-];
+    useEffect(() => {
+        redux?.auth?.authData?.result?.profile && setUserContext(redux.auth.authData.result.profile)
+    }, [redux])
 
-const volume = [
-    // { system: "metric", unit: "From...To...", abreviation: "", toMilliLiter: 0, toLiter: 0, toTeaSpoon: 0, toTableSpoon: 0, toCup: 0, toOnces: 0, toPint: 0, toGallon: 0 },
-    {
-        system: 'metric',
-        unit: 'MilliLiter',
-        abreviation: 'ml',
-        toMilliLiter: 1,
-        toLiter: 0.001,
-        toTeaSpoon: 0.2,
-        toTableSpoon: 0.067,
-        toCup: 0.0042,
-        toOnces: 0.033,
-        toPint: 0.0021,
-        toGallon: 0.00026,
-    },
-    {
-        system: 'metric',
-        unit: 'Liter',
-        abreviation: 'L',
-        toMilliLiter: 1000,
-        toLiter: 1,
-        toTeaSpoon: 202.88,
-        toTableSpoon: 67.62,
-        toCup: 4.227,
-        toOnces: 33.814,
-        toPint: 2.11,
-        toGallon: 0.26,
-    },
-    {
-        system: 'both',
-        unit: 'TeaSpoon',
-        abreviation: 'tsp',
-        toMilliLiter: 5,
-        toLiter: 0.005,
-        toTeaSpoon: 1,
-        toTableSpoon: 0.3333,
-        toCup: 0.02,
-        toOnces: 0.16,
-        toPint: 0.01,
-        toGallon: 0.0013,
-    },
-    {
-        system: 'both',
-        unit: 'TableSpoon',
-        abreviation: 'tbs',
-        toMilliLiter: 15,
-        toLiter: 0.015,
-        toTeaSpoon: 3,
-        toTableSpoon: 1,
-        toCup: 0.0625,
-        toOnces: 0.5,
-        toPint: 0.031,
-        toGallon: 0.0039,
-    },
-    {
-        system: 'both',
-        unit: 'Cup',
-        abreviation: 'cup',
-        toMilliLiter: 236.58,
-        toLiter: 0.23,
-        toTeaSpoon: 48,
-        toTableSpoon: 16,
-        toCup: 1,
-        toOnces: 8,
-        toPint: 0.5,
-        toGallon: 0.062,
-    },
-    {
-        system: 'imperial',
-        unit: 'Onces',
-        abreviation: 'oz',
-        toMilliLiter: 29.57,
-        toLiter: 0.029,
-        toTeaSpoon: 6,
-        toTableSpoon: 2,
-        toCup: 0.12,
-        toOnces: 1,
-        toPint: 0.062,
-        toGallon: 0.0077,
-    },
-    {
-        system: 'imperial',
-        unit: 'Pint',
-        abreviation: 'pnt',
-        toMilliLiter: 473.17,
-        toLiter: 0.46,
-        toTeaSpoon: 96,
-        toTableSpoon: 32,
-        toCup: 2,
-        toOnces: 16,
-        toPint: 1,
-        toGallon: 0.12,
-    },
-    {
-        system: 'imperial',
-        unit: 'Gallon',
-        abreviation: 'gal',
-        toMilliLiter: 3785.41,
-        toLiter: 3.74,
-        toTeaSpoon: 768,
-        toTableSpoon: 256,
-        toCup: 16,
-        toOnces: 128,
-        toPint: 8,
-        toGallon: 1,
-    },
-];
+    // console.log("Home redux otherUsers", redux?.other?.otherUsers)
+    // console.log("userContext", userContext)
 
-const myEvents = [
-    {
-        _id: ' 123',
-        eventName: 'test01',
-        date: '2022-12-02',
-        recipesId: [
-            {
-                _id: '123',
-                ingredients: [
-                    {
-                        product: 'tomato',
-                        quantity: 5,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'flour',
-                        quantity: 1,
-                        units: 'Cup',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'milk',
-                        quantity: 2,
-                        units: 'Liter',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'meat',
-                        quantity: 3,
-                        units: 'KiloGrams',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'onions',
-                        quantity: 1,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aab',
-                    },
-                    {
-                        product: 'olives',
-                        quantity: 20,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aar',
-                    },
-                ],
-            },
-        ],
-    },
-    {
-        _id: ' 124',
-        eventName: 'test02',
-        date: '2022-12-04',
-        recipesId: [
-            {
-                _id: '123',
-                ingredients: [
-                    {
-                        product: 'tomato',
-                        quantity: 5,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'flour',
-                        quantity: 1,
-                        units: 'Cup',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'milk',
-                        quantity: 2,
-                        units: 'Liter',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'meat',
-                        quantity: 3,
-                        units: 'KiloGrams',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'onions',
-                        quantity: 1,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aab',
-                    },
-                    {
-                        product: 'olives',
-                        quantity: 20,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aar',
-                    },
-                ]
-            },
-            {
-                _id: '124',
-                ingredients: [
-                    {
-                        product: 'tomato',
-                        quantity: 400,
-                        units: 'Grams',
-                        remark: 'text',
-                        _id: 'aa4',
-                    },
-                    {
-                        product: 'chives',
-                        quantity: 1,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aaa5',
-                    },
-                    {
-                        product: 'water',
-                        quantity: 2,
-                        units: 'Pint',
-                        remark: 'text',
-                        _id: 'aaa5',
-                    },
-                    {
-                        product: 'Soup',
-                        quantity: 2,
-                        units: 'Gallon',
-                        remark: 'text',
-                        _id: 'aaa5',
-                    },
-                    {
-                        product: 'cumcumber',
-                        quantity: 5,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aaa5r',
-                    },
-                    {
-                        product: 'garlic',
-                        quantity: 5,
-                        units: 'TableSpoon',
-                        remark: 'text',
-                        _id: 'aaa5r',
-                    },
-                    {
-                        product: 'garlic',
-                        quantity: 5,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aaa5r',
-                    },
-                    {
-                        product: 'pepper',
-                        quantity: 3,
-                        units: 'Pint',
-                        remark: 'text',
-                        _id: 'aaa5y',
-                    },
-                ],
-            },
-        ],
-    },
-    {
-        _id: ' 125',
-        eventName: 'test03',
-        date: '2022-12-10',
-        recipesId: [
-            {
-                _id: '123',
-                ingredients: [
-                    {
-                        product: 'tomato',
-                        quantity: 5,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'flour',
-                        quantity: 1,
-                        units: 'Cup',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'milk',
-                        quantity: 2,
-                        units: 'Liter',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'meat',
-                        quantity: 3,
-                        units: 'KiloGrams',
-                        remark: 'text',
-                        _id: 'aaa',
-                    },
-                    {
-                        product: 'onions',
-                        quantity: 1,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aab',
-                    },
-                    {
-                        product: 'olives',
-                        quantity: 20,
-                        units: 'units',
-                        remark: 'text',
-                        _id: 'aar',
-                    },
-                ],
-            },
-        ],
-    },
-];
+    const otherUsersList = redux?.other?.otherUsers
 
-const myMeals = [
-    {
-        _id: "123",
-        mealName: "Meal01",
-        recipesId: [{
-            _id: '123',
-            ingredients: [
-                {
-                    product: 'tomato',
-                    quantity: 5,
-                    units: 'units',
-                    remark: 'text',
-                    _id: 'aaa',
-                },
-                {
-                    product: 'flour',
-                    quantity: 1,
-                    units: 'Cup',
-                    remark: 'text',
-                    _id: 'aaa',
-                },
-                {
-                    product: 'milk',
-                    quantity: 2,
-                    units: 'Liter',
-                    remark: 'text',
-                    _id: 'aaa',
-                },
-                {
-                    product: 'meat',
-                    quantity: 3,
-                    units: 'KiloGrams',
-                    remark: 'text',
-                    _id: 'aaa',
-                },
-                {
-                    product: 'onions',
-                    quantity: 1,
-                    units: 'units',
-                    remark: 'text',
-                    _id: 'aab',
-                },
-                {
-                    product: 'olives',
-                    quantity: 20,
-                    units: 'units',
-                    remark: 'text',
-                    _id: 'aar',
-                },
-            ],
-        },
-        {
-            _id: '124',
-            ingredients: [
-                {
-                    product: 'cumcumber',
-                    quantity: 2,
-                    units: 'units',
-                    remark: 'text',
-                    _id: 'aa4',
-                },
-                {
-                    product: 'chives',
-                    quantity: 1,
-                    units: 'units',
-                    remark: 'text',
-                    _id: 'aaa5',
-                },
-                {
-                    product: 'salt',
-                    quantity: 3,
-                    units: 'TeaSpoon',
-                    remark: 'text',
-                    _id: 'aaa5r',
-                },
-                {
-                    product: 'black pepper',
-                    quantity: 1,
-                    units: 'TeaSpoon',
-                    remark: 'text',
-                    _id: 'aaa5y',
-                },
-            ],
-        },]
+    useEffect(() => {
+        getItem()
+    }, [userContext])
+
+    async function getItem() {
+        setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
     }
-]
 
-export default function App() {
-    const todayDate = new Date();
+    useEffect(() => {
+        dispatch(getotherusers(userId))//.then(dispatch(getotherrecipes()))
+        dispatch(getotherrecipes())
+    }, [userId, isFocused])
 
-    const [showPicker, setShowPicker] = useState(false);
-    const [date, setDate] = useState(todayDate);
-    const [fromDate, setFromDate] = useState(todayDate);
-    const [toDate, setToDate] = useState(todayDate);
-    const [type, setType] = useState();
-    const [answer, setAnswer] = useState();
-    const [system, setSystem] = useState('metric');
-    const [mealNameForShow, setMealNameForShow] = useState("Meal01");
+    useEffect(() => {
+        userId && dispatch(getUserInfo(userId))
+    }, [userId, isFocused])
 
-    const createShopList = (shopType) => {
-        var filter = [];
+    const wait = (timeout) => {
+        return new Promise(resolve => setTimeout(resolve, timeout));
+    }
 
-        if (shopType === "events") {
-            myEvents.map((event) =>
-                event.date >= fromDate.toISOString().split('T')[0] && event.date <= toDate.toISOString().split('T')[0]
-                    ? filter.push(event.recipesId[0])
-                    // ? console.log(event.date)
-                    : null
-            );
-        } else {
-            myMeals.map((meal) =>
-                meal.mealName === mealNameForShow
-                    ? filter.push(meal.recipesId[0])
-                    : null
-            );
-        }
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        // setMyRecipes(userContext?.result?.recipesId)
+        wait(3000).then(() => setRefreshing(false))//.then(() => dispatch(getUserInfo(userId)))
+    }, []);
 
-        var newMyRecipes = [];
-        filter.map((myEvent) => {
-            myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
-        });
+    const openOtherUser = (otherUserID) => {
+        console.log(otherUserID)
+    }
 
-        if (system === 'metric') {
-            newMyRecipes.map((item) =>
-                item.units === 'units'
-                    ? products.map((prod) => {
-                        if (prod.product === item.product) {
-                            item.quantity = item.quantity * prod.metricQty;
-                            item.units = prod.metricUn;
-                        }
-                    })
-                    : null
-            );
-            newMyRecipes.map((item) =>
-                mass.map((value) => {
-                    if (item.units === value.unit) {
-                        item.quantity = item.quantity * value.toGrams;
-                        item.units = 'Grams';
-                    }
-                })
-            );
-            newMyRecipes.map((item) =>
-                volume.map((value) => {
-                    if (item.units === value.unit) {
-                        item.quantity = item.quantity * value.toMilliLiter;
-                        item.units = 'MilliLiters';
-                    }
-                })
-            );
-        } else {
-            newMyRecipes.map((item) =>
-                item.units === 'units'
-                    ? products.map((prod) => {
-                        if (prod.product === item.product) {
-                            item.quantity = item.quantity * prod.imperialQty;
-                            item.units = prod.imperialUn;
-                        }
-                    })
-                    : null
-            );
-            newMyRecipes.map((item) =>
-                mass.map((value) => {
-                    if (item.units === value.unit) {
-                        item.quantity = item.quantity * value.toOnces;
-                        item.units = 'Onces';
-                    }
-                })
-            );
-            newMyRecipes.map((item) =>
-                volume.map((value) => {
-                    if (item.units === value.unit) {
-                        item.quantity = item.quantity * value.toOnces;
-                        item.units = 'Onces';
-                    }
-                })
-            );
-        }
+    const openRecipe = (recipe) => {
+        navigation.push('RecipeDetail', { recipeData: recipe })
+    }
 
-        const newArray = newMyRecipes.reduce((acc, item) => {
-            // check if item with the same product exists in the accumulator
-            const existingItem = acc.find(
-                (i) => i.product === item.product && i.units === item.units
-            );
-            if (existingItem) {
-                // if it does, add the quantities together
-                existingItem.quantity += item.quantity;
-            } else {
-                // if it doesn't, add the new item to the accumulator
-                acc.push(item);
-            }
-            return acc;
-        }, []);
-
-        setAnswer(newArray);
-    };
-
-    const showDatepicker = (event) => {
-        setType(event);
-        setShowPicker(true);
-    };
-
-    const onChange = (event, selectedDate) => {
-        const date = selectedDate;
-        if (type === 'fromDate') {
-            setFromDate(date);
-        } else {
-            setToDate(date);
-        }
-        setShowPicker(false);
-    };
+    const startFollowingFn = (follow_id) => {
+        dispatch(startFollowing({ userId, follow_id }))
+    }
 
     return (
-        <View style={styles.container}>
-            <Button title="fromDate" onPress={() => alert(fromDate)} />
-            <Button title="toDate" onPress={() => alert(toDate)} />
-            <Text></Text>
-
-            <Button title="Events" onPress={() => createShopList("events")} />
-            <Text></Text>
-
-            <Button title="byMeal" onPress={() => createShopList("meals")} />
-            <Text></Text>
-
-            <Button title="Clear" onPress={() => setAnswer()} />
-
-            {answer?.map((item) => (
-                <View style={{ flexDirection: 'row' }} key={uuid.v4()}>
-                    <Text style={{ width: 120 }}>Prod: {item.product} </Text>
-                    <Text style={{ width: 90 }}>Qty: {item.quantity} </Text>
-                    <Text>Un: {item.units} </Text>
-                </View>
-            ))}
-            <Text></Text>
-            <Text>Save Shop List || Share Shop List || Print</Text>
-            <Text></Text>
-
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={{ width: '80%' }}>
-                    From Date: {fromDate?.toISOString().split('T')[0]}
-                </Text>
-                <TouchableOpacity
-                    style={{
-                        width: '20%',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                    onPress={() => showDatepicker('fromDate')}>
-                    <Ionicons name="calendar-outline" size={30} color="black" />
-                </TouchableOpacity>
-            </View>
-            <Text></Text>
-
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={{ width: '80%' }}>
-                    To Date: {toDate?.toISOString().split('T')[0]}
-                </Text>
-                <TouchableOpacity
-                    style={{
-                        width: '20%',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                    onPress={() => showDatepicker('toDate')}>
-                    <Ionicons name="calendar-outline" size={30} color="black" />
-                </TouchableOpacity>
-            </View>
-
-            {showPicker && (
-                <DateTimePicker
-                    testID="dateTimePicker"
-                    value={date}
-                    mode="date"
-                    is24Hour={true}
-                    onChange={onChange}
-                // display='spinner'
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={() => onRefresh()}
                 />
-            )}
-        </View>
-    );
+            }>
+            <View style={{ flexDirection: "row", height: 100, width: "100%", justifyContent: 'space-around', alignItems: 'center', marginTop: 15, backgroundColor: 'white', alignContent: 'center' }}>
+                <Image
+                    source={require("../../assets/images/user-profile.jpeg")}
+                    // source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture }}
+                    // source={{ uri: userContext?.profilePicture }}
+                    style={{ height: 90, width: 90, borderRadius: 45 }}
+                />
+                <View style={{ alignItems: 'center' }}>
+                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{countRecipe}</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Recipes</Text>
+                </View>
+                <View style={{ alignItems: 'center' }}>
+                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{userContext?.followers?.length}</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Followers</Text>
+                </View>
+                <View style={{ alignItems: 'center' }}>
+                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{userContext?.following?.length}</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Following</Text>
+                </View>
+            </View>
+
+            <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10, paddingVertical: 10 }}>
+                <Text style={{ width: '95%', textAlign: 'justify', alignSelf: 'center', marginBottom: 5 }}>
+                    {userContext?.personalDescription}
+                </Text>
+                {userContext?.socialMediaHandles?.facebook &&
+                    <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                        <Entypo name="facebook" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                        <Text>{userContext?.socialMediaHandles?.facebook}</Text>
+                    </View>
+                }
+                {userContext?.socialMediaHandles?.instagram &&
+                    <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                        <Entypo name="instagram" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                        <Text>{userContext?.socialMediaHandles?.instagram}</Text>
+                    </View>
+                }
+                {userContext?.socialMediaHandles?.pinterest &&
+                    <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                        <Entypo name="pinterest" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                        <Text>{userContext?.socialMediaHandles?.pinterest}</Text>
+                    </View>
+                }
+                {userContext?.socialMediaHandles?.tiktok &&
+                    <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                        <FontAwesome5 name="tiktok" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                        <Text>{userContext?.socialMediaHandles?.tiktok}</Text>
+                    </View>
+                }
+                {userContext?.socialMediaHandles?.blog &&
+                    <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                        <FontAwesome5 name="blogger" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                        <Text>{userContext?.socialMediaHandles?.blog}</Text>
+                    </View>
+                }
+            </View>
+
+            {/* {otherUsersList.map(user => <Text key={user._id}>{user.userName}</Text>)} */}
+            <ScrollView
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+            >
+                {otherUsersList.map(user => !redux?.auth?.authData?.result?.profile?.following?.includes(user._id) &&
+                    <TouchableOpacity onPress={() => openOtherUser(user._id)} key={user._id}>
+                        <View style={{ width: 90, height: 150, borderRadius: 10, borderWidth: 1, borderColor: 'black', marginHorizontal: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white' }}>
+                            <Image
+                                source={require("../../assets/images/user-profile.jpeg")}
+                                // source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture }}
+                                // source={{ uri: userContext?.profilePicture }}
+                                style={{ height: 70, width: 70, borderRadius: 35, marginBottom: 5, borderWidth: 0.5, borderColor: 'black' }}
+                            />
+                            <Text style={{ marginBottom: 5 }}>{user.userName}</Text>
+                            <TouchableOpacity onPress={() => startFollowingFn(user._id)} style={{ borderWidth: 1, borderColor: 'black', paddingHorizontal: 7, marginBottom: 5, backgroundColor: 'cyan' }}>
+                                <Text style={{ fontWeight: '500' }}>Follow</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
+                )}
+            </ScrollView>
+
+            <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-around', alignSelf: 'center', height: 40, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'black', marginBottom: 15 }}>
+                <TouchableOpacity onPress={() => setShowPictures("grid")}>
+                    <MaterialIcons name="grid-on" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowPictures("list")}>
+                    <Foundation name="list" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                </TouchableOpacity>
+
+            </View>
+
+            {showPictures === "grid" ?
+                <FlatList
+                    data={redux?.auth?.authData?.result?.recipesId}
+                    showsVerticalScrollIndicator={false}
+                    numColumns={3}
+                    renderItem={({ item }) =>
+                        (!item?.isDeleted) ?
+                            <TouchableOpacity onPress={() => openRecipe(item)}>
+                                <View style={{ width: windowWidth / 3, height: windowWidth / 3, borderWidth: 0.2, borderColor: 'black' }}>
+                                    <Image source={{ uri: item?.recipePicture[0]?.base64 }} style={{ width: windowWidth / 3, height: windowWidth / 3 }} />
+                                </View>
+                            </TouchableOpacity>
+                            : null
+                    }
+                    key={'_'}
+                    keyExtractor={item => "_" + item._id}
+                /> :
+                <FlatList
+                    data={redux?.auth?.authData?.result?.recipesId}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({ item }) =>
+                        (!item?.isDeleted) ?
+                            <TouchableOpacity onPress={() => openRecipe(item)}>
+                                <View style={{ width: windowWidth, borderWidth: 1, borderColor: 'black' }}>
+                                    <Image source={{ uri: item?.recipePicture[0]?.base64 }} style={{ width: windowWidth, height: windowWidth * 3 / 4 }} />
+                                    <Text style={{ minHeight: 50, width: windowWidth * 0.9, alignSelf: 'center', paddingVertical: 10, textAlign: 'justify' }}>{item.freeText}</Text>
+                                </View>
+                            </TouchableOpacity>
+                            : null
+                    }
+                    key={'#'}
+                    keyExtractor={item => "#" + item._id}
+                />
+            }
+
+            <PopupModal message={redux?.auth?.message} popupModal={popupModal} />
+
+        </ScrollView >
+    )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        paddingTop: Constants.statusBarHeight,
-        backgroundColor: '#ecf0f1',
-        padding: 8,
-    },
-});
+const styles = StyleSheet.create({})

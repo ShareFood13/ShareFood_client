@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useContext } from 'react'
 
 import {
     View,
@@ -20,13 +20,16 @@ import {
     StatusBar,
     RefreshControl,
     ImageBackground,
+    FlatList
 } from 'react-native'
 
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons, FontAwesome } from '@expo/vector-icons';
 
 import uuid from 'react-native-uuid';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+
+import { useIsFocused } from '@react-navigation/native';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -36,7 +39,14 @@ import { getMeals, createMeal, updateMeal, deleteMeal } from '../../Redux/action
 
 import { getMyRecipes } from '../../Redux/actions/recipes';
 
+import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
+
 import SwitchButton from '../../components/SwitchButton'
+
+import { Context } from "../../context/UserContext";
+
+import MealCard from '../../components/MealCard';
+import PopupModal from '../../components/PopupModal';
 
 const initialState = {
     mealName: "",
@@ -100,57 +110,68 @@ export default function MyMeals({ navigation }) {
     const [show, setShow] = useState("Public")
     const [tagsValue, setTagsValue] = useState("")
     const [update, setUpdate] = useState(false)
-    const [user, setUser] = useState()
+    const [userId, setUserId] = useState()
     const [sDietMeal, setSDietMeal] = useState()
     // const [modalVisible2, setModalVisible2] = useState(false)
+    const [popupModal, setPopupModal] = useState(false)
+
 
     const dispatch = useDispatch();
+    const isFocused = useIsFocused();
+
+    // const { userContext, setUserContext } = useContext(Context)
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
 
-    const mealList = useSelector((state) => state.meal.meals)
-    const myRecipes = useSelector((state) => state.recipe.recipes)
-    const userInfo = useSelector((state) => state.auth._3.authData)
+    const redux = useSelector((state) => state)
+    // console.log("MyMeals redux", redux.meal.meals)
+    const mealList = redux?.meal?.meals
 
-    console.log("userInfo:", userInfo?.result);
-
-    // console.log("mealForm:", mealForm);
-    // console.log("mealForm:", mealForm.specialDiet);
-
-    // console.log("user:", user);
-    console.log("mealList:", mealList);
-    // console.log("myEvents:", user?.eventsId);
-    // console.log("myRecipes:", user?.recipesId);
-
+    useEffect(() => {
+        // if (redux?.recipe.recipes) {
+        //     setMyRecipes(redux.recipe.recipes)
+        //     // setUserContext({ result: redux.recipe.recipes[0] })
+        // }
+        if (redux?.meal.message !== "") {
+            setPopupModal(true)
+            setTimeout(() => {
+                setPopupModal(false)
+                dispatch({ type: CLEAR_MSG })
+                redux?.meal.message.includes("Created") && navigation.navigate('MyBookStackScreen')
+            }, 2500)
+        }
+    }, [redux?.meal, isFocused])
 
     useEffect(() => {
         getUser()
     }, [])
 
     const getUser = async () => {
-        const result = JSON.parse(await AsyncStorage.getItem('profile'))
-        setUser(result)
+        setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
     }
 
-    // useEffect(() => {
-    //     console.log('====================================');
-    //     console.log('test');
-    //     console.log('====================================');
-    // }, [userInfo])
-
     useEffect(() => {
-        setMealForm({ ...mealForm, status: show })
-    }, [show])
+        onRefresh()
+        dispatch(getMeals(userId))
+        // dispatch(getMyRecipes(userId))
+    }, [userId, isFocused])
 
+    // REFRESH FUNCTIONS //////////////////////////////////////////
     const wait = (timeout) => {
         return new Promise(resolve => setTimeout(resolve, timeout));
     }
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        wait(3000).then(() => setRefreshing(false)).then(dispatch(getUserInfo(user?.result?._id)));
+        dispatch(getMyRecipes(userId))
+        wait(5000).then(() => setRefreshing(false))//.then(dispatch(getMyRecipes(userId)));
     }, []);
+
+
+    useEffect(() => {
+        setMealForm({ ...mealForm, status: show })
+    }, [show])
 
     const handleOnChange = (name, text) => {
         if (name === "tags") {
@@ -164,7 +185,7 @@ export default function MyMeals({ navigation }) {
                 setTagsValue("")
             }
         } else {
-            setMealForm({ ...mealForm, [name]: text, creatorId: userInfo?.result._id })
+            setMealForm({ ...mealForm, [name]: text, creatorId: userId })
         }
     }
 
@@ -180,21 +201,22 @@ export default function MyMeals({ navigation }) {
     }
 
     const saveMeal = () => {
+        // console.log("MyMeals mealForm", mealForm)
         dispatch(createMeal(mealForm))
         closeModal()
         onRefresh()
-        dispatch(getUserInfo(userInfo?.result._id))
+        // dispatch(getUserInfo(userId))
+        // dispatch(getMeals(userId))
+
     }
 
     const openMeal = (mealItem) => {
         const array = []
-        console.log("mealItem", userInfo?.result)
-        // dispatch(getMeals(user?.result._id))
-        // dispatch(getMyRecipes(user?.result._id))
         setModalVisible3(true)
         setMeal(mealItem)
         mealItem?.recipesId.map(recipeId =>
-            userInfo?.result.recipesId.map(item => {
+            // userContext?.result?.recipesId.map
+            redux?.recipe?.recipes.map(item => {
                 if (item._id === recipeId && item.isDeleted === false) {
                     item.specialDiet.map(sDiet => !array.includes(sDiet) && array.push(sDiet))
                 }
@@ -215,29 +237,33 @@ export default function MyMeals({ navigation }) {
         setUpdate(false)
         setModalVisible(false)
         setMealForm(initialState)
-        dispatch(getUserInfo(userInfo?.result._id))
-    }
+        // dispatch(getUserInfo(userId))
+        dispatch(getMeals(userId))
 
+    }
 
     const delMeal = (meal) => {
-        console.log("deleteMeal", meal);
+        // console.log("deleteMeal", meal);
         dispatch(deleteMeal(meal._id))
-        dispatch(getUserInfo(userInfo?.result._id))
-    }
+        // dispatch(getUserInfo(userId))
+        dispatch(getMeals(userId))
 
+    }
+    //////////////////////
     const createShopList = () => {
         const mealToShopList = []
         meal?.recipesId.map(recipeId =>
-            userInfo?.result.recipesId.map(item => {
+            // userContext?.result?.recipesId.map
+            redux?.recipe?.recipes?.map(item => {
                 if (item._id === recipeId && item.isDeleted === false) {
                     mealToShopList.push(item)
                 }
             })
         )
         // console.log("mealToShopList", mealToShopList);
-        navigation.navigate('ShowShopList', { recipe: mealToShopList, showType: "meals" })
+        navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: mealToShopList, showType: "meals" } })
     }
-
+    //////////////////////////////
     return (
         <View style={styles.container}>
             <View style={{
@@ -273,7 +299,7 @@ export default function MyMeals({ navigation }) {
                 <Text style={styles.banner}>My Meals</Text>
 
             </View>
-            <ScrollView
+            {/* <ScrollView
                 style={{ width: windowWidth }}
                 refreshControl={
                     <RefreshControl
@@ -282,13 +308,36 @@ export default function MyMeals({ navigation }) {
                         progressViewOffset={windowHeight / 2 - 70}
                     />
                 }
-            >
+            > */}
 
 
+            <FlatList
+                data={mealList}
+                showsVerticalScrollIndicator={false}
+                style={{ width: '100%', marginTop: 120 }}
+                renderItem={({ item }) => !item?.isDeleted &&
+                    <MealCard
+                        meal={item}
+                        navigation={navigation}
+                        openMeal={openMeal}
+                        remove={remove}
+                        editMeal={editMeal}
+                        delMeal={delMeal}
+                    />
+                }
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => onRefresh()}
+                    />
+                }
+                keyExtractor={item => item?._id}
+            // extraData={selectedId}
+            />
 
-
-                <View style={{ width: '100%', marginTop: 120 }}>
-                    {userInfo?.result?.mealsId?.map(meal =>
+            {/* <View style={{ width: '100%', marginTop: 120 }}>
+                     {userInfo?.result?.mealsId?.map(meal => 
+                    {mealList.map(meal =>
                         !meal.isDeleted && <View key={uuid.v4()}
                             style={{
                                 flexDirection: 'row',
@@ -335,72 +384,72 @@ export default function MyMeals({ navigation }) {
 
                         </View>
                     )}
-                </View>
+                </View> */}
 
-                <Modal
-                    animationType="fade"
-                    transparent={true}
-                    visible={modalVisible}>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}>
 
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <TouchableOpacity onPress={() => closeModal()}
-                                style={{
-                                    width: "100%",
-                                    alignItems: 'flex-end',
-                                    marginTop: 20,
-                                    marginRight: 40,
-                                    marginBottom: 20
-                                }}>
-                                <EvilIcons name="close-o" size={30} color="black" />
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <TouchableOpacity onPress={() => closeModal()}
+                            style={{
+                                width: "100%",
+                                alignItems: 'flex-end',
+                                marginTop: 20,
+                                marginRight: 40,
+                                marginBottom: 20
+                            }}>
+                            <EvilIcons name="close-o" size={30} color="black" />
+                        </TouchableOpacity>
+
+                        <TextInput
+                            style={styles.outPuts}
+                            placeholder="Meal Name"
+                            value={mealForm.mealName}
+                            onChangeText={text => handleOnChange('mealName', text)} />
+
+                        <View style={styles.inputTags}>
+                            <TouchableOpacity onPress={() => Alert.alert(
+                                'HashTag',
+                                'Just press "space" or "," to enter your HashTag, \nNo need for #. \nMaximum 20 Characters.\nTo delete one just click on it.',
+                                [
+                                    { text: "OK" }
+                                ])}>
+                                <FontAwesome5 name="hashtag" size={24} color="black" />
                             </TouchableOpacity>
 
                             <TextInput
-                                style={styles.outPuts}
-                                placeholder="Meal Name"
-                                value={mealForm.mealName}
-                                onChangeText={text => handleOnChange('mealName', text)} />
-
-                            <View style={styles.inputTags}>
-                                <TouchableOpacity onPress={() => Alert.alert(
-                                    'HashTag',
-                                    'Just press "space" or "," to enter your HashTag, \nNo need for #. \nMaximum 20 Characters.\nTo delete one just click on it.',
-                                    [
-                                        { text: "OK" }
-                                    ])}>
-                                    <FontAwesome5 name="hashtag" size={24} color="black" />
-                                </TouchableOpacity>
-
-                                <TextInput
-                                    value={tagsValue}
-                                    style={{ width: "90%", paddingLeft: 10 }}
-                                    placeholder='Your Tags'
-                                    maxLength={21}
-                                    onChangeText={text => handleOnChange('tags', text)} />
-                            </View>
-
-                            <Text style={styles.outputTags} >
-                                {mealForm.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
-                            </Text>
-
-                            <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
-
-                            {update ? <TouchableOpacity
-                                style={styles.genericButton}
-                                onPress={() => updateMealFc()}>
-                                <Text style={{ color: 'white', fontWeight: '700' }}>Update</Text>
-                            </TouchableOpacity>
-                                : <TouchableOpacity
-                                    style={styles.genericButton}
-                                    onPress={() => saveMeal()}>
-                                    <Text style={{ color: 'white', fontWeight: '700' }}>Save</Text>
-                                </TouchableOpacity>
-                            }
+                                value={tagsValue}
+                                style={{ width: "90%", paddingLeft: 10 }}
+                                placeholder='Your Tags'
+                                maxLength={21}
+                                onChangeText={text => handleOnChange('tags', text)} />
                         </View>
-                    </View>
-                </Modal>
 
-                {/* <View style={styles.specialDiet}>
+                        <Text style={styles.outputTags} >
+                            {mealForm.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
+                        </Text>
+
+                        <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
+
+                        {update ? <TouchableOpacity
+                            style={styles.genericButton}
+                            onPress={() => updateMealFc()}>
+                            <Text style={{ color: 'white', fontWeight: '700' }}>Update</Text>
+                        </TouchableOpacity>
+                            : <TouchableOpacity
+                                style={styles.genericButton}
+                                onPress={() => saveMeal()}>
+                                <Text style={{ color: 'white', fontWeight: '700' }}>Save</Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
+                </View>
+            </Modal>
+
+            {/* <View style={styles.specialDiet}>
 
                     <Modal
                         animationType="fade"
@@ -428,39 +477,40 @@ export default function MyMeals({ navigation }) {
                 </View> */}
 
 
-                <Modal
-                    animationType="fade"
-                    transparent={false}
-                    visible={modalVisible3}>
+            <Modal
+                animationType="fade"
+                transparent={false}
+                visible={modalVisible3}>
 
-                    <View style={styles.centeredView}>
-                        <View style={styles.mealCard}>
-                            <ImageBackground source={require('../../assets/images/linePaper.png')} style={{ width: '100%', height: 350 }}
-                                imageStyle={{ resizeMode: 'cover' }}>
-                                <TouchableOpacity onPress={() => closeModal()}
-                                    style={{
-                                        width: "100%",
-                                        alignItems: 'flex-end',
-                                        marginTop: 5,
-                                        marginRight: 40,
-                                        marginBottom: 0
-                                    }}>
-                                    <EvilIcons name="close-o" size={30} color="black" />
-                                </TouchableOpacity>
-                                <View style={styles.mealShow}>
-                                    <Text style={{ fontSize: 20, marginBottom: 18 }}>{meal?.mealName}</Text>
-                                    <View style={{ height: 150, width: '90%', justifyContent: 'space-around', alignItems: 'center' }}>
-                                        {meal?.recipesId.map(recipeId =>
-                                            userInfo?.result.recipesId.map(item => {
-                                                if (item._id === recipeId && item.isDeleted === false) {
-                                                    return <Text key={uuid.v4()} style={{ fontSize: 16 }}>{item.recipeName}</Text>
-                                                }
-                                            })
-                                        )}
-                                    </View>
+                <View style={styles.centeredView}>
+                    <View style={styles.mealCard}>
+                        <ImageBackground source={require('../../assets/images/linePaper.png')} style={{ width: '100%', height: 350 }}
+                            imageStyle={{ resizeMode: 'cover' }}>
+                            <TouchableOpacity onPress={() => closeModal()}
+                                style={{
+                                    width: "100%",
+                                    alignItems: 'flex-end',
+                                    marginTop: 5,
+                                    marginRight: 40,
+                                    marginBottom: 0
+                                }}>
+                                <EvilIcons name="close-o" size={30} color="black" />
+                            </TouchableOpacity>
+                            <View style={styles.mealShow}>
+                                <Text style={{ fontSize: 20, marginBottom: 18 }}>{meal?.mealName}</Text>
+                                <View style={{ height: 150, width: '90%', justifyContent: 'space-around', alignItems: 'center' }}>
+                                    {meal?.recipesId.map(recipeId =>
+                                        // userContext?.result?.recipesId.map
+                                        redux?.recipe?.recipes?.map(item => {
+                                            if (item._id === recipeId && item.isDeleted === false) {
+                                                return <Text key={uuid.v4()} style={{ fontSize: 16 }}>{item.recipeName}</Text>
+                                            }
+                                        })
+                                    )}
+                                </View>
 
 
-                                    {/* {meal?.recipesId?.map(recipe =>
+                                {/* {meal?.recipesId?.map(recipe =>
                                         <View style={{
                                             width: '90%',
                                             height: 40,
@@ -470,33 +520,36 @@ export default function MyMeals({ navigation }) {
                                         }} key={uuid.v4()}>
                                             <Text>{recipe.recipeName}</Text>
                                         </View>)} */}
-                                </View>
-                            </ImageBackground>
-                        </View>
-                        <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-                            {sDietMeal?.map(item => {
-                                return logos.map(logo =>
-                                    (logo.name === item)
-                                    && <Image
-                                        key={uuid.v4()}
-                                        resizeMode='contain'
-                                        source={logo.image}
-                                        style={{
-                                            height: 45, width: 45, margin: 5, alignSelf: 'center',
-                                        }} />
-
-                                )
-                            })}
-                        </View>
+                            </View>
+                        </ImageBackground>
                     </View>
+                    <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+                        {sDietMeal?.map(item => {
+                            return logos.map(logo =>
+                                (logo.name === item)
+                                && <Image
+                                    key={uuid.v4()}
+                                    resizeMode='contain'
+                                    source={logo.image}
+                                    style={{
+                                        height: 45, width: 45, margin: 5, alignSelf: 'center',
+                                    }} />
 
-                    <View style={styles.button}>
-                        <TouchableOpacity onPress={createShopList}>
-                            <FontAwesome name="list" size={25} color="red" />
-                        </TouchableOpacity>
+                            )
+                        })}
                     </View>
-                </Modal>
-            </ScrollView>
+                </View>
+
+                <View style={styles.button}>
+                    <TouchableOpacity onPress={createShopList}>
+                        <FontAwesome name="list" size={25} color="red" />
+                    </TouchableOpacity>
+                </View>
+            </Modal>
+
+            <PopupModal message={redux?.meal?.message} popupModal={popupModal} />
+
+            {/* </ScrollView> */}
         </View >
     )
 }
@@ -594,10 +647,10 @@ const styles = StyleSheet.create({
     mealShow: {
         justifyContent: 'space-between',
         width: '80%',
-        height: 320,
-        borderStyle: 'solid',
-        borderWidth: 1,
-        borderColor: 'black',
+        height: 150,
+        // borderStyle: 'solid',
+        // borderWidth: 1,
+        // borderColor: 'black',
         alignItems: 'flex-start',
         marginLeft: 50,
         paddingHorizontal: 10,

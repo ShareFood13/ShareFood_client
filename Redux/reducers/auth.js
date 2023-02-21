@@ -1,25 +1,44 @@
-// https://react-native-async-storage.github.io/async-storage/docs/usage
+import * as SecureStore from 'expo-secure-store';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AUTH, LOGOUT, SENDPASS, USER_INFO, SEND_TO_US, SAVE_PROFILE, START_FOLLOWING, AUTH_ERROR, CLEAR_ERROR, CLEAR_STATE, CLEAR_MSG } from "../constants/constantsTypes"
 
-import { AUTH, LOGOUT, SENDPASS, USER_INFO, SEND_TO_US } from "../constants/constantsTypes"
-
-const autoReducer = async (state = { autoData: null }, action) => {
+const reducer = (state = { authData: {}, message: "" }, action) => {
     switch (action.type) {
         case AUTH:
-            // console.log('action.data:', action.data);
+            const data = action.data
 
-            await AsyncStorage.setItem('profile', JSON.stringify({ ...action?.data }))
-            return { ...state, authData: action?.data }
+            const StorageObj = { token: data.token, userId: data.result._id, userEmail: data.result.email, userName: data.result.name, userUserName: data.result.userName }
+
+            setItem(StorageObj)
+
+            async function setItem(StorageObj) {
+                await SecureStore.setItemAsync('storageData', JSON.stringify(StorageObj));
+            }
+
+            return { ...state, authData: { ...data }, token: data.token }
         case LOGOUT:
+            deleteItem()
 
-            await AsyncStorage.clear()
+            async function deleteItem({ navigation }) {
+
+                try {
+
+                    await SecureStore.deleteItemAsync('storageData')
+                } catch (error) {
+
+                    console.log(error)
+                }
+
+                navigation.navigate('Auth', { screen: 'LogIn' })
+            }
+
             return { ...state, authData: null }
         case SENDPASS:
+            // console.log("SENDPASS", action.data.password)
+            //DEPOIS TENHO QUE VERIFICAR OQ ROLA NESSE SET ITEM
+            async () => await SecureStore.setItemAsync('sendPassword', JSON.stringify({ ...action.data.password }))
 
-            await AsyncStorage.setItem('sendPassword', JSON.stringify({ ...action?.data }))
             return { ...state, authData: action?.data }
-
         case USER_INFO:
             // console.log('USER_INFO action.data:', action.data);
 
@@ -29,6 +48,30 @@ const autoReducer = async (state = { autoData: null }, action) => {
             // console.log('SEND_TO_US action.data:', action.data);
 
             return { ...state, authData: action?.data }
+        case AUTH_ERROR:
+
+            // console.log("AUTH_ERROR", action.error_msg)
+            return { ...state, auth_msg: action.error_msg }
+        case CLEAR_ERROR:
+
+            return { ...state, auth_msg: "" }
+
+        case CLEAR_STATE:
+            // console.log("CLEAR_STATE")
+
+            return state = ""
+        case SAVE_PROFILE:
+            // console.log("SAVE_PROFILE", action?.data)
+
+            return { ...state, authData: action?.data.result, message: action?.data.message }
+        case START_FOLLOWING:
+            // console.log(action.data)
+
+            return { ...state, authData: action.data.result, message: action.data.message }
+        case CLEAR_MSG:
+            // console.log("CLEAR_MSG from MyProfile")
+
+            return { ...state, message: "" }
         default:
             return state
     }
@@ -36,4 +79,4 @@ const autoReducer = async (state = { autoData: null }, action) => {
 
 
 
-export default autoReducer
+export default reducer

@@ -26,7 +26,7 @@ import { MaterialIcons, Feather, MaterialCommunityIcons, Ionicons } from '@expo/
 import { useDispatch } from 'react-redux';
 import { sendToSharedFood } from '../../Redux/actions/auth';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 const initialValue = {
     fromUserName: "",
@@ -37,7 +37,7 @@ const initialValue = {
 }
 
 export default function ContactUs({ navigation }) {
-    const [user, setUser] = useState()
+    const [userId, setUserId] = useState()
     const [contactUsForm, setContactUsForm] = useState(initialValue)
 
     const dispatch = useDispatch();
@@ -47,15 +47,15 @@ export default function ContactUs({ navigation }) {
     }, [])
 
     const getUser = async () => {
-        setUser(JSON.parse(await AsyncStorage.getItem('profile')))
+        setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
     }
 
     const handleOnChange = (name, text) => {
-        setContactUsForm({ ...contactUsForm, [name]: text, creatorId: user.result._id })
+        setContactUsForm({ ...contactUsForm, [name]: text, creatorId: userId })
     }
 
     const sendContactUs = () => {
-        console.log(contactUsForm)
+        // console.log(contactUsForm)
         dispatch(sendToSharedFood(contactUsForm))
         setContactUsForm(initialValue)
     }

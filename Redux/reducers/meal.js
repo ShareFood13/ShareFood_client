@@ -1,21 +1,23 @@
-import { GET_MEALS, UPDATE_MEAL, DEL_MEAL, CREATE_MEAL } from "../constants/constantsTypes";
+import { GET_MEALS, UPDATE_MEAL, DEL_MEAL, CREATE_MEAL, CLEAR_MSG } from "../constants/constantsTypes";
 
-const reducer = (state = { meal: [] }, action) => {
+const reducer = (state = { meals: [], message: "" }, action) => {
+
     switch (action.type) {
         case CREATE_MEAL:
-            return { ...state, meal: [...state.meal, action.payload] }
 
+            return { ...state, meals: [...state.meals, action.payload.meals], message: action.payload.message }
         case GET_MEALS:
-            // console.log("action", action.payload);
-            return { ...state, meals: action.payload }
 
+            return { ...state, meals: action.payload.meals }
         case UPDATE_MEAL:
-            console.log("UPDATE_MEAL:", action.payload);
-        // return { ...state, meal: state.meal.push(action.payload) }
 
+            return { ...state, meals: [...state.meals, action.payload.meals], message: action.payload.message }
         case DEL_MEAL:
-        // return { ...state, meal: state.meal.filter(meal => meal.id !== action.payload) }
 
+            return { ...state, meals: [...state.meals, action.payload.meals], message: action.payload.message }
+        case CLEAR_MSG:
+
+            return { ...state, message: "" }
         default:
             return state
     }

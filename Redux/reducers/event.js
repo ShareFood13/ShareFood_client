@@ -1,24 +1,23 @@
-import { GET_EVENTS, UPDATE_EVENT, DEL_EVENT, CREATE_EVENT, ADD_RECIPE_TO } from "../constants/constantsTypes";
+import { GET_EVENTS, UPDATE_EVENT, DEL_EVENT, CREATE_EVENT, ADD_RECIPE_TO, CLEAR_MSG } from "../constants/constantsTypes";
 
-const reducer = (state = { event: [] }, action) => {
+const reducer = (state = { events: [], message: "" }, action) => {
+
     switch (action.type) {
         case CREATE_EVENT:
-            return { ...state, event: [...state.event, action.payload] }
 
+            return { ...state, events: [...state.events, action.payload.events], message: action.payload.message }
         case GET_EVENTS:
-            // console.log("action", action);
-            return { ...state, events: action.payload }
 
+            return { ...state, events: action.payload.events }
         case UPDATE_EVENT:
-            return { ...state, event: state.event.push(action.payload) }
-
+            // return { ...state, events: state.events.push(action.payload) }
+            return { ...state, events: [...state.events, action.payload.events], message: action.payload.message }
         case DEL_EVENT:
-        // return { ...state, event: state.event.filter(event => event.id !== action.payload) }
+            // return { ...state, event: state.event.filter(event => event.id !== action.payload) }
+            return { ...state, events: [...state.events, action.payload.events], message: action.payload.message }
+        case CLEAR_MSG:
 
-        case ADD_RECIPE_TO:
-            console.log(state.event);
-        // return { ...state, event: state.event.push(action.payload) }
-
+            return { ...state, message: "" }
         default:
             return state
     }

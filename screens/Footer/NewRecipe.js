@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext, useRef, LegacyRef } from 'react'
+import { Context } from "../../context/UserContext";
 
 import {
     View,
@@ -16,7 +17,8 @@ import {
     ScrollView,
     Image,
     Dimensions,
-    Alert
+    Alert,
+    FlatList
 } from 'react-native'
 
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
@@ -26,8 +28,18 @@ import uuid from 'react-native-uuid';
 import * as ImagePicker from 'expo-image-picker';
 
 import SwitchButton from '../../components/SwitchButton';
-
 import PopUp from '../../components/PopUp'
+import SpSheet from '../../components/SpSheet';
+import Conversions from '../Drawer/Conversions';
+import PopupModal from '../../components/PopupModal';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { createRecipe, updateRecipe } from '../../Redux/actions/recipes';
+import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
+
+import * as SecureStore from 'expo-secure-store';
+import { useIsFocused } from '@react-navigation/native';
+
 
 const initialPreparation = {
     preparation: "",
@@ -47,6 +59,7 @@ const initialValue = {
     creatorId: '',
     difficulty: '',
     donwloads: [],
+    foodCourse: "",
     forHowMany: 0,
     freeText: "",
     ingredients: [],
@@ -57,37 +70,17 @@ const initialValue = {
     recipeName: '',
     recipePicture: [],
     specialDiet: [],
-    status: "public",
+    status: "Public",
     tags: [],
 }
 
 const difficulty = [
-    "Super Easy",
-    "Easy",
-    "Medium",
-    "Hard",
-    "Super Hard"
+    { key: 1, value: "Super Easy" },
+    { key: 2, value: "Easy" },
+    { key: 3, value: "Medium" },
+    { key: 4, value: "Hard" },
+    { key: 5, value: "Super Hard" }
 ]
-
-// const specialDiet = [
-//     "Vegan",
-//     "Vegetarian",
-//     "Lactose Free",
-//     "Peanut Free",
-//     "Soy Free",
-//     "Sea Food",
-//     "Contain Fish",
-//     "No Added Salt",
-
-//     "Gluten Free",
-//     "Contain Nuts",
-//     "Egg Free",
-//     "Less Sugar",
-//     "Low Fat",
-//     "Spicy",
-//     "Halal",
-//     "Kosher",
-// ]
 
 const logos = [
     { name: "Vegan", image: require('../../assets/images/logo/vegan.png') },
@@ -128,68 +121,102 @@ const units = [
 
 ]
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+const foodCourses = [
+    { key: 1, value: "Hors d'oeuvre (Appetizer)" },
+    { key: 2, value: "Potage (Soup)" },
+    { key: 3, value: "Oeufs (Eggs)" },
+    { key: 4, value: "Farineaux (Rice & Pasta)" },
+    { key: 5, value: "Poisson (Fish)" },
+    { key: 6, value: "Entrée (entry of 1st meat course)" },
+    { key: 7, value: "Reléve (Meat Course)" },
+    { key: 8, value: "Sorbet (Flavoured Water)" },
+    { key: 9, value: "Rôti (Roast)" },
+    { key: 10, value: "Légume (Vegetables)" },
+    { key: 11, value: "Salade (Salad)" },
+    { key: 12, value: "Buffet Froid (Cold Buffet)" },
+    { key: 13, value: "Entremet de sûcre (Sweets)" },
+    { key: 14, value: "Savoureaux (Savoury)" },
+    { key: 15, value: "Fromage (Cheese)" },
+    { key: 16, value: "Desserts (Fresh fruits & Nuts)" },
+    { key: 17, value: "Café (Coffee)" },
+    { key: 18, value: "Pain (Bread)" },
+]
 
-import { useDispatch, useSelector } from 'react-redux';
-
-import { createRecipe, updateRecipe } from '../../Redux/actions/recipes';
-
-import SpSheet from '../../components/SpSheet';
-
-import Conversions from '../Drawer/Conversions';
-
-import PopupModal from '../../components/PopupModal';
-
-export default function NewRecipe(navigation) {
-    const [difficultyColor, setDifficultyColor] = useState("#F194FF")
+export default function NewRecipe({ navigation, route }) {
+    const [difficultyColor, setDifficultyColor] = useState("#66ccff")
     const [ingredients, setIngredients] = useState(initialIngredients)
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible3, setModalVisible3] = useState(false);
+    const [modalVisible4, setModalVisible4] = useState(false);
     const [oldStep, setOldStep] = useState(0)
     const [preparation, setPreparation] = useState(initialPreparation)
     const [recipeForm, setRecipeForm] = useState(initialValue)
     const [showImage, setShowImage] = useState(0)
-    const [show, setShow] = useState("public")
+    const [show, setShow] = useState("Public")
     const [tagsValue, setTagsValue] = useState("")
     const [user, setUser] = useState("");
     const [message, setMessage] = useState("")
     const [popupModal, setPopupModal] = useState(false)
+    const [showPopUp, setShowPopUp] = useState(false)
+    const [userData, setUserData] = useState(null)
 
+
+    // const gotoRef = useRef(null)
     const dispatch = useDispatch();
+    const isFocused = useIsFocused();
 
-    const reduxMessage = useSelector((state) => state.recipe)
-    // console.log("reduxMessage", reduxMessage.message);
+
+    const redux = useSelector((state) => state)
+
+    // console.log("redux NewRecipe", redux);
+    // console.log("redux Message", redux.recipe.message);
+    // console.log("redux Recipes", redux?.recipe.recipes);
+    // console.log("route.params", route.params)
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
 
-    useEffect(() => {
-        (navigation.route.params !== undefined) && setRecipeForm(navigation.route.params.recipe.recipe)
-    }, [navigation.route.params])
+    const { userContext, setUserContext } = useContext(Context)
+    // console.log("userContext", userContext)
 
     useEffect(() => {
-        getUser()
-    }, [])
+        // if (redux?.recipe.recipes) {
+        //     setUserContext({ result: redux.recipe.recipes[0] })
+        // }
+        if (redux?.recipe.message) {
+            setPopupModal(true)
+            setTimeout(() => {
+                setPopupModal(false)
+                dispatch({ type: CLEAR_MSG })
+                navigation.navigate('MyBookStackScreen')
+                // navigation.navigate('Home1')
+            }, 2500)
+        }
+    }, [redux])
 
-    const getUser = async () => {
-        setUser(JSON.parse(await AsyncStorage.getItem('profile')))
+    // const userInfo = userContext.result
+    // console.log("NewRecipe userContext", userInfo.recipesId)
+
+    useEffect(() => {
+        // gotoRef.current.focus()
+
+        getItem()
+    }, [isFocused])
+
+    async function getItem() {
+        setUserData(JSON.parse(await SecureStore.getItemAsync('storageData')))
     }
+
+    useEffect(() => {
+        route?.params !== undefined && setRecipeForm(route.params.recipe)
+    }, [route.params])
 
     useEffect(() => {
         setRecipeForm({ ...recipeForm, status: show })
     }, [show])
 
-    useEffect(() => {
-        setMessage(reduxMessage.message)
-        showModal()
-    }, [reduxMessage])
-
-    const showModal = () => {
-        setPopupModal(true)
-        setTimeout(() => setPopupModal(false), 5000)
-    }
-
+    ///// page 01 - general
     const handleOnChange = (name, text) => {
         if (name === "tags") {
             if (text.charAt(text.length - 1) === '#') {
@@ -202,7 +229,48 @@ export default function NewRecipe(navigation) {
                 setTagsValue("")
             }
         } else {
-            setRecipeForm({ ...recipeForm, [name]: text, creatorId: user.result._id, creator: user.result.userName })
+            setRecipeForm({ ...recipeForm, [name]: text, creatorId: userData.userId, creator: userData.userUserName })
+        }
+    }
+
+    const pickImage = async () => {
+        // console.log("pickImageFunc")
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            base64: true,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+            exif: true,
+        });
+        // console.log("111", result.canceled)
+        // result: {
+        //     "assets": [
+        //       {
+        //         "assetId": null,
+        //         "base64": null,
+        //         "duration": null,
+        //         "exif": null,
+        //         "height": 4800,
+        //         "rotation": null,
+        //         "type": "image",
+        //         "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%username%252Fsticker-smash-47-beta/ImagePicker/77c4e56f-4ccc-4c83-8634-fc376597b6fb.jpeg",
+        //         "width": 3200
+        //       }
+        //     ],
+        //     "canceled": false,
+        //     "cancelled": false
+        //   }
+        if (!result.canceled) {
+            setRecipeForm({ ...recipeForm, recipePicture: [...recipeForm.recipePicture, { path: result.assets[0].uri, base64: `data:image/jpg;base64,${result.assets[0].base64}` }] })
+        } else {
+            Alert.alert(
+                'Adding pincture.',
+                'Action Canceled!!!',
+                [
+                    { text: "OK" }
+                ])
         }
     }
 
@@ -235,6 +303,26 @@ export default function NewRecipe(navigation) {
         setModalVisible2(!modalVisible2)
     }
 
+    const handleFoodCourse = (text) => {
+        setRecipeForm({ ...recipeForm, foodCourse: text._dispatchInstances.pendingProps.children })
+        setModalVisible4(!modalVisible4)
+    }
+
+    const remove = (text, name) => {
+        switch (name) {
+            case "specialDiet":
+                // const result1 = recipeForm.specialDiet.filter(item => item !== text._dispatchInstances.pendingProps.children[0])
+                const result1 = recipeForm.specialDiet.filter(item => item !== text)
+                setRecipeForm({ ...recipeForm, specialDiet: result1 })
+                break
+            case "tags":
+                const result2 = recipeForm.tags.filter(item => item !== text._dispatchInstances.pendingProps.children[0])
+                setRecipeForm({ ...recipeForm, tags: result2 })
+                break
+        }
+    }
+
+    ////// page 02 - ingredients
     const handleIngredients = (name, text) => {
         if (text !== " ") {
             if (name === "units") {
@@ -264,15 +352,13 @@ export default function NewRecipe(navigation) {
             setRecipeForm({ ...recipeForm, ingredients: result })
         }
         if (name === "picture") {
-            // console.log('====================================');
-            // console.log("index:", product);
-            // console.log('====================================');
             const result2 = recipeForm.recipePicture.filter((item, index) => index !== product)
             setRecipeForm({ ...recipeForm, recipePicture: result2 })
             setShowImage(0)
         }
     }
 
+    ////// page 03 - preparation steps
     const handlePreparation = (text) => {
         setPreparation({ step: recipeForm.preparation.length + 1, preparation: text })
     }
@@ -307,31 +393,19 @@ export default function NewRecipe(navigation) {
         setRecipeForm({ ...recipeForm, preparation: result })
     }
 
-    const remove = (text, name) => {
-        switch (name) {
-            case "specialDiet":
-                // const result1 = recipeForm.specialDiet.filter(item => item !== text._dispatchInstances.pendingProps.children[0])
-                const result1 = recipeForm.specialDiet.filter(item => item !== text)
-                setRecipeForm({ ...recipeForm, specialDiet: result1 })
-                break
-            case "tags":
-                const result2 = recipeForm.tags.filter(item => item !== text._dispatchInstances.pendingProps.children[0])
-                setRecipeForm({ ...recipeForm, tags: result2 })
-                break
-        }
-    }
-
+    ///// backend CRUP
     const handleAdd = () => {
+        // gotoRef.current.focus()
+
         dispatch(createRecipe(recipeForm));
         clearForm()
-        // navigation.navigation.navigate('MyBook')
     }
 
     const handleEdit = () => {
         dispatch(updateRecipe(recipeForm._id, recipeForm));
         clearForm()
-        navigation.route.params = undefined
-        // navigation.navigation.navigate('MyBook')
+        route.params = undefined
+
     }
 
     const clearForm = () => {
@@ -339,82 +413,43 @@ export default function NewRecipe(navigation) {
         setIngredients(initialIngredients)
         setPreparation(initialPreparation)
         setTagsValue("")
-        setDifficultyColor("#F194FF")
+        setDifficultyColor("#66ccff")
+        route.params = undefined
     }
-
-    const pickImage = async () => {
-        // console.log("pickImageFunc")
-        // No permissions request is necessary for launching the image library
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            base64: true,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-            exif: true,
-        });
-        console.log("111", result.canceled)
-        // result: {
-        //     "assets": [
-        //       {
-        //         "assetId": null,
-        //         "base64": null,
-        //         "duration": null,
-        //         "exif": null,
-        //         "height": 4800,
-        //         "rotation": null,
-        //         "type": "image",
-        //         "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%username%252Fsticker-smash-47-beta/ImagePicker/77c4e56f-4ccc-4c83-8634-fc376597b6fb.jpeg",
-        //         "width": 3200
-        //       }
-        //     ],
-        //     "canceled": false,
-        //     "cancelled": false
-        //   }
-        if (!result.canceled) {
-            setRecipeForm({ ...recipeForm, recipePicture: [...recipeForm.recipePicture, { path: result.assets[0].uri, base64: `data:image/jpg;base64,${result.assets[0].base64}` }] })
-        } else {
-            Alert.alert(
-                'Adding pincture.',
-                'Action Canceled!!!',
-                [
-                    { text: "OK" }
-                ])
-        }
-    };
-
-    // console.log(recipeForm.prepTime, recipeForm.cookTime, recipeForm.forHowMany);
 
     return (
 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView style={styles.scrollView}
+            {/* <ScrollView
                 showsVerticalScrollIndicator={false}
-            >
-                {/* <KeyboardAvoidingView
+            > */}
+            {/* <KeyboardAvoidingView
                     style={styles.container}
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                 > */}
-                <ScrollView
-                    // scrollView das 3 paginas
-                    pagingEnabled
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={{
-                        width: windowWidth, minHeight: windowHeight - 140,
-                        borderStyle: 'solid',
-                        borderWidth: 1,
-                        borderColor: 'black',
+            <ScrollView
+                // scrollView das 3 paginas
+                pagingEnabled
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{
+                    width: windowWidth, maxHeight: windowHeight - 140,
+                    borderStyle: 'solid',
+                    borderWidth: 1,
+                    borderColor: 'black',
 
-                    }}
-                >
+                }}
+            >
+                {/* /// general */}
+                <ScrollView showsVerticalScrollIndicator={false}>
+
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', width: windowWidth, position: 'relative' }}>
-                        {/* <View style={{ height: 60 }}> */}
-                        <Text style={styles.banner}>New Recipe</Text>
-                        {/* </View> */}
+
+                        <Text style={styles.banner} >New Recipe</Text>
 
                         <View style={styles.inputLogo}>
                             <TextInput
+                                // ref={gotoRef}
                                 value={recipeForm.recipeName}
                                 style={styles.input}
                                 placeholder='Recipe Name'
@@ -440,6 +475,7 @@ export default function NewRecipe(navigation) {
                                         marginBottom: 10,
                                         position: 'absolute'
                                     }}>
+
                                     {recipeForm.recipePicture.map((image, index) =>
                                         <View key={uuid.v4()}>
                                             <Image source={{ uri: image.base64 }}
@@ -487,12 +523,14 @@ export default function NewRecipe(navigation) {
                                 </ScrollView>}
                         </View>
 
-                        <View style={[styles.genericButton, { marginTop: 0 }]}>
-                            {recipeForm.recipePicture.length < 3 &&
-                                <TouchableOpacity>
-                                    <Text onPress={pickImage}>Add an image. {recipeForm.recipePicture.length}/3</Text>
-                                </TouchableOpacity>}
-                        </View>
+                        {recipeForm.recipePicture.length < 3 &&
+                            <View style={[styles.genericButton, { marginTop: 0 }]}>
+                                {recipeForm.recipePicture.length < 3 &&
+                                    <TouchableOpacity>
+                                        <Text onPress={pickImage}>Add an image. {recipeForm.recipePicture.length}/3</Text>
+                                    </TouchableOpacity>}
+                            </View>
+                        }
 
                         <View style={styles.cookInfo}>
                             <View style={styles.cookItem}>
@@ -508,6 +546,7 @@ export default function NewRecipe(navigation) {
                                     <Text>min</Text>
                                 </View>
                             </View>
+
                             <View style={styles.cookItem}>
                                 <Text>Cook Time</Text>
                                 <View style={styles.logoInput}>
@@ -535,16 +574,20 @@ export default function NewRecipe(navigation) {
                                         >
                                             <View style={styles.centeredView}>
                                                 <View style={styles.modalView}>
-                                                    {difficulty.map(level =>
-                                                        <Pressable
-                                                            key={uuid.v4()}
+                                                    <FlatList
+                                                        data={difficulty}
+                                                        showsVerticalScrollIndicator={false}
+                                                        renderItem={({ item }) => <Pressable
                                                             style={[styles.button, styles.buttonClose]}
                                                         >
                                                             <Text style={styles.textStyle}
                                                                 onPress={(text) => handleDifficulty(text)}
-                                                            >{level}</Text>
+                                                            >{item.value}</Text>
                                                         </Pressable>
-                                                    )}
+
+                                                        }
+                                                        keyExtractor={item => item.key}
+                                                    />
                                                 </View>
                                             </View>
                                         </Modal>
@@ -577,8 +620,6 @@ export default function NewRecipe(navigation) {
                         </View>
 
                         <View style={styles.specialDiet}>
-                            {/* <Text style={styles.specialDietText} > */}
-                            {/* {recipeForm.specialDiet.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "specialDiet")}>{item}, </Text>)} */}
                             <View style={styles.specialDietLogo}>
                                 {recipeForm.specialDiet.map(item => {
                                     return logos.map(logo =>
@@ -591,10 +632,8 @@ export default function NewRecipe(navigation) {
                                                     style={{ height: 45, width: 45, margin: 5 }}
                                                 /></TouchableOpacity> : null
                                     )
-                                }
-                                )}
+                                })}
                             </View>
-                            {/* </Text> */}
 
                             <Pressable
                                 style={[styles.button, styles.buttonOpen2]}
@@ -609,22 +648,72 @@ export default function NewRecipe(navigation) {
                                 visible={modalVisible2}>
 
                                 <View style={styles.centeredView}>
-                                    <View style={styles.modalView}>
-                                        <ScrollView style={styles.scrollView}
-                                            showsVerticalScrollIndicator={false}>
+                                    <View style={[styles.modalView, { height: 370 }]}>
+                                        <FlatList
+                                            data={logos}
+                                            showsVerticalScrollIndicator={false}
+                                            renderItem={({ item }) => <Pressable
+                                                style={[styles.button, styles.buttonClose]}>
 
-                                            {/* {specialDiet.map(diet => */}
-                                            {logos.map(diet =>
-                                                <Pressable
-                                                    key={uuid.v4()}
-                                                    style={[styles.button, styles.buttonClose]}>
+                                                <Text style={[styles.textStyle]}
+                                                    onPress={(text) => handleSpecialDiet(text)}>
+                                                    {item.name}</Text>
+                                            </Pressable>
+                                            }
+                                            keyExtractor={item => item.name}
+                                        />
+                                    </View>
+                                </View>
+                            </Modal>
+                        </View>
 
-                                                    <Text style={styles.textStyle}
-                                                        onPress={(text) => handleSpecialDiet(text)}>
-                                                        {diet.name}</Text>
-                                                </Pressable>
-                                            )}
-                                        </ScrollView>
+                        <View style={{ flexDirection: "row", width: '90%', marginBottom: 10 }}>
+                            <View style={{ backgroundColor: 'white', width: '78%', height: 40, borderRadius: 10 }}>
+                                <Pressable onPress={() => setRecipeForm({ ...recipeForm, foodCourse: "" })}>
+                                    <Text style={{ width: '100%', height: '100%', textAlign: 'center', textAlignVertical: 'center', fontSize: 16, fontWeight: '500' }}>
+                                        {recipeForm.foodCourse}
+                                    </Text>
+                                </Pressable>
+                            </View>
+
+                            <Pressable
+                                style={[styles.button, styles.buttonOpen2, { width: 70, marginLeft: 10 }]}
+                                onPress={() => setModalVisible4(true)}>
+
+                                <Text style={[styles.textStyle, styles.textStyle2, { width: 70 }]}>Course</Text>
+                            </Pressable>
+
+                            <Modal
+                                animationType="fade"
+                                transparent={true}
+                                visible={modalVisible4}>
+
+                                <View style={styles.centeredView}>
+                                    <View style={[styles.modalView, { height: 370 }]}>
+                                        <FlatList
+                                            data={foodCourses}
+                                            showsVerticalScrollIndicator={false}
+                                            renderItem={({ item }) => <Pressable
+                                                style={{
+                                                    width: 280,
+                                                    height: 45,
+                                                    borderColor: '#307ecc',
+                                                    borderWidth: 1,
+                                                    borderRadius: 30,
+                                                    marginVertical: 5,
+                                                    backgroundColor: '#307ecc',
+                                                    // borderWidth: 0,
+                                                    color: '#FFFFFF',
+                                                    alignItems: 'center',
+                                                }}>
+
+                                                <Text style={[{ width: '100%', height: '100%', textAlign: 'center', textAlignVertical: 'center' }, styles.buttonTextStyle]}
+                                                    onPress={(text) => handleFoodCourse(text)}>
+                                                    {item.value}</Text>
+                                            </Pressable>
+                                            }
+                                            keyExtractor={item => item.key}
+                                        />
                                     </View>
                                 </View>
                             </Modal>
@@ -643,173 +732,239 @@ export default function NewRecipe(navigation) {
                             <TextInput
                                 value={tagsValue}
                                 style={{ width: "90%", paddingLeft: 10 }}
-                                placeholder='Your Tags'
+                                placeholder='Enter Your Tags'
                                 maxLength={21}
                                 onChangeText={text => handleOnChange('tags', text)} />
                         </View>
 
-                        <Text style={styles.outputTags} >
-                            {recipeForm.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
-                        </Text>
-                    </View>
-
-                    <View style={{
-                        flex: 1,
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        height: windowHeight - 140,
-                        width: windowWidth
-                    }}>
-
-                        <Text style={styles.banner}>Ingredients</Text>
-
-                        <SpSheet text={"Open Units Convertor"} heightValue={550}><Conversions /></SpSheet>
-
-                        <View style={styles.inputIngredients}>
-
-                            <TextInput
-                                value={ingredients.quantity}
-                                style={styles.quantity}
-                                keyboardType='numeric'
-                                placeholder='qty'
-                                onChangeText={text => handleIngredients('quantity', text)} />
-
-                            <View style={styles.centeredView}>
-                                <Modal
-                                    animationType="fade"
-                                    transparent={true}
-                                    visible={modalVisible3}
-                                >
-                                    <View style={styles.centeredView}>
-                                        <View style={[styles.modalView, styles.modalView2]}>
-                                            {units.map(unit =>
-                                                <Pressable
-                                                    key={uuid.v4()}
-                                                    style={[styles.button, styles.buttonClose]}>
-
-                                                    <Text style={styles.textStyle}
-                                                        onPress={(text) => handleIngredients('units', text)}>
-                                                        {unit.unit}
-                                                    </Text>
-                                                </Pressable>
-                                            )}
-                                        </View>
-                                    </View>
-                                </Modal>
-
-                                <Pressable
-                                    style={[styles.button3]}
-                                    onPress={() => setModalVisible3(true)}
-                                >
-                                    {(ingredients.units === "")
-                                        ? <Text style={styles.textStyle}>Un.</Text>
-                                        : <Text style={styles.textStyle}>{units.map(unit => unit.unit === ingredients.units && unit.abreviation)}</Text>}
-                                </Pressable>
-                            </View>
-
-                            <TextInput
-                                value={ingredients.product}
-                                style={styles.product}
-                                placeholder='Ingredients'
-                                onChangeText={text => handleIngredients('product', text)} />
-
-                            <TextInput
-                                value={ingredients.remarks}
-                                style={styles.remarks}
-                                placeholder='Remarks'
-                                onChangeText={text => handleIngredients('remarks', text)} />
-
-                            <Button title='Add' onPress={addIngredient} />
+                        <View style={styles.outputTags} >
+                            <FlatList
+                                data={recipeForm.tags}
+                                // horizontal={true}
+                                // showsHorizontalScrollIndicator={false}
+                                showsVerticalScrollIndicator={false}
+                                renderItem={({ item }) => <Text
+                                    onPress={(text) => remove(text, "tags")}>{item}, </Text>}
+                                keyExtractor={item => item}
+                            />
+                            {/* {recipeForm.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)} */}
                         </View>
 
-                        {recipeForm.ingredients.map(item =>
-                            <View style={styles.outputIngredients} key={uuid.v4()}>
-                                <Text style={styles.quantity}>{item.quantity}</Text>
-                                <Text style={styles.units}>{item.units}</Text>
-                                <Text style={styles.product}>{item.product}</Text>
-                                <Text style={styles.remarks}>{item.remarks}</Text>
+                        <View style={[styles.outputTags, { marginBottom: 20, position: "relative" }]}>
+                            <TextInput
+                                style={{ height: 120, textAlignVertical: 'top', }}
+                                placeholder='Free Text max 256 char.'
+                                value={recipeForm.freeText}
+                                onChangeText={text => handleOnChange('freeText', text)}
+                                keyboardType="default"
+                                maxLength={256}
+                                multiline={true}
+                            />
+                            <Text style={{ position: "absolute", bottom: 0, right: 0 }}>{recipeForm?.freeText?.length}/256</Text>
+                        </View>
+                    </View>
+                </ScrollView>
+                {/* /// ingredients */}
+                <View style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    height: windowHeight - 140,
+                    // maxHeight: 500,
+                    width: windowWidth
+                }}>
 
-                                <View style={styles.buttons}>
-                                    <TouchableOpacity key={uuid.v4()} style={styles.validation} onPress={() => editIngredient(item.product)}>
+                    <Text style={styles.banner}>Ingredients</Text>
+
+                    <SpSheet text={"Open Units Convertor"} heightValue={550}><Conversions /></SpSheet>
+
+                    <View style={styles.inputIngredients}>
+
+                        <TextInput
+                            value={ingredients.quantity}
+                            style={styles.quantity}
+                            keyboardType='numeric'
+                            placeholder='qty'
+                            onChangeText={text => handleIngredients('quantity', text)} />
+
+                        <View style={styles.centeredView}>
+                            <Modal
+                                animationType="fade"
+                                transparent={true}
+                                visible={modalVisible3}
+                            >
+                                <View style={styles.centeredView}>
+                                    <View style={[styles.modalView, styles.modalView2]}>
+                                        <FlatList
+                                            data={units}
+                                            showsVerticalScrollIndicator={false}
+                                            renderItem={({ item }) => <Pressable
+                                                style={[styles.button, styles.buttonClose]}>
+                                                <Text style={styles.textStyle}
+                                                    onPress={(text) => handleIngredients('units', text)}>
+                                                    {item.unit}
+                                                </Text>
+                                            </Pressable>
+                                            }
+                                            keyExtractor={item => item.product}
+                                        />
+                                    </View>
+                                </View>
+                            </Modal>
+
+                            <Pressable
+                                style={[styles.button3]}
+                                onPress={() => setModalVisible3(true)}
+                            >
+                                {(ingredients.units === "")
+                                    ? <Text style={styles.textStyle}>Un.</Text>
+                                    // : <Text style={styles.textStyle}>{ingredients.units}</Text>}
+                                    : <Text style={styles.textStyle}>{units.map(unit => unit.unit === ingredients.units && unit.abreviation)}</Text>}
+                            </Pressable>
+                        </View>
+
+                        <TextInput
+                            value={ingredients.product}
+                            style={styles.product}
+                            placeholder='Ingredients'
+                            onChangeText={text => handleIngredients('product', text)} />
+
+                        <TextInput
+                            value={ingredients.remarks}
+                            style={styles.remarks}
+                            placeholder='Remarks'
+                            onChangeText={text => handleIngredients('remarks', text)} />
+
+                        <TouchableOpacity
+                            onPress={addIngredient}
+                            style={{
+                                width: 45,
+                                height: '100%',
+                                backgroundColor: '#66ccff'
+                            }}>
+                            <Text style={{
+                                width: '100%',
+                                height: '100%',
+                                textAlign: 'center',
+                                textAlignVertical: 'center',
+                                fontWeight: '500'
+                            }}>ADD</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <FlatList
+                        data={recipeForm.ingredients}
+                        showsVerticalScrollIndicator={false}
+                        renderItem={({ item }) => <View style={styles.outputIngredients}>
+                            <Text style={styles.quantity}>{item.quantity}</Text>
+                            <Text style={styles.units}>{units.map(unit => unit.unit === item.units && unit.abreviation)}</Text>
+                            <Text style={styles.product}>{item.product}</Text>
+                            <Text style={styles.remarks}>{item.remarks}</Text>
+
+                            <View style={styles.buttons}>
+                                <TouchableOpacity style={styles.validation} onPress={() => editIngredient(item.product)}>
+                                    <Feather name="edit-3" size={24} color="black" />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.validation} onPress={() => delIngredient(item.product, "ingredient")}>
+                                    <AntDesign name="delete" size={24} color="black" />
+                                </TouchableOpacity>
+                            </View>
+
+                        </View>
+                        }
+                        keyExtractor={item => item.product}
+                    />
+                </View>
+                {/* /// preparation */}
+                <View style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    minHeight: windowHeight - 400,
+                    // height: 650,
+                    width: windowWidth
+                }}>
+
+                    <View style={{ flex: 0.97 }}>
+                        <Text style={styles.banner}>Preparation</Text>
+
+                        <View style={[styles.inputPreparation, styles.inputIngredients]}>
+
+                            <TextInput
+                                value={preparation.preparation}
+                                style={styles.preparation}
+                                keyboardType='ascii-capable'
+                                placeholder='Preparation Step'
+                                onChangeText={text => handlePreparation(text)}
+                            // multiline
+                            // numberOfLines={2}
+                            />
+                            <TouchableOpacity
+                                onPress={addStep}
+                                style={{
+                                    width: 45,
+                                    height: '100%',
+                                    backgroundColor: '#66ccff'
+                                }}>
+                                <Text style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    textAlign: 'center',
+                                    textAlignVertical: 'center',
+                                    fontWeight: '500'
+                                }}>ADD</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <FlatList
+                            data={recipeForm.preparation}
+                            showsVerticalScrollIndicator={false}
+                            renderItem={({ item }) => <View style={styles.outputPreparation} >
+                                <Text style={styles.step} >Step {item.step}</Text>
+                                <Text style={styles.prep} >{item.preparation}</Text>
+
+                                <View style={styles.buttons} >
+                                    <TouchableOpacity style={styles.validation} onPress={() => editStep(item.step)}>
                                         <Feather name="edit-3" size={24} color="black" />
                                     </TouchableOpacity>
-                                    <TouchableOpacity key={uuid.v4()} style={styles.validation} onPress={() => delIngredient(item.product, "ingredient")}>
-                                        <AntDesign name="delete" size={24} color="black" />
-                                    </TouchableOpacity>
-                                </View>
-
-                            </View>
-                        )}
-                    </View>
-
-                    <View style={{
-                        flex: 1,
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        minHeight: windowHeight - 400,
-                        width: windowWidth
-                    }}>
-
-                        <View style={{ flex: 0.97 }}>
-                            <Text style={styles.banner}>Preparation</Text>
-
-                            <View style={[styles.inputPreparation, styles.inputIngredients]}>
-
-                                <TextInput
-                                    value={preparation.preparation}
-                                    style={styles.preparation}
-                                    keyboardType='ascii-capable'
-                                    placeholder='Preparation Step'
-                                    onChangeText={text => handlePreparation(text)}
-                                // multiline
-                                // numberOfLines={2}
-                                />
-                                <Button title='Add' onPress={addStep} />
-                            </View>
-
-                            {recipeForm.preparation.map(item =>
-                                <View style={styles.outputPreparation} key={uuid.v4()}>
-                                    <Text style={styles.step} key={uuid.v4()}>Step {item.step}</Text>
-                                    <Text style={styles.prep} key={uuid.v4()}>{item.preparation}</Text>
-
-                                    <View style={styles.buttons} key={uuid.v4()}>
-                                        <TouchableOpacity style={styles.validation} key={uuid.v4()} onPress={() => editStep(item.step)}>
-                                            <Feather name="edit-3" size={24} color="black" />
+                                    {(recipeForm.preparation[recipeForm.preparation.length - 1].step === item.step) &&
+                                        <TouchableOpacity style={styles.validation} onPress={() => delStep(item.step)}>
+                                            <AntDesign name="delete" size={24} color="black" />
                                         </TouchableOpacity>
-                                        {(recipeForm.preparation[recipeForm.preparation.length - 1].step === item.step) &&
-                                            <TouchableOpacity style={styles.validation} key={uuid.v4()} onPress={() => delStep(item.step)}>
-                                                <AntDesign name="delete" size={24} color="black" />
-                                            </TouchableOpacity>
-                                        }
-                                    </View>
-
+                                    }
                                 </View>
-                            )}
-                        </View>
 
-                        <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
-
-                        < View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '90%' }} >
-                            <TouchableOpacity style={styles.genericButton} onPress={clearForm}>
-                                <Text>Clear Form</Text>
-                            </TouchableOpacity>
-                            {(navigation.route.params === undefined)
-                                ? <TouchableOpacity style={styles.genericButton} onPress={handleAdd}>
-                                    <Text>Add Recipe to My Book</Text>
-                                </TouchableOpacity>
-                                : <TouchableOpacity style={styles.genericButton} onPress={handleEdit}>
-                                    <Text>Update Recipe</Text>
-                                </TouchableOpacity>
+                            </View>
                             }
-                        </View>
-
+                            keyExtractor={item => item.preparation}
+                        />
                     </View>
 
-                    {/* {message !== undefined && <PopupModal message={message} popupModal={popupModal} />} */}
+                    <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
 
-                </ScrollView>
-                {/* </KeyboardAvoidingView> */}
-            </ScrollView >
+                    < View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '90%' }} >
+                        <TouchableOpacity style={styles.genericButton} onPress={clearForm}>
+                            <Text>Clear Form</Text>
+                        </TouchableOpacity>
+                        {(route.params === undefined)
+                            ? <TouchableOpacity style={styles.genericButton} onPress={handleAdd}>
+                                <Text>Add Recipe to My Book</Text>
+                            </TouchableOpacity>
+                            : <TouchableOpacity style={styles.genericButton} onPress={handleEdit}>
+                                <Text>Update Recipe</Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
+
+                    {/* {showPopUp && <PopUp message={redux?.recipe.message} type="success" />} */}
+                    {/* <PopUp message={redux?.recipe.message} type="success" /> */}
+                </View>
+
+                <PopupModal message={redux?.recipe.message} popupModal={popupModal} />
+
+            </ScrollView>
+            {/* </KeyboardAvoidingView> */}
+            {/* </ScrollView > */}
         </TouchableWithoutFeedback >
     )
 }
@@ -838,11 +993,11 @@ const styles = StyleSheet.create({
     },
     buttonOpen: {
         width: 40,
-        height: 40,
+        height: 40, fontWeight: '500', fontSize: 18
     },
     buttonOpen2: {
-        backgroundColor: "#F194FF",
-        width: 60,
+        backgroundColor: "#66ccff",
+        width: 70,
         height: 40,
 
     },
@@ -859,11 +1014,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     buttonClose: {
-        // backgroundColor: "#2196F3",
+        backgroundColor: "#307ecc",
         marginVertical: 5
     },
     buttonStyle: {
-        backgroundColor: '#307ecc',
+        backgroundColor: '#66ccff',
         borderWidth: 0,
         color: '#FFFFFF',
         borderColor: '#307ecc',
@@ -873,7 +1028,7 @@ const styles = StyleSheet.create({
         width: 100,
     },
     buttonTextStyle: {
-        color: '#FFFFFF',
+        color: 'black',
         paddingVertical: 10,
         fontSize: 16,
     },
@@ -984,6 +1139,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+        height: 320,
         maxHeight: 400,
     },
     modalView2: {
@@ -1065,7 +1221,7 @@ const styles = StyleSheet.create({
     },
     specialDietLogo: {
         justifyContent: 'flex-start',
-        width: "81%",
+        width: "78%",
         backgroundColor: "white",
         borderRadius: 10,
         paddingHorizontal: 5,
@@ -1091,7 +1247,7 @@ const styles = StyleSheet.create({
     },
     textStyle: {
         color: "black",
-        fontWeight: "bold",
+        fontWeight: "500",
         textAlign: "center"
     },
     textStyle2: {

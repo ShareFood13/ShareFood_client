@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 
 import {
     View,
@@ -27,12 +27,13 @@ import { Card } from 'react-native-paper';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons } from '@expo/vector-icons';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { Context } from "../../context/UserContext"
 
+import { useDispatch, useSelector } from 'react-redux';
 import { createEvent, updateEvent, fetchEvents, deleteEvent } from '../../Redux/actions/events';
 
 import SwitchButton from '../../components/SwitchButton'
@@ -40,6 +41,12 @@ import DatePicker2 from '../../components/DatePicker';
 
 import SpSheet from '../../components/SpSheet';
 import ShowShopList from "../../screens/pages/ShopList2"
+import PopupModal from '../../components/PopupModal';
+import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
+import { useIsFocused } from '@react-navigation/native';
+
+import { getMyRecipes } from '../../Redux/actions/recipes';
+
 
 
 const timeToString = (time) => {
@@ -50,7 +57,7 @@ const timeToString = (time) => {
 const initialValue = {
     alarm: {
         isAlarm: false,
-        alarmDate: "",
+        // alarmDate: "",
         alarmTime: "",
     },
     eventDate: "",
@@ -67,36 +74,83 @@ const Mycallendar = ({ navigation }) => {
     const todayDate = new Date()
 
     const [alarm2, setAlarm2] = useState(false)
-    const [alarmDate, setAlarmDate] = useState(todayDate)
-    const [date, setDate] = useState(todayDate);
     const [eventForm, setEventForm] = useState(initialValue)
     const [items, setItems] = useState({});
     const [modalVisible, setModalVisible] = useState(false)
     const [modalFromEdit, setModalFromEdit] = useState(false)
-    const [mode, setMode] = useState('date');
     const [refreshing, setRefreshing] = useState(false);
     const [show, setShow] = useState("Public")
-    const [showPicker, setShowPicker] = useState(true);
-    // const [showPicker2, setShowPicker2] = useState(false);
-    // const [showPicker3, setShowPicker3] = useState(false);
-    const [type, setType] = useState()
-    const [type2, setType2] = useState()
-    const [user, setUser] = useState()
+    const [alarmDate, setAlarmDate] = useState(todayDate)
+    // const [date, setDate] = useState(todayDate);
+    // const [mode, setMode] = useState('date');
+    // const [showPicker, setShowPicker] = useState(true);
+    const [userId, setUserId] = useState()
 
     ////////////
     // const [infoPicked, setInfoPicked] = useState();
     // const [showPickedInfo, setShowPickedInfo] = useState();
     // const [eventForm, setEventForm] = useState([]);
     const [fromToForm, setFromToForm] = useState({ fromDate: "", toDate: "" })
+    const [popupModal, setPopupModal] = useState(false)
+
+    const dispatch = useDispatch();
+    const isFocused = useIsFocused();
+    // const { userContext, setUserContext } = useContext(Context)
+
+    const redux = useSelector((state) => state)
+    console.log("MyCallendar redux", redux)
+    const eventList = redux?.event?.events
+
+    // useEffect(
+    //     () => navigation.addListener('focus', () => dispatch(fetchEvents(userId))),
+    //     []
+    // );
+
+    useEffect(() => {
+        // if (redux?.recipe.recipes) {
+        //     setUserContext({ result: redux.event.events[0] })
+        // }
+        if (redux?.event.message) {
+            setPopupModal(true)
+            setTimeout(() => {
+                setPopupModal(false)
+                dispatch({ type: CLEAR_MSG })
+                // redux?.event.message.includes("Created") ?
+                navigation.navigate('MyBookStackScreen')
+                // : onRefresh()
+            }, 2500)
+        }
+    }, [redux?.event, isFocused])
+
+    useEffect(() => {
+        getUser()
+    }, [])
+
+    const getUser = async () => {
+        setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
+    }
+
+    useEffect(() => {
+        onRefresh()
+        dispatch(fetchEvents(userId))
+        dispatch(getMyRecipes(userId))
+    }, [userId, isFocused])
+
+    // REFRESH FUNCTIONS //////////////////////////////////////////
+    const wait = (timeout) => {
+        return new Promise(resolve => setTimeout(resolve, timeout));
+    }
+
+    const onRefresh = useCallback(() => {
+        loadItems()
+        setRefreshing(true);
+        // dispatch(getMyRecipes(userId))
+        wait(5000).then(() => setRefreshing(false)).then(dispatch(getMyRecipes(userId)));
+    }, []);
+
+    ////////////////////////////
 
     const infoPickerFunction = (pickerType, selectedDate, formTypeInput) => {
-        // console.log(pickerType, selectedDate, formTypeInput)
-        // setShowPickedInfo(selectedDate)
-        // setShowPickedInfo(
-        //     pickerType === 'date'
-        //         ? selectedDate.toISOString().split('T')[0]
-        //         : selectedDate.toLocaleTimeString('he-IL')
-        // );
 
         const info =
             pickerType === 'date'
@@ -110,33 +164,13 @@ const Mycallendar = ({ navigation }) => {
             setEventForm({ ...eventForm, alarm: { ...eventForm.alarm, [formTypeInput]: info } });
 
         } else {
-            setEventForm({ ...eventForm, [formTypeInput]: info, creatorId: user });
+            setEventForm({ ...eventForm, [formTypeInput]: info, creatorId: userId });
         }
-
     };
+
     ////////////////////
-
-    const dispatch = useDispatch();
-
     useEffect(() => {
-        getUser()
-    }, [])
-
-    const getUser = async () => {
-        const result = JSON.parse(await AsyncStorage.getItem('profile'))
-        setUser(result.result._id)
-    }
-
-    const eventList = useSelector((state) => state.event.events)
-    console.log(eventList)
-    // console.log(user)
-
-    useEffect(() => {
-        dispatch(fetchEvents(user))
-    }, [user])
-
-    useEffect(() => {
-        loadItems()
+        eventList && loadItems()
     }, [eventList])
 
     useEffect(() => {
@@ -155,7 +189,8 @@ const Mycallendar = ({ navigation }) => {
     const addNewEvent = () => {
         dispatch(createEvent(eventForm))
         setModalVisible(false)
-        dispatch(fetchEvents(user))
+        // dispatch(fetchEvents(userId))
+        setEventForm(initialValue)
     }
 
     const editEvent = (event) => {
@@ -167,7 +202,7 @@ const Mycallendar = ({ navigation }) => {
     const updatEvent = () => {
         // console.log(eventForm);
         dispatch(updateEvent(eventForm))
-        dispatch(fetchEvents(user))
+        // dispatch(fetchEvents(userId))
         setModalFromEdit(false)
         setModalVisible(false)
 
@@ -176,20 +211,9 @@ const Mycallendar = ({ navigation }) => {
     const delEvent = (event) => {
         // console.log(event._id);
         dispatch(deleteEvent(event._id))
-        dispatch(fetchEvents(user))
+        // dispatch(fetchEvents(userId))
     }
 
-    ///////////////////////////////////////////////////////////////
-    // REFRESH FUNCTIONS //////////////////////////////////////////
-    const wait = (timeout) => {
-        return new Promise(resolve => setTimeout(resolve, timeout));
-    }
-
-    const onRefresh = useCallback(() => {
-        loadItems()
-        setRefreshing(true);
-        wait(2000).then(() => setRefreshing(false));
-    }, []);
     /////////////////////////////////////////////////////////////////
     const closeModal = () => {
         // setEventForm(initialValue)
@@ -197,7 +221,7 @@ const Mycallendar = ({ navigation }) => {
     }
 
     const openShowEventDetail = (item) => {
-        navigation.push('ShowEventDetail', { item: item })
+        navigation.push('ShowEventDetail', { eventData: item })
     }
 
     const loadItems = () => {
@@ -205,7 +229,7 @@ const Mycallendar = ({ navigation }) => {
         var date = new Date();
         var timestamp = date.getTime();
         setTimeout(() => {
-            for (let i = -30; i < 30; i++) {
+            for (let i = -60; i < 30; i++) {
 
                 // const time = day.timestamp + (i + 30) * 24 * 60 * 60 * 1000;
                 const time = timestamp + i * 24 * 60 * 60 * 1000;
@@ -260,12 +284,13 @@ const Mycallendar = ({ navigation }) => {
     }
 
     const createShopList = () => {
+        // console.log("createShopList newMyRecipes", newMyRecipes)
+        // console.log("createShopList filter", filter)
         var filter = [];
-
+        // console.log(fromToForm.fromDate, fromToForm.toDate)
         eventList.map((event) =>
             event.eventDate >= fromToForm.fromDate && event.eventDate <= fromToForm.toDate
                 ? filter.push(event.recipesId[0])
-                // ? console.log(event.date)
                 : null
         );
 
@@ -273,9 +298,12 @@ const Mycallendar = ({ navigation }) => {
         filter.map((myEvent) => {
             myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
         });
-        // console.log("newMyRecipes", newMyRecipes)
+        // console.log("createShopList newMyRecipes", newMyRecipes)
+        // console.log("createShopList filter", filter)
 
-        navigation.navigate('ShowShopList', { recipe: filter, showType: "events" })
+        navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: filter, showType: "events" } })
+
+        // navigation.navigate('ShowShopList', { recipe: filter, showType: "events" })
     }
 
     return (
@@ -410,7 +438,7 @@ const Mycallendar = ({ navigation }) => {
                                 pickerType="date"
                                 // setInfoPicked={setInfoPicked}
                                 infoPickerFunction={infoPickerFunction}
-                                formTypeInput="alarmDate"
+                            // formTypeInput="alarmDate"
                             />
                             <DatePicker2
                                 pickerType="time"
@@ -437,6 +465,9 @@ const Mycallendar = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
+
+            <PopupModal message={redux?.event.message} popupModal={popupModal} />
+
         </View >
 
     );
@@ -445,9 +476,9 @@ const Mycallendar = ({ navigation }) => {
 const styles = StyleSheet.create({
     centeredView: {
         flex: 1,
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 90
+        // marginTop: 50
     },
     container: {
         flex: 1,

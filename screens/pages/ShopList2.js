@@ -1,6 +1,14 @@
-import { Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
-import Constants from 'expo-constants';
 import React, { useState, useEffect } from 'react';
+import {
+    Text,
+    View,
+    StyleSheet,
+    Button,
+    TouchableOpacity,
+    FlatList,
+    SafeAreaView
+} from 'react-native';
+import Constants from 'expo-constants';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
     Entypo,
@@ -722,11 +730,11 @@ const myMeals = [
     }
 ]
 
-export default function ShopList2(navigation) {
+export default function ShopList2({ navigation, route }) {
     const todayDate = new Date();
 
-    const recipeData = navigation.route.params
-    console.log("RecipeDetail ShopList2:", recipeData);
+    const recipeData = route.params
+    // console.log("RecipeDetail ShopList2:", recipeData);
 
     const [system, setSystem] = useState('metric');
     const [showPicker, setShowPicker] = useState(false);
@@ -756,21 +764,21 @@ export default function ShopList2(navigation) {
         //             : null
         //     );
         // }
-        if (recipeData.showType === "recipe") {
+        if (recipeData?.showType === "recipe") {
             filter = [recipeData?.recipe]
         }
-        if (recipeData.showType === "meals" || recipeData.showType === "events") {
+        if (recipeData?.showType === "meals" || recipeData?.showType === "events") {
             filter = [...recipeData?.recipe]
         }
 
-        console.log("filter:", filter)
+        // console.log("filter:", filter)
 
         var newMyRecipes = [];
         filter.map((myEvent) => {
             myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
         });
 
-        console.log("newMyRecipes:", newMyRecipes)
+        // console.log("newMyRecipes:", newMyRecipes)
 
 
         if (system === 'metric') {
@@ -866,19 +874,38 @@ export default function ShopList2(navigation) {
 
     return (
         <View style={styles.container}>
+            <Text>ShopList2</Text>
             {/* <Button title="fromDate" onPress={() => alert(fromDate)} />
             <Button title="toDate" onPress={() => alert(toDate)} />
             <Button title="Events" onPress={() => createShopList("events")} />
             <Button title="byMeal" onPress={() => createShopList("meals")} />
             <Button title="byRecipe" onPress={() => createShopList()} /> */}
 
-            {answer?.map((item) => (
+            {/* {answer?.map((item) => (
                 <View style={{ flexDirection: 'row' }}>
                     <Text style={{ width: 120 }}>Prod: {item.product} </Text>
                     <Text style={{ width: 90 }}>Qty: {item.quantity} </Text>
                     <Text>Un: {item.units} </Text>
                 </View>
-            ))}
+            ))} */}
+            <SafeAreaView>
+                <FlatList
+                    data={answer}
+                    showsVerticalScrollIndicator={false}
+                    style={{ width: '100%', marginTop: 120 }}
+                    renderItem={({ item }) => <View style={{ flexDirection: 'row' }}>
+                        <Text style={{ width: 120 }}>Prod: {item.product} </Text>
+                        <Text style={{ width: 90 }}>Qty: {item.quantity} </Text>
+                        <Text>Un: {item.units} </Text>
+                    </View>}
+                    keyExtractor={item => item._id}
+                // extraData={selectedId}
+                />
+                <Button title="Back Home" onPress={() => navigation.navigate('MyDrawer', { screen: 'Home' })} />
+                <Button title="Back" onPress={() => navigation.navigate('MyDrawer', { screen: 'Home' })} />
+                <Button title="Save Shop List" onPress={() => alert("TODO")} />
+
+            </SafeAreaView>
             {/* 
             <View style={{ flexDirection: 'row' }}>
                 <Text style={{ width: '80%' }}>

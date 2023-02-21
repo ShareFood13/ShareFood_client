@@ -119,7 +119,7 @@ const Conversions = () => {
 
         useEffect(() => {
 
-            console.log(show, fromUnit, toUnit);
+            // console.log(show, fromUnit, toUnit);
 
             const obj = (show === 'mass') ? mass.filter(elem => elem.unit === fromUnit)[0]
                 : (show === 'volume') ? volume.filter(elem => elem.unit === fromUnit)[0]

@@ -10,17 +10,17 @@ import {
     KeyboardAvoidingView,
     Keyboard,
     Alert,
-    TouchableOpacity
+    TouchableOpacity,
+    Image
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
+import { ScrollView } from 'react-native-gesture-handler';
 
 import { MaterialIcons, Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { sendPassword, changePassword } from '../../Redux/actions/auth';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { LOGOUT, AUTH_ERROR, CLEAR_ERROR } from "../../Redux/constants/constantsTypes.js"
 
 const initialState = { email: '', userName: '' };
 const initialState2 = { email: '', code: '', password: '', confirmPassword: '' }
@@ -35,6 +35,8 @@ export default function ForgetPass({ navigation }) {
     const [receivePassword, setReceivePassword] = useState(null)
 
     const dispatch = useDispatch();
+    const userInfo = useSelector((state) => state)
+    console.log("ForgetPass.js userInfo", userInfo)
 
     useEffect(() => {
         setIsValid(Object.values(form).every(value => value !== ""))
@@ -42,6 +44,7 @@ export default function ForgetPass({ navigation }) {
     }, [form, form2])
 
     const handleOnChange = (name, text) => {
+        userInfo?.auth.auth_msg && dispatch({ type: CLEAR_ERROR })
         switch (name) {
             case "userName":
                 // Minimum 4 characters, maximum 20 characters, at least on letter
@@ -62,7 +65,7 @@ export default function ForgetPass({ navigation }) {
                 break
 
             case "code":
-                text === receivePassword?.password.split(".")[0].slice(0, 10) ? setForm2({ ...form2, [name]: text }) : setForm2({ ...form2, [name]: "" })
+                text === receivePassword ? setForm2({ ...form2, [name]: text }) : setForm2({ ...form2, [name]: "" })
                 break
 
             case "password":
@@ -79,181 +82,187 @@ export default function ForgetPass({ navigation }) {
         }
     }
 
-    const backToLogin = () => {
-        navigation.navigate('LogIn')
-    }
+    useEffect(() => {
+        if (userInfo?.auth?.authData?.message) {
+            alert(userInfo?.auth?.authData?.message)
+            setReceivePassword(userInfo?.auth?.authData?.password)
+            // dispatch({ type: CLEAR_ERROR })
+        }
+        // if (userInfo?.auth?.authData?.message2) {
+        //     alert(userInfo?.auth?.authData?.message2)
+        //     // dispatch({ type: CLEAR_ERROR })
+        // }
+    }, [userInfo])
 
     const sendPass = async (e) => {
         e.preventDefault();
-        alert(`send password`)
-        dispatch(sendPassword(form, navigation));
-        checkSendPass()
-
+        dispatch(sendPassword(form));
     };
-
-    async function checkSendPass() {
-        setReceivePassword(JSON.parse(await AsyncStorage.getItem('sendPassword')))
-    }
-
-    // (receivePassword !== null) && sendEmail(
-    //     receivePassword?.email,
-    //     'ShareFood - Forgot my Password',
-    //     `Copy the password bellow. \n${receivePassword?.password.split(".")[0]}`)
-
-    // async function sendEmail(to, subject, body, options = {}) {
-    //     const { cc, bcc } = options;
-
-    //     let url = `mailto:${to}`;
-
-    //     // Create email link query
-    //     const query = qs.stringify({
-    //         subject: subject,
-    //         body: body,
-    //         cc: cc,
-    //         bcc: bcc
-    //     });
-
-    //     if (query.length) {
-    //         url += `?${query}`;
-    //     }
-
-    //     // check if we can use this link
-    //     const canOpen = await Linking.canOpenURL(url);
-
-    //     if (!canOpen) {
-    //         throw new Error('Provided URL can not be handled');
-    //     }
-
-    //     // return Linking.openURL(url);
-
-    // }
 
     const resetPassword = () => {
         dispatch(changePassword(form2, navigation));
-        alert(`Reset Password`)
+        // alert(`Reset Password`)
     }
 
-    // console.log('====================================');
-    // console.log(form2, receivePassword?.password.split(".")[0]);
-    // console.log('====================================');
+    // if (userInfo?.auth?.authData?.token) {
+    //     dispatch({ type: CLEAR_ERROR })
+    //     navigation.navigate("LogIn")
+    // }
+
+    console.log(form2)
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <KeyboardAvoidingView style={styles.container}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-            >
-                <Text>Password Reset</Text>
+            <ScrollView>
+                <KeyboardAvoidingView style={styles.container}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                >
 
-                {!receivePassword ? <>
-                    <View style={styles.inputLogo}>
-                        <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
-                            'Validation',
-                            'Minimum 4 characters, maximum 20 characters, at least on letter',
-                            [
-                                { text: "OK" }
-                            ])}>
-                            <Feather name="user" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                        </TouchableOpacity>
-                        <TextInput
-                            style={styles.input}
-                            placeholder='User Name'
-                            keyboardType="ascii-capable"
-                            onChangeText={text => handleOnChange('userName', text)} />
+                    <View style={styles.logoView}>
+                        <Image style={styles.logo} source={require('../../assets/images/favicon.png')} />
+                        {/* TODO add my Logo here */}
                     </View>
 
-                    <View style={styles.inputLogo}>
-                        <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
-                            'Validation',
-                            'aaa@bbb.com',
-                            [
-                                { text: "OK" }
-                            ])}>
-                            <MaterialIcons name="alternate-email" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                        </TouchableOpacity>
-                        <TextInput
-                            style={styles.input}
-                            placeholder='E-mail'
-                            keyboardType="ascii-capable"
-                            onChangeText={text => handleOnChange('email', text)} />
-                    </View >
-                    <View style={styles.logButton}>
-                        <Button title="Send my Password" disabled={!isValid} onPress={sendPass} />
-                    </View>
+                    <Text style={{ fontSize: 16, marginVertical: 15 }}>Forgot Password?</Text>
 
-
-                </>
-                    : <>
+                    {!receivePassword ? <>
                         <View style={styles.inputLogo}>
+                            <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
+                                'Validation',
+                                'Minimum 4 characters, maximum 20 characters, at least on letter',
+                                [
+                                    { text: "OK" }
+                                ])}>
+                                <Feather name="user" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                            </TouchableOpacity>
+                            <TextInput
+                                style={styles.input}
+                                placeholder='User Name'
+                                keyboardType="ascii-capable"
+                                autoCorrect={false}
+                                onChangeText={text => handleOnChange('userName', text)} />
+                        </View>
 
-                            <MaterialIcons name="alternate-email" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                        <View style={styles.inputLogo}>
+                            <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
+                                'Validation',
+                                'aaa@bbb.com',
+                                [
+                                    { text: "OK" }
+                                ])}>
+                                <MaterialIcons name="alternate-email" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                            </TouchableOpacity>
                             <TextInput
                                 style={styles.input}
                                 placeholder='E-mail'
                                 keyboardType="ascii-capable"
-                                defaultValue={form.email}
-                            // onChangeText={text => handleOnChange('email', text)} 
-                            />
+                                autoCapitalize='none'
+                                autoCorrect={false}
+                                onChangeText={text => handleOnChange('email', text)} />
                         </View >
-                        <View style={[styles.inputLogo, styles.inputMargin]}>
-                            <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
-                                'Code',
-                                'Enter the code you received in your email.',
-                                [
-                                    { text: "OK" }
-                                ])}>
-                                <MaterialCommunityIcons name="form-textbox-password" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            </TouchableOpacity>
-                            <TextInput
-                                style={styles.input}
-                                placeholder='Code'
-                                // defaultValue={receivePassword?.password.split(".")[0]}
-                                onChangeText={text => handleOnChange('code', text)}
-                            />
+
+                        <View style={{ height: 30, color: 'red', marginVertical: 10 }}>
+                            {userInfo?.auth.auth_msg &&
+                                <Text style={{ color: 'red', fontWeight: '500', fontSize: 16 }}>{userInfo.auth.auth_msg}</Text>
+                            }
                         </View>
-                        <View style={[styles.inputLogo, styles.inputMargin]}>
-                            <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
-                                'Validation',
-                                'Minimum eight characters, at least one uppercase letter, one lowercase letter and one number:',
-                                [
-                                    { text: "OK" }
-                                ])}>
-                                <MaterialCommunityIcons name="form-textbox-password" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            </TouchableOpacity>
-                            <TextInput
-                                style={styles.input}
-                                placeholder='Password'
-                                secureTextEntry={!showPassword}
-                                onChangeText={text => handleOnChange('password', text)} />
-                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} >
-                                {showPassword ? <Ionicons name="eye-off-outline" size={24} color="black" />
-                                    : <Ionicons name="eye-outline" size={24} color="black" />}
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.inputLogo}>
-                            <MaterialCommunityIcons name="form-textbox-password" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder='Confrim Password'
-                                secureTextEntry={!showConPassword}
-                                onChangeText={text => handleOnChange('confirmPassword', text)} />
-                            <TouchableOpacity onPress={() => setShowConPassword(!showConPassword)} >
-                                {showConPassword ? <Ionicons name="eye-off-outline" size={24} color="black" />
-                                    : <Ionicons name="eye-outline" size={24} color="black" />}
-                            </TouchableOpacity>
-                        </View>
+
                         <View style={styles.logButton}>
-                            <Button title="Reset Password" disabled={!isValid2} onPress={resetPassword} />
+                            <Button title="Send my Password" disabled={!isValid} onPress={sendPass} />
                         </View>
 
-                    </>}
+
+                    </>
+                        : <>
+                            <View style={styles.inputLogo}>
+
+                                <MaterialIcons name="alternate-email" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder='E-mail'
+                                    keyboardType="ascii-capable"
+                                    defaultValue={form.email}
+                                    onChangeText={text => handleOnChange('email', text)}
+                                />
+                            </View >
+
+                            <View style={[styles.inputLogo, styles.inputMargin]}>
+                                <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
+                                    'Code',
+                                    'Enter the code you received in your email.',
+                                    [
+                                        { text: "OK" }
+                                    ])}>
+                                    <MaterialCommunityIcons name="form-textbox-password" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                                </TouchableOpacity>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder='Code'
+                                    defaultValue={receivePassword}
+                                    onChangeText={text => handleOnChange('code', text)}
+                                />
+                            </View>
+
+                            <View style={[styles.inputLogo, styles.inputMargin]}>
+                                <TouchableOpacity style={styles.validation} onPress={() => Alert.alert(
+                                    'Validation',
+                                    'Minimum eight characters, at least one uppercase letter, one lowercase letter and one number:',
+                                    [
+                                        { text: "OK" }
+                                    ])}>
+                                    <MaterialCommunityIcons name="form-textbox-password" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                                </TouchableOpacity>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder='Password'
+                                    secureTextEntry={!showPassword}
+                                    autoCapitalize='none'
+                                    autoCorrect={false}
+                                    onChangeText={text => handleOnChange('password', text)} />
+                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} >
+                                    {showPassword ? <Ionicons name="eye-off-outline" size={24} color="black" />
+                                        : <Ionicons name="eye-outline" size={24} color="black" />}
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.inputLogo}>
+                                <MaterialCommunityIcons name="form-textbox-password" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder='Confrim Password'
+                                    secureTextEntry={!showConPassword}
+                                    autoCapitalize='none'
+                                    autoCorrect={false}
+                                    onChangeText={text => handleOnChange('confirmPassword', text)} />
+                                <TouchableOpacity onPress={() => setShowConPassword(!showConPassword)} >
+                                    {showConPassword ? <Ionicons name="eye-off-outline" size={24} color="black" />
+                                        : <Ionicons name="eye-outline" size={24} color="black" />}
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={{ height: 30, color: 'red', marginVertical: 10 }}>
+                                {userInfo?.auth.auth_msg &&
+                                    <Text style={{ color: 'red', fontWeight: '500', fontSize: 16 }}>{userInfo.auth.auth_msg}</Text>
+                                }
+                            </View>
+
+                            <View style={styles.logButton}>
+                                <Button title="Reset Password" disabled={!isValid2} onPress={resetPassword} />
+                            </View>
+
+                        </>}
 
 
-                <View style={styles.textLink}>
-                    <TouchableOpacity onPress={backToLogin} >
-                        <Text style={[styles.link]}>Back to Login</Text>
-                    </TouchableOpacity>
-                </View>
-            </KeyboardAvoidingView>
+                    <View style={styles.textLink}>
+                        <TouchableOpacity onPress={() => {
+                            dispatch({ type: CLEAR_ERROR })
+                            navigation.navigate('LogIn')
+                        }} >
+                            <Text style={[styles.link]}>Back to Login</Text>
+                        </TouchableOpacity>
+                    </View>
+                </KeyboardAvoidingView>
+            </ScrollView>
         </TouchableWithoutFeedback>
     )
 }
@@ -261,8 +270,16 @@ export default function ForgetPass({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center'
+    },
+    logoView: {
+        height: 100,
+        marginTop: 100
+    },
+    logo: {
+        height: 70,
+        width: 70
     },
     inputLogo: {
         flexDirection: "row",

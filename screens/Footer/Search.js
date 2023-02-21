@@ -1,11 +1,19 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { View, Text, Button, StyleSheet } from 'react-native'
+import { Context } from "../../context/UserContext";
 
 export default function Search({ navigation }) {
+    const { userContext } = useContext(Context)
+
+    // console.log("userContext.result.eventsId", userContext.result.eventsId)
+    // console.log("userContext.result.mealsId", userContext.result.mealsId)
+    // console.log("userContext.result.recipesId", userContext.result.recipesId)
+
+
     return (
         <View style={styles.container}>
             <Text>Search</Text>
-            <Button title='Click Me' onPress={() => alert('ToDo')} />
+            {/* <Button title='Click Me' onPress={() => setUserContext(66666)} /> */}
         </View>
     )
 }

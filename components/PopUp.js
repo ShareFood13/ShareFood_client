@@ -5,7 +5,12 @@ import React from 'react'
 
 const PopUp = ({ message, type }) => {
     //hook or class 
-    console.log(message);
+    // console.log(message);
+    // const TestComp = () => {
+    //     return (
+    //         message
+    //     )
+    // }
 
     return (
         <Root>
@@ -13,6 +18,7 @@ const PopUp = ({ message, type }) => {
                 <TouchableOpacity
                     onPress={() =>
                         Popup.show({
+                            // component: () => TestComp(),
                             type: { type },
                             title: { message },
                             // textBody: 'Body ',
@@ -52,7 +58,7 @@ const PopUp = ({ message, type }) => {
                         })
                     }
                 >
-                    <Text>Open Popup Message</Text>
+                    <Text>{message}</Text>
                 </TouchableOpacity>
             </View>
         </Root >);
@@ -61,7 +67,7 @@ const PopUp = ({ message, type }) => {
     //props.spSheet.setHeight(150,()=>alert('nice'));
 }
 
-<Root>
+{/* <Root>
     <View>
         <TouchableOpacity
             onPress={() => {
@@ -82,7 +88,7 @@ const PopUp = ({ message, type }) => {
             <Text>Open Popup Message</Text>
         </TouchableOpacity>
     </View>
-</Root>
+</Root> */}
 
 export default PopUp
 

@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useIsFocused } from '@react-navigation/native';
-
 
 import {
     View,
@@ -28,7 +26,7 @@ import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAweso
 
 import uuid from 'react-native-uuid';
 
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -39,9 +37,106 @@ import { createMyMail, getMyMails, getSendedMails, deleteMyMail } from '../../Re
 import Constants from 'expo-constants';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { SelectList } from 'react-native-dropdown-select-list';
-import PopupModal from '../../components/PopupModal';
 
-import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
+const myFriends = [
+    { key: '6', _id: '6384f0638b5328bd411aa02a', value: 'Shleper' },
+    { key: '1', _id: '1234', value: 'User01' },
+    { key: '2', _id: '1235', value: 'User02' },
+    { key: '3', _id: '1236', value: 'User03' },
+    { key: '4', _id: '1237', value: 'User04' },
+    { key: '5', _id: '1238', value: 'User05' },
+];
+
+const myMail = [
+    {
+        mailId: 'm123',
+        senderId: '1234',
+        senderName: 'User01',
+        reciverId: '111',
+        reciverName: 'Shleper',
+        subject: 'first mail',
+        message: ' first message',
+        date: '2022-12-22',
+        isDeleted: false,
+    }, //Date.now() .unshift(
+    {
+        mailId: 'm124',
+        senderId: '1236',
+        senderName: 'User03',
+        reciverId: '111',
+        reciverName: 'Shleper',
+        subject: 'sec mail',
+        message: ' sec message',
+        date: '2022-12-20',
+        isDeleted: false,
+    },
+    {
+        mailId: 'm125',
+        senderId: '1237',
+        senderName: 'User04',
+        reciverId: '111',
+        reciverName: 'Shleper',
+        subject: 'third mail',
+        message: ' third message',
+        date: '2022-12-15',
+        isDeleted: false,
+    },
+    {
+        mailId: 'm126',
+        senderId: '1236',
+        senderName: 'User03',
+        reciverId: '111',
+        reciverName: 'Shleper',
+        subject: 'forth mail',
+        message: ' forth message',
+        date: '2022-12-12',
+        isDeleted: false,
+    },
+    {
+        mailId: 'm127',
+        senderId: '1235',
+        senderName: 'User02',
+        reciverId: '111',
+        reciverName: 'Shleper',
+        subject: 'fifth mail',
+        message: ' fifth message',
+        date: '2022-12-12',
+        isDeleted: false,
+    },
+    {
+        mailId: 'm128',
+        senderId: '1238',
+        senderName: 'User05',
+        reciverId: '111',
+        reciverName: 'Shleper',
+        subject: 'sixth mail',
+        message: ' sixth message',
+        date: '2022-12-10',
+        isDeleted: false,
+    },
+    {
+        mailId: 'm129',
+        senderId: '1234',
+        senderName: 'User01',
+        reciverId: '111',
+        reciverName: 'Shleper',
+        subject: 'seventh mail',
+        message: ' seventh message',
+        date: '2022-12-02',
+        isDeleted: false,
+    },
+    {
+        mailId: 'm130',
+        senderId: '1234',
+        senderName: 'User01',
+        reciverId: '111',
+        reciverName: 'Shleper',
+        subject: 'eight mail',
+        message: ' eight message',
+        date: '2022-12-01',
+        isDeleted: false,
+    },
+];
 
 const initialMailForm = {
     // mailId: '',
@@ -55,14 +150,35 @@ const initialMailForm = {
     isDeleted: false,
 };
 
-const otherUsersList = []
 export default function MyMails({ navigation }) {
 
     const dispatch = useDispatch();
-    const isFocused = useIsFocused();
 
-    const [popupModal, setPopupModal] = useState(false)
+    const windowWidth = Dimensions.get('window').width;
+    const windowHeight = Dimensions.get('window').height;
+
     const [userInfo, setUserInfo] = useState()
+
+    useEffect(() => {
+        getUser()
+        dispatch(getMyMails(userInfo?.result._id))
+
+    }, [])
+
+    const getUser = async () => {
+        setUserInfo(JSON.parse(await AsyncStorage.getItem('profile')))
+    }
+
+    const myMails = useSelector((state) => state.myMail.myMails)
+    // const mySendedMails = useSelector((state) => state)
+
+    // console.log("userInfo", userInfo?.result._id, userInfo?.result.userName)
+    // console.log("myMails", myMails)
+
+
+    // var myMail2 = [...myMail];
+    // var listToDelete = [];
+
     const [allSelected, setAllSelected] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
@@ -71,59 +187,17 @@ export default function MyMails({ navigation }) {
     const [selected, setSelected] = React.useState('');
     const [listToDelete, setListToDelete] = useState([])
 
-
-    const windowWidth = Dimensions.get('window').width;
-    const windowHeight = Dimensions.get('window').height;
-
-
-    const redux = useSelector(state => state)
-    const myMails = redux?.myMail?.myMails
-    // const myMails = useSelector((state) => state.myMail.myMails)
-
-    // console.log('MyMails redux', redux)
-
-    useEffect(() => {
-        redux?.other?.otherUsers.map(user => !redux?.auth?.authData?.result?.profile?.following?.includes(user._id) &&
-            otherUsersList.push({ key: user._id, _id: user._id, value: user.userName }))
-    }, [])
-
-    useEffect(() => {
-        if (redux?.myMail?.message) {
-            setPopupModal(true)
-            setTimeout(() => {
-                setPopupModal(false)
-                dispatch({ type: CLEAR_MSG })
-            }, 2500)
-        }
-    }, [redux])
-
-    useEffect(() => {
-        getUser()
-    }, [])
-
-    const getUser = async () => {
-        setUserInfo(JSON.parse(await SecureStore.getItemAsync('storageData')))
-    }
-
-    useEffect(() => {
-        userInfo && dispatch(getMyMails(userInfo?.userId))
-    }, [userInfo])
-
     const addToDelList = (_id, isChecked) => {
-        console.log(_id, isChecked)
+        // console.log(_id, isChecked)
         if (isChecked) {
             !listToDelete.includes(_id) && setListToDelete([...listToDelete, _id])
             // listToDelete.unshift(_id);
         } else {
-            var newListToDelete = []
+            const newListToDelete = []
             newListToDelete = listToDelete.filter((item) => item !== _id);
             setListToDelete(newListToDelete)
         }
     };
-    useEffect(() => {
-        listToDelete.length === myMails.length ? setAllSelected(true) : setAllSelected(false)
-    }, [listToDelete])
-
 
     const deleteMails = () => {
         // console.log(listToDelete)
@@ -136,29 +210,20 @@ export default function MyMails({ navigation }) {
     };
 
     const selectAllMails = (isChecked) => {
-        // console.log(isChecked)
         setAllSelected(isChecked);
-        if (isChecked) {
-            var newListToDelete = []
-            myMails.map(mail => !listToDelete.includes(mail._id) && newListToDelete.push(mail._id))
-            setListToDelete([...listToDelete, ...newListToDelete])
-        } else {
-            setListToDelete([])
-        }
+        myMails.map(mail => listToDelete.push(mail._id))
     };
-
-    console.log({ listToDelete })
 
     const onChange = (name, text) => {
         if (name === 'reciverName') {
-            otherUsersList.map((friend) =>
+            myFriends.map((friend) =>
                 friend.value === text
                     ? setMailForm({
                         ...mailForm,
                         reciverName: friend.value,
                         reciverId: friend._id,
-                        senderId: userInfo?.userId,
-                        senderName: userInfo?.userUserName,
+                        senderId: userInfo?.result._id,
+                        senderName: userInfo?.result.userName,
                     })
                     : console.log('null')
             );
@@ -166,8 +231,8 @@ export default function MyMails({ navigation }) {
             setMailForm({
                 ...mailForm,
                 [name]: text,
-                senderId: userInfo?.userId,
-                senderName: userInfo?.userUserName,
+                senderId: userInfo?.result._id,
+                senderName: userInfo?.result.userName,
             });
         }
     };
@@ -179,8 +244,8 @@ export default function MyMails({ navigation }) {
 
     const sendMailFunc = () => {
         dispatch(createMyMail(mailForm))
-        dispatch(getMyMails(userInfo?.userId))
-        setModalVisible(!modalVisible);
+        dispatch(getMyMails(userInfo?.result._id))
+        // setModalVisible(!modalVisible);
         // userInfo._id === mailForm.reciverId
         //     ? myMail2.unshift(mailForm)
         //     : console.log('null');
@@ -194,7 +259,7 @@ export default function MyMails({ navigation }) {
                     width: 350,
                     justifyContent: 'space-between',
                 }}>
-                <TouchableOpacity onPress={() => setModalVisible(true)} style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 150, height: 50, borderWidth: 1, borderStyle: 'solid', borderColor: 'black', borderRadius: 10, backgroundColor: 'cyan', marginBottom: 20 }}>
+                <TouchableOpacity onPress={() => setModalVisible(true)} style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 150, height: 50, borderWidth: 1, borderStyle: 'solid', borderColor: 'black', borderRadius: 10, backgroundColor: 'cyan' }}>
                     <Feather name="edit-3" size={24} color="black" />
                     <Text style={{ marginLeft: 15 }}>Compose</Text>
                 </TouchableOpacity>
@@ -203,6 +268,10 @@ export default function MyMails({ navigation }) {
                     <AntDesign name="delete" size={24} color="black" />
                 </TouchableOpacity>
             </View>
+
+            <Text></Text>
+            <Text></Text>
+            <Text></Text>
 
             <View style={{ justifyContent: 'center', flexDirection: 'row', height: 50, width: windowWidth, borderColor: "black", borderBottomWidth: 1, borderStyle: 'solid' }}>
                 <BouncyCheckbox
@@ -216,7 +285,6 @@ export default function MyMails({ navigation }) {
                     onPress={(isChecked) => {
                         selectAllMails(isChecked);
                     }}
-                    isChecked={allSelected}//
                     style={{ width: '10%', justifyContent: 'center' }}
                 />
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', alignSelf: 'center', width: windowWidth * 0.85, height: '100%' }}>
@@ -273,7 +341,7 @@ export default function MyMails({ navigation }) {
                                 setSelected={setSelected}
                                 placeholder="To:"
                                 maxHeight="150"
-                                data={otherUsersList}
+                                data={myFriends}
                                 search={true}
                                 // fontFamily="lato"
                                 save="value"
@@ -407,9 +475,6 @@ export default function MyMails({ navigation }) {
                     </View>
                 </Modal>
             </View>
-
-            <PopupModal message={redux?.myMail?.message} popupModal={popupModal} />
-
         </View>
     );
 }

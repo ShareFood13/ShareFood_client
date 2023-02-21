@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { Text, View, Button, Image, StyleSheet } from 'react-native'
 
-import Loading from './Loading'
+import Loading from '../Loading'
 
 export default function Wellcome({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <Image source={require("../assets/images/favicon.png")} />
-            <Text style={{ fontSize: 24, fontWeight: 'bold' }}>ShareFood</Text>
+            <Image source={require("../../assets/logo.png")} style={{ height: 250, width: 250 }} />
+            {/* <Text style={{ fontSize: 24, fontWeight: 'bold' }}>ShareFood</Text> */}
         </View>
     )
 }
