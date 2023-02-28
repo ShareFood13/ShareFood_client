@@ -55,7 +55,6 @@ export default function ContactUs({ navigation }) {
     }
 
     const sendContactUs = () => {
-        // console.log(contactUsForm)
         dispatch(sendToSharedFood(contactUsForm))
         setContactUsForm(initialValue)
     }

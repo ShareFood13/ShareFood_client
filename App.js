@@ -13,6 +13,7 @@ import ShowShopList from "./screens/pages/ShopList2"
 import ShowEventDetail from "./screens/Drawer/ShowEventDetail"
 import ForgetPass from './screens/Logs/ForgetPass';
 import TermsConditions from './screens/Logs/TermsConditions';
+import ShowOtherUser from './screens/pages/ShowOtherUser'
 
 import MyDrawer from './routes/DrawerNavigator';
 import MyFooter from './routes/FooterNavigator'
@@ -96,6 +97,11 @@ const MainStackScreen = () => (
       name="ShowEventDetail"
       component={ShowEventDetail}
       options={{ title: "Show Event Detail" }}
+    />
+    <MainStack.Screen
+      name="ShowOtherUser"
+      component={ShowOtherUser}
+      options={{ title: "Show Other User" }}
     />
   </MainStack.Navigator>
 )

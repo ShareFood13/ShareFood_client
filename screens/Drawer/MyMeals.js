@@ -125,14 +125,9 @@ export default function MyMeals({ navigation }) {
     const windowHeight = Dimensions.get('window').height;
 
     const redux = useSelector((state) => state)
-    // console.log("MyMeals redux", redux.meal.meals)
     const mealList = redux?.meal?.meals
 
     useEffect(() => {
-        // if (redux?.recipe.recipes) {
-        //     setMyRecipes(redux.recipe.recipes)
-        //     // setUserContext({ result: redux.recipe.recipes[0] })
-        // }
         if (redux?.meal.message !== "") {
             setPopupModal(true)
             setTimeout(() => {
@@ -201,7 +196,6 @@ export default function MyMeals({ navigation }) {
     }
 
     const saveMeal = () => {
-        // console.log("MyMeals mealForm", mealForm)
         dispatch(createMeal(mealForm))
         closeModal()
         onRefresh()
@@ -243,7 +237,6 @@ export default function MyMeals({ navigation }) {
     }
 
     const delMeal = (meal) => {
-        // console.log("deleteMeal", meal);
         dispatch(deleteMeal(meal._id))
         // dispatch(getUserInfo(userId))
         dispatch(getMeals(userId))
@@ -260,7 +253,6 @@ export default function MyMeals({ navigation }) {
                 }
             })
         )
-        // console.log("mealToShopList", mealToShopList);
         navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: mealToShopList, showType: "meals" } })
     }
     //////////////////////////////

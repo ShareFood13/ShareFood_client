@@ -169,21 +169,12 @@ export default function NewRecipe({ navigation, route }) {
 
     const redux = useSelector((state) => state)
 
-    // console.log("redux NewRecipe", redux);
-    // console.log("redux Message", redux.recipe.message);
-    // console.log("redux Recipes", redux?.recipe.recipes);
-    // console.log("route.params", route.params)
-
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
 
     const { userContext, setUserContext } = useContext(Context)
-    // console.log("userContext", userContext)
 
     useEffect(() => {
-        // if (redux?.recipe.recipes) {
-        //     setUserContext({ result: redux.recipe.recipes[0] })
-        // }
         if (redux?.recipe.message) {
             setPopupModal(true)
             setTimeout(() => {
@@ -194,9 +185,6 @@ export default function NewRecipe({ navigation, route }) {
             }, 2500)
         }
     }, [redux])
-
-    // const userInfo = userContext.result
-    // console.log("NewRecipe userContext", userInfo.recipesId)
 
     useEffect(() => {
         // gotoRef.current.focus()
@@ -234,7 +222,6 @@ export default function NewRecipe({ navigation, route }) {
     }
 
     const pickImage = async () => {
-        // console.log("pickImageFunc")
         // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,

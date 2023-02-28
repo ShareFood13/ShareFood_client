@@ -32,6 +32,8 @@ export default function Home({ navigation }) {
     const [refreshing, setRefreshing] = useState(false)
     const [moreHeight, setMoreHeight] = useState(true)
 
+
+
     const isFocused = useIsFocused();
 
     const redux = useSelector((state) => state)
@@ -81,10 +83,8 @@ export default function Home({ navigation }) {
         wait(3000).then(() => setRefreshing(false))//.then(() => dispatch(getUserInfo(userId)))
     }, []);
 
-    const openOtherUser = (userInfo) => {
-        console.log(userInfo)
-        navigation.navigate("ShowOtherUser", { userInfo })
-
+    const openOtherUser = (otherUserID) => {
+        console.log(otherUserID)
     }
 
     const openRecipe = (recipe) => {
@@ -95,8 +95,14 @@ export default function Home({ navigation }) {
         dispatch(startFollowing({ userId, follow_id }))
     }
 
-    const Header = () => {
-        return (<>
+    return (
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={() => onRefresh()}
+                />
+            }>
             <View style={{ flexDirection: "row", height: 100, width: "100%", justifyContent: 'space-around', alignItems: 'center', marginTop: 15, backgroundColor: 'white', alignContent: 'center' }}>
                 <Image
                     source={require("../../assets/images/user-profile.jpeg")}
@@ -162,12 +168,13 @@ export default function Home({ navigation }) {
                 </TouchableOpacity>
             </View>
 
+            {/* {otherUsersList.map(user => <Text key={user._id}>{user.userName}</Text>)} */}
             <ScrollView
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
             >
                 {otherUsersList.map(user => !redux?.auth?.authData?.result?.profile?.following?.includes(user._id) &&
-                    <TouchableOpacity onPress={() => openOtherUser(user)} key={user._id}>
+                    <TouchableOpacity onPress={() => openOtherUser(user._id)} key={user._id}>
                         <View style={{ width: 90, height: 150, borderRadius: 10, borderWidth: 1, borderColor: 'black', marginHorizontal: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white' }}>
                             <Image
                                 source={require("../../assets/images/user-profile.jpeg")}
@@ -194,28 +201,8 @@ export default function Home({ navigation }) {
 
             </View>
 
-        </>)
-    }
-
-    return (
-        // <ScrollView
-        //     refreshControl={
-        //         <RefreshControl
-        //             refreshing={refreshing}
-        //             onRefresh={() => onRefresh()}
-        //         />
-        //     }>
-
-        <>
             {showPictures === "grid" ?
                 <FlatList
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={() => onRefresh()}
-                        />
-                    }
-                    ListHeaderComponent={<Header />}
                     data={redux?.auth?.authData?.result?.recipesId}
                     showsVerticalScrollIndicator={false}
                     numColumns={3}
@@ -234,7 +221,6 @@ export default function Home({ navigation }) {
                     keyExtractor={item => "_" + item._id}
                 /> :
                 <FlatList
-                    ListHeaderComponent={<Header />}
                     data={redux?.auth?.authData?.result?.recipesId}
                     showsVerticalScrollIndicator={false}
                     initialNumToRender={6}
@@ -255,8 +241,8 @@ export default function Home({ navigation }) {
             }
 
             <PopupModal message={redux?.auth?.message} popupModal={popupModal} />
-        </>
-        // </ScrollView >
+
+        </ScrollView >
     )
 }
 

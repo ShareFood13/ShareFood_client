@@ -148,7 +148,6 @@ export default MyProfile = () => {
     const windowHeight = Dimensions.get('window').height;
 
     const { userContext, setUserContext } = useContext(Context)
-    // console.log("myProfile userContext", userContext)
 
     const [profileForm, setProfileForm] = useState(initialState);
     const [userData, setUserData] = useState();
@@ -160,8 +159,6 @@ export default MyProfile = () => {
     const isFocused = useIsFocused()
     const dispatch = useDispatch()
     const redux = useSelector(state => state)
-    // console.log("redux", redux?.auth?.message)
-    // console.log(userData)
 
     useEffect(() => {
         if (redux?.auth?.message) {
@@ -192,7 +189,6 @@ export default MyProfile = () => {
             .then(response => response.json())
             .then(data => {
                 setList(data);
-                // console.log(data);
             })
     }, [])
 
@@ -221,7 +217,6 @@ export default MyProfile = () => {
         })
     }, [list])
 
-    // console.log("countries", countries)
     //////////////////
     ///// get SecureStorage
     useEffect(() => {
@@ -231,7 +226,6 @@ export default MyProfile = () => {
     const getUser = async () => {
         setUserData(JSON.parse(await SecureStore.getItemAsync('storageData')))
     }
-    // console.log({ userData })
 
     useEffect(() => {
         userData &&
@@ -259,7 +253,6 @@ export default MyProfile = () => {
         });
 
         if (!result.canceled) {
-            // console.log(result)
             setProfileForm({ ...profileForm, [name]: { path: result.assets[0].uri, base64: `data:image/jpg;base64,${result.assets[0].base64}` } })
         } else {
             Alert.alert(
@@ -326,9 +319,6 @@ export default MyProfile = () => {
                 : selectedDate?.toLocaleTimeString('he-IL');
         setProfileForm({ ...profileForm, [formTypeInput]: info });
     };
-
-    // console.log("MyProfile submitProfile", profileForm)
-    // console.log("MyProfile userContext", userContext)
 
     return (
         <ScrollView style={{

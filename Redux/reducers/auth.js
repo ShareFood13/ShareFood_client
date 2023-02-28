@@ -34,42 +34,33 @@ const reducer = (state = { authData: {}, message: "" }, action) => {
 
             return { ...state, authData: null }
         case SENDPASS:
-            // console.log("SENDPASS", action.data.password)
             //DEPOIS TENHO QUE VERIFICAR OQ ROLA NESSE SET ITEM
             async () => await SecureStore.setItemAsync('sendPassword', JSON.stringify({ ...action.data.password }))
 
             return { ...state, authData: action?.data }
         case USER_INFO:
-            // console.log('USER_INFO action.data:', action.data);
 
             return { ...state, authData: action?.data }
-
         case SEND_TO_US:
-            // console.log('SEND_TO_US action.data:', action.data);
 
             return { ...state, authData: action?.data }
         case AUTH_ERROR:
 
-            // console.log("AUTH_ERROR", action.error_msg)
             return { ...state, auth_msg: action.error_msg }
         case CLEAR_ERROR:
 
             return { ...state, auth_msg: "" }
 
         case CLEAR_STATE:
-            // console.log("CLEAR_STATE")
 
             return state = ""
         case SAVE_PROFILE:
-            // console.log("SAVE_PROFILE", action?.data)
 
             return { ...state, authData: action?.data.result, message: action?.data.message }
         case START_FOLLOWING:
-            // console.log(action.data)
 
             return { ...state, authData: action.data.result, message: action.data.message }
         case CLEAR_MSG:
-            // console.log("CLEAR_MSG from MyProfile")
 
             return { ...state, message: "" }
         default:

@@ -146,7 +146,6 @@ const initialMailForm = {
     reciverName: '',
     subject: '',
     message: '',
-    // date: '2012-12-29',
     isDeleted: false,
 };
 
@@ -170,14 +169,6 @@ export default function MyMails({ navigation }) {
     }
 
     const myMails = useSelector((state) => state.myMail.myMails)
-    // const mySendedMails = useSelector((state) => state)
-
-    // console.log("userInfo", userInfo?.result._id, userInfo?.result.userName)
-    // console.log("myMails", myMails)
-
-
-    // var myMail2 = [...myMail];
-    // var listToDelete = [];
 
     const [allSelected, setAllSelected] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
@@ -188,10 +179,8 @@ export default function MyMails({ navigation }) {
     const [listToDelete, setListToDelete] = useState([])
 
     const addToDelList = (_id, isChecked) => {
-        // console.log(_id, isChecked)
         if (isChecked) {
             !listToDelete.includes(_id) && setListToDelete([...listToDelete, _id])
-            // listToDelete.unshift(_id);
         } else {
             const newListToDelete = []
             newListToDelete = listToDelete.filter((item) => item !== _id);

@@ -4,13 +4,6 @@ import { Root, SPSheet, Popup } from 'react-native-popup-confirm-toast'
 import React from 'react'
 
 const PopUp = ({ message, type }) => {
-    //hook or class 
-    // console.log(message);
-    // const TestComp = () => {
-    //     return (
-    //         message
-    //     )
-    // }
 
     return (
         <Root>
@@ -18,7 +11,6 @@ const PopUp = ({ message, type }) => {
                 <TouchableOpacity
                     onPress={() =>
                         Popup.show({
-                            // component: () => TestComp(),
                             type: { type },
                             title: { message },
                             // textBody: 'Body ',
@@ -62,33 +54,7 @@ const PopUp = ({ message, type }) => {
                 </TouchableOpacity>
             </View>
         </Root >);
-
-    //props.spSheet.hide();
-    //props.spSheet.setHeight(150,()=>alert('nice'));
 }
-
-{/* <Root>
-    <View>
-        <TouchableOpacity
-            onPress={() => {
-                const spSheet = SPSheet;
-                spSheet.show({
-                    component: () => component({ ...this.props, spSheet }),
-                    dragFromTopOnly: true,
-                    onCloseComplete: () => {
-                        alert('onCloseComplete');
-                    },
-                    onOpenComplete: () => {
-                        alert('onOpenComplete');
-                    },
-                    height: 260
-                });
-            }}
-        >
-            <Text>Open Popup Message</Text>
-        </TouchableOpacity>
-    </View>
-</Root> */}
 
 export default PopUp
 

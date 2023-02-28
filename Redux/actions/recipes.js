@@ -35,21 +35,8 @@ export const updateRecipe = (_id, recipe) => async (dispatch) => {
     }
 }
 
-// export const getRecipesByCreator = (id) => async (dispatch) => {
-//     try {
-
-//         const { data } = await api.fetchRecipesByCreator(id)
-
-//         dispatch({ type: FETCH_RECIPES, payload: { recipe: data } })
-
-//     } catch (error) {
-//         console.log(error)
-
-//     }
-// }
-
 export const deleteRecipe = (_id) => async (dispatch) => {
-    // console.log("_id", _id) //6384fda91ab20095039b3147
+
     try {
         const { data } = await api.deleteRecipe(_id)
 
@@ -76,13 +63,9 @@ export const addRecipeTo = (addTo, item) => async (dispatch) => {
 
 export const getotherrecipes = (_id) => async (dispatch) => {
 
-    console.log(_id)
-
     try {
 
         const { data } = await api.getOtherRecipes(_id)
-
-        // console.log("getotherrecipes", data)
 
         await dispatch({ type: OTHER_RECIPES, payload: data })
     } catch (error) {

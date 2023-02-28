@@ -24,7 +24,6 @@ const reducer = (state = { recipes: [], message: "" }, action) => {
 
             return { ...state, message: "" }
         case OTHER_RECIPES:
-            // console.log("OTHER_RECIPES", action.payload)
 
             return { ...state, otherRecipes: action.payload.otherRecipes }
         case ADD_RECIPE_TO:

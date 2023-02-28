@@ -37,10 +37,6 @@ export default function MyBook({ navigation }) {
     const windowHeight = Dimensions.get('window').height;
 
     const redux = useSelector((state) => state)
-    // console.log("MyBook redux", redux)
-    // console.log("MyBook redux", redux?.recipe?.recipes)
-    // console.log("userContext", userContext)
-    // console.log("MyBook myRecipes", myRecipes)
 
     useEffect(() => {
         if (redux?.recipe.recipes) {

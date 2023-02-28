@@ -52,8 +52,6 @@ const ShowEventDetail = ({ navigation, route }) => {
         navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: mealToShopList, showType: "meals" } })
     }
 
-    console.log(eventData.recipesId)
-    console.log(recipesList)
     return (
         <SafeAreaView style={{
             flex: 1,

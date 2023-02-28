@@ -72,7 +72,6 @@ const logos = [
 
 export default function RecipeDetail({ navigation, route }) {
     const { recipeData } = route.params
-    // console.log("RecipeDetail:", recipeData.creatorId);
 
     const [show, setShow] = useState('ingredients')
     const [modalVisible, setModalVisible] = useState(false)
@@ -86,16 +85,10 @@ export default function RecipeDetail({ navigation, route }) {
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
 
-
-    // const { userContext, setUserContext } = useContext(Context)
-    // const userInfo = userContext.result
-    // console.log("userInfo", userInfo)
-
     const redux = useSelector((state) => state)
-    console.log("RecipeDetail redux", redux);
+
     const eventList = redux?.event?.events
     const mealList = redux?.meal?.meals
-
 
     useEffect(() => {
         onRefresh()
@@ -114,9 +107,6 @@ export default function RecipeDetail({ navigation, route }) {
     const todayDate = new Date().toJSON().slice(0, 10)
 
     useEffect(() => {
-        // if (redux?.recipe.recipes) {
-        //     setUserContext({ result: redux.recipe.recipes[0] })
-        // }
         if (redux?.recipe.message !== "") {
             setPopupModal(true)
             setTimeout(() => {

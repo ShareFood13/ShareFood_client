@@ -114,13 +114,9 @@ export default function App() {
     setUserToken(JSON.parse(await AsyncStorage.getItem('token')))
   }
 
-  // console.log("App.js user 125", user);
-  // console.log("App.js usertoken 125", userToken);
-
   if (isLoading) {
     return <Wellcome />;
   }
-
 
   return (
     <ReduxProvider store={store}>

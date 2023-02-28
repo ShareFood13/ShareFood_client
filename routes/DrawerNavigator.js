@@ -51,12 +51,10 @@ export default function MyDrawer({ navigation }) {
     const dispatch = useDispatch();
 
     const redux = useSelector(state => state)
-    // console.log("redux", redux?.auth?.authData?.result)
 
     const window = Dimensions.get('window');
 
     const { userContext, setUserContext } = useContext(Context)
-    // console.log("userContext", userContext.result.name)
 
     useEffect(() => {
         getUser()

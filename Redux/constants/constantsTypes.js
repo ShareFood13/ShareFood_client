@@ -31,6 +31,7 @@ export const CREATE_MY_MAIL = "CREATE_MY_MAIL"
 export const GET_MY_MAILS = "GET_MY_MAILS"
 export const GET_SENDED_MAILS = "GET_SENDED_MAILS"
 export const DEL_MY_MAIL = "DEL_MY_MAIL"
+export const MAIL_VIEW = "MAIL_VIEW"
 
 export const CLEAR_STATE = "CLEAR_STATE"
 

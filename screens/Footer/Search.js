@@ -5,11 +5,6 @@ import { Context } from "../../context/UserContext";
 export default function Search({ navigation }) {
     const { userContext } = useContext(Context)
 
-    // console.log("userContext.result.eventsId", userContext.result.eventsId)
-    // console.log("userContext.result.mealsId", userContext.result.mealsId)
-    // console.log("userContext.result.recipesId", userContext.result.recipesId)
-
-
     return (
         <View style={styles.container}>
             <Text>Search</Text>

@@ -98,7 +98,6 @@ const Mycallendar = ({ navigation }) => {
     // const { userContext, setUserContext } = useContext(Context)
 
     const redux = useSelector((state) => state)
-    console.log("MyCallendar redux", redux)
     const eventList = redux?.event?.events
 
     // useEffect(
@@ -200,7 +199,6 @@ const Mycallendar = ({ navigation }) => {
     }
 
     const updatEvent = () => {
-        // console.log(eventForm);
         dispatch(updateEvent(eventForm))
         // dispatch(fetchEvents(userId))
         setModalFromEdit(false)
@@ -209,7 +207,6 @@ const Mycallendar = ({ navigation }) => {
     }
 
     const delEvent = (event) => {
-        // console.log(event._id);
         dispatch(deleteEvent(event._id))
         // dispatch(fetchEvents(userId))
     }
@@ -284,10 +281,7 @@ const Mycallendar = ({ navigation }) => {
     }
 
     const createShopList = () => {
-        // console.log("createShopList newMyRecipes", newMyRecipes)
-        // console.log("createShopList filter", filter)
         var filter = [];
-        // console.log(fromToForm.fromDate, fromToForm.toDate)
         eventList.map((event) =>
             event.eventDate >= fromToForm.fromDate && event.eventDate <= fromToForm.toDate
                 ? filter.push(event.recipesId[0])
@@ -298,12 +292,8 @@ const Mycallendar = ({ navigation }) => {
         filter.map((myEvent) => {
             myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
         });
-        // console.log("createShopList newMyRecipes", newMyRecipes)
-        // console.log("createShopList filter", filter)
 
         navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: filter, showType: "events" } })
-
-        // navigation.navigate('ShowShopList', { recipe: filter, showType: "events" })
     }
 
     return (

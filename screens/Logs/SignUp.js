@@ -44,7 +44,6 @@ export default function SignUp({ navigation }) {
 
     const dispatch = useDispatch();
     const userInfo = useSelector((state) => state)
-    // console.log("SignUp.js userInfo", userInfo)
 
     useEffect(() => {
         setIsValid(Object.values(form).every(value => value !== "") && form.isPermission === true)

@@ -734,7 +734,6 @@ export default function ShopList2({ navigation, route }) {
     const todayDate = new Date();
 
     const recipeData = route.params
-    // console.log("RecipeDetail ShopList2:", recipeData);
 
     const [system, setSystem] = useState('metric');
     const [showPicker, setShowPicker] = useState(false);
@@ -771,15 +770,10 @@ export default function ShopList2({ navigation, route }) {
             filter = [...recipeData?.recipe]
         }
 
-        // console.log("filter:", filter)
-
         var newMyRecipes = [];
         filter.map((myEvent) => {
             myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
         });
-
-        // console.log("newMyRecipes:", newMyRecipes)
-
 
         if (system === 'metric') {
             newMyRecipes.map((item) =>

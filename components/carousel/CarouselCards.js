@@ -1,13 +1,11 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { View } from "react-native"
 import Carousel from 'react-native-snap-carousel'
 import CarouselCardItem, { SLIDER_WIDTH, ITEM_WIDTH } from './CarouselCardItem'
 // import data from './data'
 
 const CarouselCards = ({ data }) => {
-    const isCarousel = React.useRef(null)
-
-    // console.log("data:", data[0]?.base64.slice(0, 50));
+    const isCarousel = useRef(null)
 
     return (
         <View>

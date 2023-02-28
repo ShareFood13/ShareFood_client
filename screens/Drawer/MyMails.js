@@ -34,7 +34,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { getUserInfo } from '../../Redux/actions/auth'
 
-import { createMyMail, getMyMails, getSendedMails, deleteMyMail } from '../../Redux/actions/mymails';
+import { createMyMail, getMyMails, getSendedMails, deleteMyMail, mailView } from '../../Redux/actions/mymails';
 
 import Constants from 'expo-constants';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
@@ -44,19 +44,20 @@ import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
 
 const initialMailForm = {
-    // mailId: '',
     senderId: '',
     senderName: '',
     reciverId: '',
     reciverName: '',
     subject: '',
     message: '',
-    // date: '2012-12-29',
     isDeleted: false,
+    isOpen: false
 };
 
 const otherUsersList = []
 export default function MyMails({ navigation }) {
+    const myRefs = React.useRef([]);
+
 
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
@@ -70,17 +71,21 @@ export default function MyMails({ navigation }) {
     const [mailToShow, setMailtoShow] = useState('');
     const [selected, setSelected] = React.useState('');
     const [listToDelete, setListToDelete] = useState([])
+    const [checkboxState, setCheckboxState] = useState([])
+    const [myMails, setMyMails] = useState([])
 
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
 
+    useEffect(() => {
+        navigation.addListener('focus', () => setListToDelete([]))
+    }, [])
 
     const redux = useSelector(state => state)
-    const myMails = redux?.myMail?.myMails
-    // const myMails = useSelector((state) => state.myMail.myMails)
-
-    // console.log('MyMails redux', redux)
+    useEffect(() => {
+        setMyMails(redux?.myMail?.myMails)
+    }, [redux])
 
     useEffect(() => {
         redux?.other?.otherUsers.map(user => !redux?.auth?.authData?.result?.profile?.following?.includes(user._id) &&
@@ -107,36 +112,28 @@ export default function MyMails({ navigation }) {
 
     useEffect(() => {
         userInfo && dispatch(getMyMails(userInfo?.userId))
-    }, [userInfo])
+    }, [userInfo, isFocused])
 
-    const addToDelList = (_id, isChecked) => {
-        console.log(_id, isChecked)
-        if (isChecked) {
-            !listToDelete.includes(_id) && setListToDelete([...listToDelete, _id])
-            // listToDelete.unshift(_id);
+    const addToDelList = (_id) => {
+
+        if (!listToDelete.includes(_id)) {
+            setListToDelete([...listToDelete, _id])
         } else {
             var newListToDelete = []
             newListToDelete = listToDelete.filter((item) => item !== _id);
             setListToDelete(newListToDelete)
         }
     };
+
     useEffect(() => {
-        listToDelete.length === myMails.length ? setAllSelected(true) : setAllSelected(false)
+        listToDelete.map(item => myRefs.current[item].setNativeProps({ style: { backgroundColor: 'cyan', opacity: 1 } }))
     }, [listToDelete])
 
-
     const deleteMails = () => {
-        // console.log(listToDelete)
-        // dispatch(deleteMyMail(userInfo?.result._id, listToDelete))
-        // myMail2.map((mail) =>
-        //     listToDelete.map((item) =>
-        //         item === mail.mailId ? (mail.isDeleted = true) : null
-        //     )
-        // )
+        dispatch(deleteMyMail(userInfo?.userId, listToDelete))
     };
 
     const selectAllMails = (isChecked) => {
-        // console.log(isChecked)
         setAllSelected(isChecked);
         if (isChecked) {
             var newListToDelete = []
@@ -146,8 +143,6 @@ export default function MyMails({ navigation }) {
             setListToDelete([])
         }
     };
-
-    console.log({ listToDelete })
 
     const onChange = (name, text) => {
         if (name === 'reciverName') {
@@ -175,12 +170,18 @@ export default function MyMails({ navigation }) {
     const showMail = (mail) => {
         setMailtoShow(mail);
         setModalVisible2(true);
+        dispatch(mailView(mail._id))
     };
 
     const sendMailFunc = () => {
-        dispatch(createMyMail(mailForm))
-        dispatch(getMyMails(userInfo?.userId))
-        setModalVisible(!modalVisible);
+        if (mailForm.reciverName === "") {
+            Alert.alert('Please add the recipient!!!')
+        } else {
+            dispatch(createMyMail(mailForm))
+            dispatch(getMyMails(userInfo?.userId))
+            setMailForm(initialMailForm)
+            setModalVisible(!modalVisible);
+        }
         // userInfo._id === mailForm.reciverId
         //     ? myMail2.unshift(mailForm)
         //     : console.log('null');
@@ -191,21 +192,24 @@ export default function MyMails({ navigation }) {
             <View
                 style={{
                     flexDirection: 'row',
-                    width: 350,
-                    justifyContent: 'space-between',
+                    width: 330,
+                    justifyContent: 'center',
+                    alignSelf: 'center',
+                    alignItems: 'center',
+                    marginBottom: 20
                 }}>
-                <TouchableOpacity onPress={() => setModalVisible(true)} style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 150, height: 50, borderWidth: 1, borderStyle: 'solid', borderColor: 'black', borderRadius: 10, backgroundColor: 'cyan', marginBottom: 20 }}>
+                <TouchableOpacity onPress={() => setModalVisible(true)} style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 150, height: 50, borderWidth: 1, borderStyle: 'solid', borderColor: 'black', borderRadius: 10, backgroundColor: 'cyan' }}>
                     <Feather name="edit-3" size={24} color="black" />
                     <Text style={{ marginLeft: 15 }}>Compose</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={deleteMails}>
+                {/* <TouchableOpacity onPress={deleteMails}>
                     <AntDesign name="delete" size={24} color="black" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
 
-            <View style={{ justifyContent: 'center', flexDirection: 'row', height: 50, width: windowWidth, borderColor: "black", borderBottomWidth: 1, borderStyle: 'solid' }}>
-                <BouncyCheckbox
+            <View style={{ justifyContent: 'center', flexDirection: 'row', height: 50, width: windowWidth, borderColor: "black", borderBottomWidth: 1, borderStyle: 'solid', alignItems: 'center' }}>
+                {/* <BouncyCheckbox
                     size={25}
                     fillColor="cyan"
                     unfillColor="#FFFFFF"
@@ -216,9 +220,11 @@ export default function MyMails({ navigation }) {
                     onPress={(isChecked) => {
                         selectAllMails(isChecked);
                     }}
-                    isChecked={allSelected}//
                     style={{ width: '10%', justifyContent: 'center' }}
-                />
+                /> */}
+                <TouchableOpacity onPress={deleteMails} style={{ width: '10%', justifyContent: 'center' }}>
+                    <AntDesign name="delete" size={24} color="black" />
+                </TouchableOpacity>
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', alignSelf: 'center', width: windowWidth * 0.85, height: '100%' }}>
                     <Text style={{ width: '20%' }}>From:</Text>
                     <Text style={{ marginLeft: 10, width: '50%' }}>Subject:</Text>
@@ -228,34 +234,25 @@ export default function MyMails({ navigation }) {
 
             <View style={{ justifyContent: 'center' }}>
                 <ScrollView style={{ height: 500, borderColor: "black", borderBottomWidth: 0.5, borderStyle: 'solid' }}>
-                    {myMails?.map(
-                        (mail) =>
-                            mail.isDeleted === false && (
-                                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', height: 50, borderStyle: 'solid', borderColor: "black", borderBottomWidth: 0.5 }} key={uuid.v4()}>
-                                    <BouncyCheckbox
-                                        size={25}
-                                        fillColor="cyan"
-                                        unfillColor="#FFFFFF"
-                                        iconStyle={{ borderColor: 'cyan' }}
-                                        innerIconStyle={{ borderWidth: 2 }}
-                                        // textStyle={{ fontFamily: 'JosefinSans-Regular' }}
-                                        onPress={(isChecked) => {
-                                            addToDelList(mail._id, isChecked);
-                                        }}
-                                        isChecked={allSelected}
-                                        disableText={true}
-                                        style={{ width: '10%', justifyContent: 'center' }}
-                                    />
-                                    <Pressable onPress={() => showMail(mail)} style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', alignSelf: 'center', width: windowWidth * 0.85, height: '100%' }}>
-                                        <Text style={{ marginLeft: 10, width: '20%' }}>{mail.senderName}</Text>
-                                        <Text style={{ marginLeft: 10, width: '50%' }}>{mail.subject}</Text>
-                                        <Text>{mail.date.split('T')[0]}</Text>
-                                    </Pressable>
-                                </View>
-                            )
+                    {myMails?.map(mail =>
+                        mail.isDeleted === false && (
+                            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', height: 50, borderStyle: 'solid', borderColor: "black", borderBottomWidth: 0.5 }} key={uuid.v4()}>
+                                <TouchableOpacity onPress={() => addToDelList(mail._id)}>
+                                    <View
+                                        style={{ width: 25, height: 25, borderRadius: 20, borderWidth: 2, borderColor: 'cyan', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Entypo name="check" size={25} ref={el => myRefs.current[mail._id] = el} color="white" style={{ width: 25, height: 25, textAlign: 'center', opacity: 0, borderRadius: 20, borderWidth: 1, borderColor: 'cyan' }} />
+                                    </View>
+                                </TouchableOpacity>
+                                <Pressable onPress={() => showMail(mail)} style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', alignSelf: 'center', width: windowWidth * 0.85, height: '100%' }}>
+                                    <Text style={[{ marginLeft: 10, width: '20%' }, mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>{mail.senderName}</Text>
+                                    <Text style={[{ marginLeft: 10, width: '50%' }, mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>{mail.subject}</Text>
+                                    <Text style={[mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>{mail.date.split('T')[0]}</Text>
+                                </Pressable>
+                            </View>
+                        )
                     )}
                 </ScrollView>
-            </View>
+            </View >
 
             <View style={styles.centeredView}>
                 <Modal
@@ -268,10 +265,24 @@ export default function MyMails({ navigation }) {
                     }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
+                            <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}
+                                style={{
+                                    width: "120%",
+                                    alignItems: 'flex-end',
+                                    marginTop: 0,
+                                    marginRight: 0,
+                                    marginBottom: 0,
+                                    // borderColor: 'black',
+                                    // borderWidth: 1
+                                }}>
+                                <EvilIcons name="close-o" size={30} color="black" />
+                            </TouchableOpacity>
                             <SelectList
                                 onSelect={() => onChange('reciverName', selected)}
                                 setSelected={setSelected}
-                                placeholder="To:"
+                                // placeholder="To:"
+                                placeholder={mailForm.reciverName ? mailForm.reciverName : "To:"}
+
                                 maxHeight="150"
                                 data={otherUsersList}
                                 search={true}
@@ -281,25 +292,14 @@ export default function MyMails({ navigation }) {
                                     width: 300,
                                     borderWidth: 0,
                                     borderBottomWidth: 2,
-                                    // marginBottom: 10,
                                     borderStyle: 'solid',
                                     borderColor: 'black',
-
-                                    // position: 'absolute',
-                                    // left: -150
                                 }}
                                 dropdownItemStyles={{
                                     width: 250,
                                     marginBottom: 10,
                                 }}
                                 dropdownStyles={{
-                                    // position: 'absolute',
-                                    // marginTop: 50,
-                                    // width: 300,
-                                    // backgroundColor: 'red',
-
-                                    // position: 'absolute',
-                                    // marginTop: 50,
                                     width: windowWidth * 0.75,
                                     alignSelf: 'center',
                                     backgroundColor: 'white',
@@ -353,7 +353,7 @@ export default function MyMails({ navigation }) {
                                 multiline
                                 numberOfLines={4}
                             />
-                            <View style={{ flexDirection: 'row' }}>
+                            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-around' }}>
                                 <Pressable
                                     style={[styles.button, styles.buttonClose]}
                                     onPress={() => sendMailFunc()}>
@@ -365,7 +365,7 @@ export default function MyMails({ navigation }) {
                                     <Text style={styles.textStyle}>Clear Mail</Text>
                                 </Pressable>
                             </View>
-                            <View style={{ flexDirection: 'row' }}>
+                            {/* <View style={{ flexDirection: 'row' }}>
 
                                 <Pressable
                                     style={[styles.button, styles.buttonClose]}
@@ -377,7 +377,7 @@ export default function MyMails({ navigation }) {
                                     onPress={() => console.log(mailForm)}>
                                     <Text style={styles.textStyle}>Mail Form</Text>
                                 </Pressable>
-                            </View>
+                            </View> */}
 
                         </View>
                     </View>
@@ -401,7 +401,10 @@ export default function MyMails({ navigation }) {
                         </View>
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
-                            onPress={() => setModalVisible2(!modalVisible2)}>
+                            onPress={() => {
+                                setModalVisible2(!modalVisible2)
+                                dispatch(getMyMails(userInfo?.userId))
+                            }}>
                             <Text style={styles.textStyle}>Close Mail</Text>
                         </Pressable>
                     </View>
@@ -410,7 +413,7 @@ export default function MyMails({ navigation }) {
 
             <PopupModal message={redux?.myMail?.message} popupModal={popupModal} />
 
-        </View>
+        </View >
     );
 }
 
@@ -429,10 +432,12 @@ const styles = StyleSheet.create({
         marginTop: 22,
     },
     modalView: {
-        margin: 20,
+        margin: 0,
         backgroundColor: 'white',
         borderRadius: 20,
-        padding: 35,
+        paddingHorizontal: 35,
+        paddingBottom: 35,
+        paddingTop: 10,
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: {

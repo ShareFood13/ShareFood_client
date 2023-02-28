@@ -7,9 +7,7 @@ const reducer = (state = { otherUsers: [], message: "" }, action) => {
         case GET_OTHER_USERS:
 
             return { ...state, otherUsers: action.payload.otherUsers }
-
         case CLEAR_MSG:
-            // console.log("other clear msg")
 
             return { ...state, message: "" }
         default:

@@ -36,7 +36,6 @@ export default function ForgetPass({ navigation }) {
 
     const dispatch = useDispatch();
     const userInfo = useSelector((state) => state)
-    console.log("ForgetPass.js userInfo", userInfo)
 
     useEffect(() => {
         setIsValid(Object.values(form).every(value => value !== ""))
@@ -88,10 +87,6 @@ export default function ForgetPass({ navigation }) {
             setReceivePassword(userInfo?.auth?.authData?.password)
             // dispatch({ type: CLEAR_ERROR })
         }
-        // if (userInfo?.auth?.authData?.message2) {
-        //     alert(userInfo?.auth?.authData?.message2)
-        //     // dispatch({ type: CLEAR_ERROR })
-        // }
     }, [userInfo])
 
     const sendPass = async (e) => {
@@ -104,13 +99,6 @@ export default function ForgetPass({ navigation }) {
         // alert(`Reset Password`)
     }
 
-    // if (userInfo?.auth?.authData?.token) {
-    //     dispatch({ type: CLEAR_ERROR })
-    //     navigation.navigate("LogIn")
-    // }
-
-    console.log(form2)
-
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <ScrollView>
@@ -119,8 +107,7 @@ export default function ForgetPass({ navigation }) {
                 >
 
                     <View style={styles.logoView}>
-                        <Image style={styles.logo} source={require('../../assets/images/favicon.png')} />
-                        {/* TODO add my Logo here */}
+                        <Image style={styles.logo} source={require('../../assets/logo.png')} />
                     </View>
 
                     <Text style={{ fontSize: 16, marginVertical: 15 }}>Forgot Password?</Text>

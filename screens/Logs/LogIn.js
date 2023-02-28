@@ -35,12 +35,6 @@ export default function LogIn({ navigation }) {
     const [isValid, setIsValid] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [userToken, setUserToken] = useState(null)
-    // const [userId, setUserId] = useState(null)
-
-    // console.log('login user token ', userToken)
-    // console.log('login user Id ', userId)
-    // console.log("Login.js userInfo", userInfo)
-    console.log("Login.js userInfo", userInfo?.auth?.authData?.result)
 
     setUserContext(userInfo?.auth?.authData?.result)
 

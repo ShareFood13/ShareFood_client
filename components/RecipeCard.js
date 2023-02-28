@@ -53,7 +53,6 @@ const logos = [
 ]
 
 export default function RecipeCard({ recipe, navigation }) {
-    // console.log(recipe?.recipePicture)
 
     const openRecipe = (recipe) => {
         navigation.push('RecipeDetail', { recipeData: recipe })
@@ -90,20 +89,8 @@ export default function RecipeCard({ recipe, navigation }) {
                                         )
                                     }}
                                     keyExtractor={item => item}
-                                // extraData={selectedId}
                                 />
                             </ScrollView>
-                            {/* {recipe?.specialDiet?.map(item => {
-                                return logos.map(logo =>
-                                    (logo.name === item)
-                                        ? <Image
-                                            // key={uuid.v4()}
-                                            resizeMode='contain'
-                                            source={logo.image}
-                                            style={{ height: 35, width: 35, margin: 5 }} />
-                                        : null
-                                )
-                            })} */}
                         </View>
 
                         <View style={{ flexDirection: 'row', width: 170, justifyContent: 'space-between', alignSelf: 'center' }}>
@@ -116,7 +103,6 @@ export default function RecipeCard({ recipe, navigation }) {
 
                     <View style={styles.image}>
                         {recipe?.recipePicture?.length > 0 && <ScrollView
-                            // pagingEnabled
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             style={{ width: 140, height: 90 }}>
@@ -126,11 +112,7 @@ export default function RecipeCard({ recipe, navigation }) {
                                 </View>)}
                         </ScrollView>}
                     </View>
-
                 </View>
-
-                {/* {message !== undefined && <PopupModal message={message} popupModal={popupModal} />} */}
-
             </View>
         </View>
     )
