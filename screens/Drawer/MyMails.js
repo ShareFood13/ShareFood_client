@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useIsFocused } from '@react-navigation/native';
 
-
 import {
     View,
     Text,
@@ -42,6 +41,7 @@ import { SelectList } from 'react-native-dropdown-select-list';
 import PopupModal from '../../components/PopupModal';
 
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
+import Banner from '../../components/Banner';
 
 const initialMailForm = {
     senderId: '',
@@ -58,7 +58,6 @@ const otherUsersList = []
 export default function MyMails({ navigation }) {
     const myRefs = React.useRef([]);
 
-
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
 
@@ -69,10 +68,12 @@ export default function MyMails({ navigation }) {
     const [modalVisible2, setModalVisible2] = useState(false);
     const [mailForm, setMailForm] = useState(initialMailForm);
     const [mailToShow, setMailtoShow] = useState('');
-    const [selected, setSelected] = React.useState('');
+    const [selected, setSelected] = useState('');
     const [listToDelete, setListToDelete] = useState([])
     const [checkboxState, setCheckboxState] = useState([])
     const [myMails, setMyMails] = useState([])
+    const [refreshing, setRefreshing] = useState(false)
+
 
 
     const windowWidth = Dimensions.get('window').width;
@@ -83,16 +84,18 @@ export default function MyMails({ navigation }) {
     }, [])
 
     const redux = useSelector(state => state)
-    useEffect(() => {
-        setMyMails(redux?.myMail?.myMails)
-    }, [redux])
+
+    // useEffect(() => {
+    //     setMyMails(redux?.myMail?.myMails)
+    // }, [redux])
 
     useEffect(() => {
-        redux?.other?.otherUsers.map(user => !redux?.auth?.authData?.result?.profile?.following?.includes(user._id) &&
+        redux?.other?.otherUsers.map(user => redux?.auth?.authData?.result?.profile?.following?.includes(user._id) &&
             otherUsersList.push({ key: user._id, _id: user._id, value: user.userName }))
     }, [])
 
     useEffect(() => {
+        setMyMails(redux?.myMail?.myMails)
         if (redux?.myMail?.message) {
             setPopupModal(true)
             setTimeout(() => {
@@ -100,7 +103,7 @@ export default function MyMails({ navigation }) {
                 dispatch({ type: CLEAR_MSG })
             }, 2500)
         }
-    }, [redux])
+    }, [redux, isFocused])
 
     useEffect(() => {
         getUser()
@@ -110,9 +113,19 @@ export default function MyMails({ navigation }) {
         setUserInfo(JSON.parse(await SecureStore.getItemAsync('storageData')))
     }
 
-    useEffect(() => {
-        userInfo && dispatch(getMyMails(userInfo?.userId))
-    }, [userInfo, isFocused])
+    const wait = (timeout) => {
+        return new Promise(resolve => setTimeout(resolve, timeout));
+    }
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        dispatch(getMyMails(userInfo.userId))
+        wait(3000).then(() => setRefreshing(false))
+    }, []);
+
+    // useEffect(() => {
+    //     (userInfo && userInfo?.userId !== undefined) && dispatch(getMyMails(userInfo?.userId))
+    // }, [userInfo, isFocused])
 
     const addToDelList = (_id) => {
 
@@ -188,7 +201,14 @@ export default function MyMails({ navigation }) {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={() => onRefresh()}
+                />
+            }>
+            <Banner title="My Mails" />
             <View
                 style={{
                     flexDirection: 'row',
@@ -413,17 +433,15 @@ export default function MyMails({ navigation }) {
 
             <PopupModal message={redux?.myMail?.message} popupModal={popupModal} />
 
-        </View >
+        </ScrollView >
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        paddingTop: Constants.statusBarHeight,
         backgroundColor: '#ecf0f1',
-        padding: 8,
+        paddingHorizontal: 8,
     },
     centeredView: {
         flex: 1,

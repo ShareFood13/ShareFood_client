@@ -160,7 +160,8 @@ export default function MyMails({ navigation }) {
 
     useEffect(() => {
         getUser()
-        dispatch(getMyMails(userInfo?.result._id))
+        userInfo?.result._id !== undefined &&
+            dispatch(getMyMails(userInfo?.result._id))
 
     }, [])
 

@@ -4,7 +4,8 @@ const reducer = (state = { myMail: [] }, action) => {
     switch (action.type) {
         case CREATE_MY_MAIL:
 
-            return { ...state, myMail: [...state.myMail, action.payload.myMail], message: action.payload.message }
+            // return { ...state, myMail: [...state.myMail, action.payload.myMail], message: action.payload.message }
+            return { ...state, myMails: action.payload.myMails, message: action.payload.message }
         case GET_MY_MAILS:
 
             return { ...state, myMails: action.payload.myMails }

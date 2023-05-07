@@ -1,16 +1,17 @@
 import { CREATE, FETCH_MY_RECIPES, FETCH_RECIPE, UPDATE, DELETE, ERROR_MSG, CLEAR_MSG, ADD_RECIPE_TO, OTHER_RECIPES } from '../constants/constantsTypes'
 
-const reducer = (state = { recipes: [], message: "" }, action) => {
+const reducer = (state = { recipes: [], recipe: {}, message: "" }, action) => {
     switch (action.type) {
         case CREATE:
 
-            return { ...state, recipes: [...state.recipes, action.payload.recipes], message: action.payload.message }
+            // return { ...state, recipes: [...state.recipes, action.payload.recipes], message: action.payload.message }
+            return { ...state, recipes: action.payload.recipes, message: action.payload.message }
         case FETCH_MY_RECIPES:
 
             return { ...state, recipes: action.payload.recipes }
         case FETCH_RECIPE:
-
-            return { ...state, recipes: action.payload.recipes }
+            // console.log("FETCH_RECIPE", action.payload.recipe)
+            return { ...state, recipe: action.payload.recipe }
         case UPDATE:
 
             return { ...state, recipes: [...state.recipes, action.payload.recipes], message: action.payload.message }

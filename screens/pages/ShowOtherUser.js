@@ -52,10 +52,6 @@ const ShowOtherUser = ({ navigation, route }) => {
         setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
     }
 
-    // console.log("ShowOtherUser userInfo", userInfo._id)
-    // console.log("ShowOtherUser userContext", userContext.following)
-    // console.log("ShowOtherUser userInfo", userInfo.profile)
-
     const startFollowingFn = (follow_id) => {
         dispatch(startFollowing({ userId, follow_id }))
         navigation.navigate("Home")
@@ -67,7 +63,7 @@ const ShowOtherUser = ({ navigation, route }) => {
                 <TouchableOpacity onPress={() => startFollowingFn(userInfo._id)} style={{ height: 30, borderWidth: 1, borderColor: 'black', paddingHorizontal: 7, backgroundColor: 'cyan' }}>
                     <Text style={{ height: '100%', fontSize: 18, fontWeight: '500', textAlign: 'center', textAlignVertical: 'center' }}>Start Following</Text>
                 </TouchableOpacity>}
-            <Text style={styles.banner} >{userInfo.userName}</Text>
+            <Banner title={userInfo.userName} />
 
             <View style={{ flexDirection: "row", height: 100, width: "100%", justifyContent: 'space-around', alignItems: 'center', marginTop: 0, backgroundColor: 'white', alignContent: 'center' }}>
                 <Image
@@ -198,20 +194,5 @@ const ShowOtherUser = ({ navigation, route }) => {
 export default ShowOtherUser
 
 const styles = StyleSheet.create({
-    banner: {
-        width: 350,
-        height: 40,
-        justifyContent: 'center',
-        alignSelf: 'center',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        borderStyle: 'solid',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 20,
-        fontSize: 18,
-        marginVertical: 10,
-        backgroundColor: "orange",
-        // color: 'white',
-    },
+
 })

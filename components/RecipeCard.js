@@ -51,20 +51,29 @@ const logos = [
     // { name: "Vegan2", image: require('../assets/images/logo/vegan2.png') },
     // { name: "Wheat Free2", image: require('../assets/images/logo/wheatFree2.png') },
 ]
+import { useDispatch, useSelector } from 'react-redux';
+import { getRecipe } from '../Redux/actions/recipes';
 
 export default function RecipeCard({ recipe, navigation }) {
+    const dispatch = useDispatch()
 
     const openRecipe = (recipe) => {
-        navigation.push('RecipeDetail', { recipeData: recipe })
-    }
+        // navigation.push('RecipeDetail', { recipeData: recipe })
+        // console.log("RecipeCard", recipe._id)
+        // dispatch(getRecipe(recipe._id))
 
+        // navigation.push('RecipeDetail', { recipeId: recipe._id })
+        navigation.push('RecipeDetail', { recipeFromHome: recipe, recipeDetailFlag: false })
+
+    }
+    // console.log(recipe?.recipePicture?.small)
     return (
         <View style={styles.container}>
             <View style={styles.recipeCard}>
                 <View style={styles.subCard}>
 
                     <Pressable style={styles.left} onPress={() => openRecipe(recipe)}>
-                        <Text style={{ width: "100%", textAlign: 'center' }}>{recipe?.recipeName}</Text>
+                        <Text style={{ width: "100%", textAlign: 'center', fontWeight: 'bold' }}>{recipe?.recipeName}</Text>
 
                         <View style={{
                             flexDirection: 'row',
@@ -72,7 +81,8 @@ export default function RecipeCard({ recipe, navigation }) {
                             paddingLeft: 0,
                             overflow: 'hidden',
                         }}>
-                            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+                            {/* <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}> */}
+                            <View style={{ height: 45 }} >
                                 <FlatList
                                     data={recipe?.specialDiet}
                                     horizontal={true}
@@ -90,25 +100,27 @@ export default function RecipeCard({ recipe, navigation }) {
                                     }}
                                     keyExtractor={item => item}
                                 />
-                            </ScrollView>
+                            </View>
+                            {/* </ScrollView> */}
                         </View>
 
                         <View style={{ flexDirection: 'row', width: 170, justifyContent: 'space-between', alignSelf: 'center' }}>
                             <Text><AntDesign name="like2" size={24} color="black" /> {recipe?.likes?.length}</Text>
                             <Text><AntDesign name="hearto" size={24} color="black" /> {recipe?.downloads?.length} </Text>
-                            <Text><Entypo name="stopwatch" size={24} color="black" /> {recipe?.cookTime + recipe?.prepTime} </Text>
+                            <Text><Entypo name="stopwatch" size={24} color="black" /> {Number(recipe?.cookTime) + Number(recipe?.prepTime)} </Text>
                         </View>
 
                     </Pressable>
 
                     <View style={styles.image}>
-                        {recipe?.recipePicture?.length > 0 && <ScrollView
+                        {recipe?.recipePicture?.small?.length > 0 && <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            style={{ width: 140, height: 90 }}>
-                            {recipe?.recipePicture?.map((image, index) =>
+                            style={{ width: 140, height: 70 }}>
+                            {recipe?.recipePicture?.small?.map((image, index) =>
                                 <View key={index} style={{ position: 'relative' }}>
-                                    <Image source={{ uri: image.base64 }} style={{ width: 140, height: 90, resizeMode: "cover", borderRadius: 10 }} />
+                                    {/* <Image source={{ uri: image.base64 }} style={{ width: 140, height: 90, resizeMode: "cover", borderRadius: 10 }} /> */}
+                                    <Image source={{ uri: image }} style={{ width: 140, height: "100%", resizeMode: "cover", borderRadius: 10 }} />
                                 </View>)}
                         </ScrollView>}
                     </View>
@@ -129,11 +141,12 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderStyle: 'solid',
+        height: "100%"
     },
     left: {
         justifyContent: 'space-around',
         width: "60%",
-        height: "100%"
+        height: "95%"
     },
     recipeCard: {
         width: "90%",
@@ -157,6 +170,7 @@ const styles = StyleSheet.create({
     subCard: {
         flexDirection: "row",
         width: "98%",
+        height: "100%",
         justifyContent: 'space-between'
     },
 })

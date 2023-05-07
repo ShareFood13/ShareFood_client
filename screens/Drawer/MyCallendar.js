@@ -46,6 +46,7 @@ import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
 import { useIsFocused } from '@react-navigation/native';
 
 import { getMyRecipes } from '../../Redux/actions/recipes';
+import Banner from '../../components/Banner';
 
 
 
@@ -92,6 +93,8 @@ const Mycallendar = ({ navigation }) => {
     // const [eventForm, setEventForm] = useState([]);
     const [fromToForm, setFromToForm] = useState({ fromDate: "", toDate: "" })
     const [popupModal, setPopupModal] = useState(false)
+    const [fromDate, setFromDate] = useState()
+    const [toDate, setToDate] = useState()
 
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
@@ -115,7 +118,8 @@ const Mycallendar = ({ navigation }) => {
                 setPopupModal(false)
                 dispatch({ type: CLEAR_MSG })
                 // redux?.event.message.includes("Created") ?
-                navigation.navigate('MyBookStackScreen')
+                // navigation.navigate('MyBookStackScreen')
+                navigation.navigate('Home1')
                 // : onRefresh()
             }, 2500)
         }
@@ -129,11 +133,13 @@ const Mycallendar = ({ navigation }) => {
         setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
     }
 
-    useEffect(() => {
-        onRefresh()
-        dispatch(fetchEvents(userId))
-        dispatch(getMyRecipes(userId))
-    }, [userId, isFocused])
+    // useEffect(() => {
+    //     if (userId !== undefined) {
+    //         onRefresh()
+    //         dispatch(fetchEvents(userId))
+    //         dispatch(getMyRecipes(userId))
+    //     }
+    // }, [userId, isFocused])
 
     // REFRESH FUNCTIONS //////////////////////////////////////////
     const wait = (timeout) => {
@@ -144,21 +150,25 @@ const Mycallendar = ({ navigation }) => {
         loadItems()
         setRefreshing(true);
         // dispatch(getMyRecipes(userId))
-        wait(5000).then(() => setRefreshing(false)).then(dispatch(getMyRecipes(userId)));
+        wait(5000).then(() => setRefreshing(false))//.then(userId !== undefined && dispatch(getMyRecipes(userId)));
     }, []);
 
     ////////////////////////////
 
     const infoPickerFunction = (pickerType, selectedDate, formTypeInput) => {
-
+        console.log(pickerType, selectedDate, formTypeInput)
         const info =
             pickerType === 'date'
                 ? selectedDate.toISOString().split('T')[0]
                 : selectedDate.toLocaleTimeString('he-IL');
 
-        if (formTypeInput === "fromDate" || formTypeInput === "toDate") {
-            setFromToForm({ ...fromToForm, [formTypeInput]: info })
-
+        // if (formTypeInput === "fromDate" || formTypeInput === "toDate") {
+        //     console.log({ fromToForm })
+        //     setFromToForm({ ...fromToForm, [formTypeInput]: info })
+        if (formTypeInput === "fromDate") {
+            setFromDate(info)
+        } else if (formTypeInput === "toDate") {
+            setToDate(info)
         } else if (formTypeInput.includes("alarm")) {
             setEventForm({ ...eventForm, alarm: { ...eventForm.alarm, [formTypeInput]: info } });
 
@@ -166,7 +176,8 @@ const Mycallendar = ({ navigation }) => {
             setEventForm({ ...eventForm, [formTypeInput]: info, creatorId: userId });
         }
     };
-
+    // console.log("fromDate", fromDate)
+    // console.log("toDate", toDate)
     ////////////////////
     useEffect(() => {
         eventList && loadItems()
@@ -282,27 +293,53 @@ const Mycallendar = ({ navigation }) => {
 
     const createShopList = () => {
         var filter = [];
+        // console.log(fromToForm)
+        console.log(fromDate, " to ", toDate)
+        console.log("eventList", eventList)
+        // eventList.map((event) =>
+        //     event.eventDate >= fromToForm.fromDate && event.eventDate <= fromToForm.toDate
+        //         ? filter.push(event.recipesId[0])
+        //         : null
+        // );
+
+        // var newMyRecipes = [];
+        // filter.map((myEvent) => {
+        //     myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
+        // });
+
+        // navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: filter, showType: "events", eventName: `${fromToForm.fromDate} to ${fromToForm.toDate}` } })
         eventList.map((event) =>
-            event.eventDate >= fromToForm.fromDate && event.eventDate <= fromToForm.toDate
-                ? filter.push(event.recipesId[0])
+            event.eventDate >= fromDate && event.eventDate <= toDate
+                ? event.recipesId.map(item => filter.push(item)) //filter.push(event.recipesId[0])
                 : null
         );
-
+        console.log(filter)
         var newMyRecipes = [];
-        filter.map((myEvent) => {
-            myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
-        });
+        // filter.map((myEvent) => {
+        //     myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
+        // });
+        filter.map(recipeId =>
+            // userContext?.result?.recipesId.map
+            redux?.recipe?.recipes?.map(item => {
+                if (item._id === recipeId && item.isDeleted === false) {
+                    newMyRecipes.push(item)
+                    // item.ingredients.map(ing => newMyRecipes.push(ing)) //newMyRecipes.push(item)
+                }
+            })
+        )
+        console.log("newMyRecipes", newMyRecipes)
+        navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: newMyRecipes, showType: "events", eventName: `from ${fromDate} to ${toDate}` } })
 
-        navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: filter, showType: "events" } })
     }
 
     return (
 
         < View style={styles.container} >
             < View style={{ alignItems: 'center' }} >
-                <View style={{ width: '100%', marginBottom: 10 }}>
+                <View style={{ width: '100%' }}>
                     <Button title='Add new Event' onPress={() => setModalVisible(true)} />
                 </View>
+                <Banner title="My Calendar" />
 
                 <SpSheet text={"Create Shop List"} heightValue={370} style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: '100%' }}>
                     <View style={{ alignItems: 'center' }}>

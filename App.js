@@ -26,6 +26,7 @@ import thunk from 'redux-thunk';
 import reducers from "./Redux/reducers"
 
 import * as SecureStore from 'expo-secure-store';
+import MyShopLists from './screens/Drawer/MyShopLists';
 
 const store = legacy_createStore(reducers, compose(applyMiddleware(thunk)))
 
@@ -94,6 +95,11 @@ const MainStackScreen = () => (
       options={{ title: "Recipe Detail" }}
     />
     <MainStack.Screen
+      name="MyShopLists"
+      component={MyShopLists}
+      options={{ title: "My Shop Lists" }}
+    />
+    <MainStack.Screen
       name="ShowEventDetail"
       component={ShowEventDetail}
       options={{ title: "Show Event Detail" }}
@@ -128,6 +134,7 @@ const RootStackScreen = ({ userToken }) => (
         animationEnabled: false
       }}
     />
+
   </RootStack.Navigator>
 );
 
@@ -139,7 +146,7 @@ export default function App() {
   useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+    }, 4000);
   }, []);
 
   useEffect(() => {
@@ -152,7 +159,13 @@ export default function App() {
   }
 
   if (isLoading) {
-    return <Wellcome />;
+    return (
+      <ReduxProvider store={store}>
+        <UserProvider>
+          <Wellcome />
+        </UserProvider>
+      </ReduxProvider>
+    );
   }
 
   return (

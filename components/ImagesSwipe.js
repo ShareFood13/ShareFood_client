@@ -1,0 +1,129 @@
+import React from 'react'
+import {
+    View,
+    Text,
+    Button,
+    StyleSheet,
+    TextInput,
+    TouchableWithoutFeedback,
+    TouchableOpacity,
+    KeyboardAvoidingView,
+    Keyboard,
+    Platform,
+    Pressable,
+    Modal,
+    ScrollView,
+    Image,
+    Dimensions,
+    Alert,
+    FlatList
+} from 'react-native'
+
+import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
+
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
+const ImagesSwipe = ({ showImage, setShowImage, recipeFormRecipePicture, delIngredient }) => {
+    // console.log("ImagesSwipe showImage", showImage)
+
+    return (
+        <View style={styles.container}>
+            {recipeFormRecipePicture.length !== 0 &&
+                <ScrollView
+                    pagingEnabled
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.scrollImage}>
+
+                    {recipeFormRecipePicture.map((image, index) =>
+                        <View key={image.path ? image.path : image}>
+                            <Image source={{ uri: image.path ? image.path : image }}
+                                style={[styles.image, {
+                                    left: -windowWidth * 0.9 * (showImage),
+                                }]} />
+                            {delIngredient && <TouchableOpacity style={styles.delImg} onPress={() => delIngredient(showImage, "picture")}>
+                                <AntDesign name="delete" size={24} color="black" />
+                            </TouchableOpacity>}
+
+                            {recipeFormRecipePicture.length > 1 &&
+                                <View style={styles.imageScreen}>
+                                    <View style={{ width: "50%", height: "100%" }}>
+                                        {showImage > 0 &&
+                                            <TouchableOpacity onPress={() => setShowImage(showImage => showImage - 1)}
+                                                style={{
+                                                    width: "100%",
+                                                    height: windowWidth * 0.54,
+                                                }}>
+                                            </TouchableOpacity>}
+                                    </View>
+                                    <View style={{ width: "50%", height: "100%" }}>
+                                        {showImage < (recipeFormRecipePicture.length - 1) &&
+                                            <TouchableOpacity onPress={() => setShowImage(showImage => showImage + 1)}
+                                                style={{
+                                                    width: "100%",
+                                                    height: windowWidth * 0.54,
+                                                }}>
+                                            </TouchableOpacity>}
+                                    </View>
+                                </View>
+                            }
+                        </View>)}
+                </ScrollView>}
+        </View>
+
+    )
+}
+
+export default ImagesSwipe
+
+const styles = StyleSheet.create({
+    container: {
+        position: "relative",
+        flex: 0.05,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: windowWidth * 0.9,
+        height: windowWidth * 0.54,
+        marginVertical: 10,
+        borderStyle: 'solid',
+        borderWidth: 1,
+        borderColor: 'black',
+        zIndex: 5,
+        elevation: 5
+    },
+    delImg: {
+        position: 'absolute',
+        bottom: 15,
+        right: 10,
+        zIndex: 10,
+        elevation: 10,
+    },
+    image: {
+        width: windowWidth * 0.9,
+        height: windowWidth * 0.54,
+        resizeMode: "cover",
+        borderStyle: 'solid',
+        borderWidth: 1,
+        borderColor: 'black',
+        marginVertical: 10,
+    },
+    imageScreen: {
+        position: "absolute",
+        flexDirection: "row",
+        justifyContent: 'space-between',
+        alignSelf: 'center',
+        width: "100%",
+        top: 10,
+        left: 0,
+        zIndex: 5,
+        elevation: 5,
+    },
+    scrollImage: {
+        position: 'absolute',
+        width: windowWidth * 0.9,
+        height: windowWidth * 0.59,
+        marginBottom: 10,
+    }
+})

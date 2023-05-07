@@ -121,6 +121,7 @@ export default function HomeScreen() {
             <Tab.Screen
                 name="MyBookStackScreen"
                 component={MyBookStackScreen}
+                // initialParams={{ fromNewRecipe: false }}
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -154,6 +155,7 @@ const MyBookStackScreen = () => (
         <MyBookStack.Screen
             name="MyBook"
             component={MyBook}
+            initialParams={{ fromNewRecipe: false }}
             options={{
                 tabBarIcon: ({ focused }) => (
                     <View style={{ justifyContent: 'center', alignItems: 'center' }}>

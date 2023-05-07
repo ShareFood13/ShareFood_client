@@ -20,6 +20,7 @@ import { DataTable } from 'react-native-paper';
 
 import uuid from 'react-native-uuid';
 import { ScrollView } from 'react-native-gesture-handler';
+import Banner from '../../components/Banner';
 
 const mainColor = '#052F5F'
 
@@ -289,6 +290,7 @@ export default function Conversions() {
 
     return (
         <View style={styles.container}>
+            <Banner title="Units Convertor" />
             <ScrollView showsVerticalScrollIndicator={false}
             >
                 <View style={styles.switch}>

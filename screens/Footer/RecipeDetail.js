@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from 'react'
+import React, { useEffect, useState, useContext, useCallback, } from 'react'
 
 import {
     View,
@@ -41,7 +41,9 @@ import { deleteRecipe, addRecipeTo } from '../../Redux/actions/recipes'
 import FloatingButton from '../../components/FloatingButton'
 import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useFocusEffect } from '@react-navigation/native';
+import ImagesSwipe from '../../components/ImagesSwipe';
+import Banner from '../../components/Banner';
 
 const logos = [
     { name: "Vegan", image: require('../../assets/images/logo/vegan.png') },
@@ -71,14 +73,14 @@ const logos = [
 ]
 
 export default function RecipeDetail({ navigation, route }) {
-    const { recipeData } = route.params
-
+    const { recipeFromHome, recipeDetailFlag } = route.params
+    console.log("RecipeDetail recipeFromHome", recipeFromHome, recipeDetailFlag)
     const [show, setShow] = useState('ingredients')
     const [modalVisible, setModalVisible] = useState(false)
     const [addTo, setAddTo] = useState(null)
     const [popupModal, setPopupModal] = useState(false)
     const [userId, setUserId] = useState()
-    const [refreshing, setRefreshing] = useState(false)
+    const [showImage, setShowImage] = useState(false)
 
     var difficultyColor = ""
 
@@ -86,23 +88,29 @@ export default function RecipeDetail({ navigation, route }) {
     const isFocused = useIsFocused();
 
     const redux = useSelector((state) => state)
+    // console.log("RecipeDetail redux", redux?.recipe?.recipe)
+    const recipeData = recipeFromHome !== undefined ? recipeFromHome : redux?.recipe?.recipe
+
+    // console.log("RecipeDetail recipeData", recipeData)
+
 
     const eventList = redux?.event?.events
     const mealList = redux?.meal?.meals
 
-    useEffect(() => {
-        onRefresh()
-        dispatch(fetchEvents(userId))
-    }, [userId, isFocused])
+    // useEffect(() => {
+    //     onRefresh()
+    //     userId !== undefined && dispatch(fetchEvents(userId))
+    // }, [userId, isFocused])
 
-    const wait = (timeout) => {
-        return new Promise(resolve => setTimeout(resolve, timeout));
-    }
+    // const wait = (timeout) => {
+    //     return new Promise(resolve => setTimeout(resolve, timeout));
+    // }
 
-    const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        wait(3000).then(() => setRefreshing(false)).then(dispatch(getMeals(userId)))
-    }, []);
+    // const onRefresh = useCallback(() => {
+    //     setRefreshing(true);
+    //     userId !== undefined && dispatch(getMeals(userId))
+    //     wait(3000).then(() => setRefreshing(false))//.then(dispatch(getMeals(userId)))
+    // }, []);
 
     const todayDate = new Date().toJSON().slice(0, 10)
 
@@ -120,6 +128,16 @@ export default function RecipeDetail({ navigation, route }) {
     useEffect(() => {
         getUser()
     }, [])
+
+    // useFocusEffect(useCallback(() => {
+    //     alert('Screen was focused');
+    //     // Do something when the screen is focused
+    //     return () => {
+    //         alert('Screen was unfocused');
+    //         // Do something when the screen is unfocused
+    //         // Useful for cleanup functions
+    //     }
+    // }, []))
 
     const getUser = async () => {
         setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
@@ -162,10 +180,10 @@ export default function RecipeDetail({ navigation, route }) {
     }
 
     const createShopList = () => {
-        navigation.navigate('ShowShopList', { recipe: recipeData, showType: "recipe" })
+        navigation.navigate('ShowShopList', { recipe: recipeData, showType: "recipe", recipeName: recipeData.recipeName })
     }
 
-    switch (recipeData.difficulty) {
+    switch (recipeData?.difficulty) {
         case "Super Easy":
             difficultyColor = "lime"
             break
@@ -184,57 +202,21 @@ export default function RecipeDetail({ navigation, route }) {
     }
 
     return (
-        <ScrollView style={styles.scrollView}
+        // <ScrollView style={styles.scrollView}
+        <ScrollView style={{ marginTop: recipeDetailFlag ? 40 : 0 }}
             showsVerticalScrollIndicator={false}
         >
             <View style={styles.container}>
 
                 <View style={{ height: 45 }}>
-                    <Text style={{ fontSize: 30 }}>{recipeData.recipeName}</Text>
+                    <Text style={{ fontSize: 30 }}>{recipeData?.recipeName}</Text>
                 </View>
 
                 <View style={{ height: 30, width: "90%", alignItems: "flex-end" }}>
-                    <Text>by_{recipeData.creator}</Text>
+                    <Text>by_{recipeData?.creator}</Text>
                 </View>
 
-                <View style={{
-                    // flex: 0.05,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: windowWidth * 0.9 + 2,
-                    height: windowWidth * 0.54,
-                    marginBottom: 10,
-                    borderStyle: 'solid',
-                    borderWidth: 0.2,
-                    borderColor: 'black',
-                    marginVertical: 10,
-                    position: "relative", zIndex: 5
-                }}>
-                    {recipeData.recipePicture.length !== 0 &&
-                        <ScrollView
-                            // pagingEnabled
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            style={{
-                                width: windowWidth * 0.9,
-                                height: windowWidth * 0.59,
-                                marginBottom: 10,
-                            }}>
-                            {recipeData.recipePicture.map((image, index) =>
-                                <View key={uuid.v4()}>
-                                    <Image source={{ uri: image.base64 }}
-                                        style={{
-                                            width: windowWidth * 0.9,
-                                            height: windowWidth * 0.54,
-                                            resizeMode: "cover",
-                                            marginVertical: 10,
-                                        }} />
-                                </View>)}
-                        </ScrollView>
-                    }
-
-
-                </View>
+                <ImagesSwipe recipeFormRecipePicture={recipeData.recipePicture.normal} setShowImage={setShowImage} showImage={showImage} />
 
                 <FloatingButton
                     style={{ bottom: 10, zIndex: 10, elevation: 10 }}
@@ -251,8 +233,8 @@ export default function RecipeDetail({ navigation, route }) {
                     alignSelf: 'center',
                     marginBottom: 10
                 }}>
-                    <Text><AntDesign name="like2" size={24} color="black" /> {recipeData.likes.length}</Text>
-                    <Text><AntDesign name="hearto" size={24} color="black" /> {recipeData.downloads.length} </Text>
+                    <Text><AntDesign name="like2" size={24} color="black" /> {recipeData?.likes?.length}</Text>
+                    <Text><AntDesign name="hearto" size={24} color="black" /> {recipeData?.downloads?.length} </Text>
                 </View>
 
                 <View style={styles.cookInfo}>
@@ -260,7 +242,7 @@ export default function RecipeDetail({ navigation, route }) {
                         <Text>Prep.Time</Text>
                         <View style={styles.logoInput}>
                             <Entypo name="stopwatch" size={24} color="black" />
-                            <Text>{recipeData.prepTime}</Text>
+                            <Text>{recipeData?.prepTime}</Text>
                             <Text>min</Text>
                         </View>
                     </View>
@@ -268,7 +250,7 @@ export default function RecipeDetail({ navigation, route }) {
                         <Text>Cook Time</Text>
                         <View style={styles.logoInput}>
                             <Entypo name="stopwatch" size={24} color="black" />
-                            <Text>{recipeData.cookTime}</Text>
+                            <Text>{recipeData?.cookTime}</Text>
                             <Text>min</Text>
                         </View>
                     </View>
@@ -286,7 +268,7 @@ export default function RecipeDetail({ navigation, route }) {
                                 alignContent: 'center',
                                 justifyContent: 'center'
                             }}>
-                                <Text style={{ textAlign: 'center', fontWeight: '500', fontSize: 18 }}>{recipeData.difficulty.split(" ")[0].slice(0, 1)}{recipeData.difficulty.split(" ")[1]?.slice(0, 1)}</Text>
+                                <Text style={{ textAlign: 'center', fontWeight: '500', fontSize: 18 }}>{recipeData?.difficulty?.split(" ")[0].slice(0, 1)}{recipeData?.difficulty?.split(" ")[1]?.slice(0, 1)}</Text>
                             </View>
                         </View>
                     </View>
@@ -295,18 +277,19 @@ export default function RecipeDetail({ navigation, route }) {
                         <Text style={styles.cookText}>Serves</Text>
                         <View style={styles.logoInput}>
                             <Ionicons name="ios-people-circle-outline" size={24} color="black" />
-                            <Text>{recipeData.prepTime}</Text>
+                            <Text>{recipeData?.prepTime}</Text>
                             <Text>ppl.</Text>
                         </View>
                     </View>
                 </View>
 
                 <View style={styles.specialDietLogo}>
-                    {recipeData.specialDiet.map(item => {
+                    {recipeData?.specialDiet?.map(item => {
                         return logos.map(logo =>
                             (logo.name === item) ?
                                 <TouchableOpacity key={uuid.v4()}
-                                    onPress={() => remove(`${logo.name}`, "specialDiet")}>
+                                // onPress={() => remove(`${logo.name}`, "specialDiet")}
+                                >
                                     <Image
                                         resizeMode='contain'
                                         source={logo.image}
@@ -318,8 +301,14 @@ export default function RecipeDetail({ navigation, route }) {
                 </View>
 
                 <Text style={styles.outputTags} >
+                    <Text >{recipeData?.foodCourse}</Text>
+                </Text>
+
+                <Text style={styles.outputTags} >
                     <FontAwesome5 name="hashtag" size={24} color="black" />
-                    {recipeData.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
+                    {recipeData?.tags?.map(item => <Text key={uuid.v4()}
+                    // onPress={(text) => remove(text, "tags")}
+                    >{item}, </Text>)}
                 </Text>
 
                 <View style={{
@@ -372,7 +361,7 @@ export default function RecipeDetail({ navigation, route }) {
 
                 {show === "ingredients"
                     ? <View style={{ width: windowWidth, alignItems: 'center', minHeight: 200 }}>
-                        {recipeData.ingredients.map(item =>
+                        {recipeData?.ingredients?.map(item =>
                             <View style={styles.outputIngredients} key={uuid.v4()}>
                                 <Text style={styles.quantity}>{item.quantity}</Text>
                                 <Text style={styles.units}>{item.units}</Text>
@@ -382,7 +371,7 @@ export default function RecipeDetail({ navigation, route }) {
                         )}
                     </View>
                     : <View style={{ width: windowWidth, alignItems: 'center', minHeight: 200 }}>
-                        {recipeData.preparation.map(item =>
+                        {recipeData?.preparation.map(item =>
                             <View style={styles.outputPreparation} key={uuid.v4()}>
                                 <Text style={styles.step} key={uuid.v4()}>Step {item.step}</Text>
                                 <Text style={styles.prep} key={uuid.v4()}>{item.preparation}</Text>
@@ -416,12 +405,13 @@ export default function RecipeDetail({ navigation, route }) {
                                     </TouchableOpacity>
                                 </View>
                                 : (addTo === "meal" ?
-                                    <View style={{ marginVertical: 20, height: 500 }}>
-                                        <Text style={styles.banner}>Meals</Text>
+                                    <View style={{ marginVertical: 0, height: 500, width: "100%", alignItems: 'center' }}>
+                                        <Banner title="Meals" />
                                         <FlatList
                                             data={mealList}
                                             showsVerticalScrollIndicator={false}
                                             style={{ maxHeight: 250 }}
+                                            contentContainerStyle={{ alignContent: 'center' }}
                                             renderItem={({ item }) =>
                                                 !item.isDeleted && <TouchableOpacity
                                                     style={styles.genericButton}
@@ -433,8 +423,8 @@ export default function RecipeDetail({ navigation, route }) {
                                         />
                                     </View>
 
-                                    : <View style={{ marginVertical: 20 }}>
-                                        <Text style={styles.banner}>Events</Text>
+                                    : <View style={{ marginVertical: 0, height: 500, width: "100%", alignItems: 'center' }}>
+                                        <Banner title="Events" />
                                         <FlatList
                                             data={eventList}
                                             showsVerticalScrollIndicator={false}
@@ -472,8 +462,8 @@ const styles = StyleSheet.create({
         marginTop: StatusBar.currentHeight - 10,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        height: windowHeight,
-        position: 'relative'
+        // height: windowHeight,
+        // position: 'relative'
     },
     cookInfo: {
         flexDirection: 'row',
@@ -596,21 +586,6 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         backgroundColor: 'white'
     },
-    banner: {
-        width: 250,
-        height: 40,
-        justifyContent: 'center',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        borderStyle: 'solid',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 20,
-        fontSize: 18,
-        marginBottom: 10,
-        backgroundColor: "orange",
-        // color: 'white',
-    },
     genericButton: {
         marginBottom: 10,
         width: 250,
@@ -636,4 +611,46 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         marginTop: 10,
     },
+    scrollView: {
+        flex: 1
+    }
 })
+
+
+///// 210
+{/* <View style={{
+                    // flex: 0.05,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: windowWidth * 0.9 + 0.2,
+                    height: windowWidth * 0.6,
+                    borderStyle: 'solid',
+                    borderWidth: 0.2,
+                    borderColor: 'black',
+                    marginVertical: 10,
+                    position: "relative", zIndex: 5
+                }}>
+                    {recipeData?.recipePicture?.normal?.length !== 0 &&
+                        <ScrollView
+                            // pagingEnabled
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            style={{
+                                width: windowWidth * 0.9,
+                                height: windowWidth * 0.6,
+                            }}>
+                            {recipeData?.recipePicture?.normal?.map((image, index) =>
+                                <View key={image}>
+                                    {/* <Image source={{ uri: image.base64 }} */}
+{/* <Image source={{ uri: image }}
+    style={{
+        width: windowWidth * 0.9,
+        height: windowWidth * 0.6,
+        resizeMode: "cover",
+    }} />
+                                </View >)}
+                        </ScrollView >
+                    } */}
+
+
+                // </View > * /}

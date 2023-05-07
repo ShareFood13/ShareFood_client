@@ -2,72 +2,9 @@ import * as React from 'react';
 import { Text, View, StyleSheet, Button } from 'react-native';
 import Constants from 'expo-constants';
 import { useState } from 'react';
+import products from '../../assets/arrays/data'
 
-const products = [
-    {
-        product: 'tomato',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 200,
-        metricUn: 'Grams',
-        imperialQty: 7,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'onions',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 200,
-        metricUn: 'Grams',
-        imperialQty: 7,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'garlic',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 5,
-        metricUn: 'Grams',
-        imperialQty: 0.17,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'olives',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 10,
-        metricUn: 'Grams',
-        imperialQty: 0.35,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'cumcumber',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 100,
-        metricUn: 'Grams',
-        imperialQty: 3.5,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'chives',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 50,
-        metricUn: 'Grams',
-        imperialQty: 0.175,
-        imperialUn: 'Onces',
-    },
-    {
-        product: 'pepper',
-        quantity: 1,
-        units: 'unit',
-        metricQty: 200,
-        metricUn: 'Grams',
-        imperialQty: 7,
-        imperialUn: 'Onces',
-    },
-];
+
 
 const myRecipes = [
     {

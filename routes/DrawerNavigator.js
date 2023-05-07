@@ -30,6 +30,8 @@ import HomeScreen from './FooterNavigator';
 
 import { Context } from "../context/UserContext";
 
+// import Share2 from "react-native-share"
+
 import {
     AntDesign,
     MaterialIcons,
@@ -37,7 +39,8 @@ import {
     FontAwesome5,
     MaterialCommunityIcons,
     Fontisto,
-    Entypo
+    Entypo,
+    FontAwesome
 } from '@expo/vector-icons';
 
 import * as SecureStore from 'expo-secure-store';
@@ -45,16 +48,25 @@ import * as SecureStore from 'expo-secure-store';
 import { useDispatch, useSelector } from 'react-redux';
 import { CLEAR_STATE } from "../Redux/constants/constantsTypes.js"
 import { getUserInfo } from '../Redux/actions/auth';
+import { useIsFocused } from '@react-navigation/native';
+import MyShopLists from '../screens/Drawer/MyShopLists';
 
 export default function MyDrawer({ navigation }) {
+    const { userContext, setUserContext } = useContext(Context)
     const [userData, setUserData] = useState()
+    const [mailsQuantity, setMailsQuantity] = useState(0)
     const dispatch = useDispatch();
+    const isFocused = useIsFocused();
 
     const redux = useSelector(state => state)
 
     const window = Dimensions.get('window');
 
-    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        var mailsQty = 0
+        redux?.myMail?.myMails?.map(mail => !mail.isOpen && mailsQty++)
+        setMailsQuantity(mailsQty)
+    }, [redux?.myMail?.myMails?.length])
 
     useEffect(() => {
         getUser()
@@ -65,7 +77,7 @@ export default function MyDrawer({ navigation }) {
     }
 
     useEffect(() => {
-        userData && dispatch(getUserInfo(userData?.userId))
+        (userData && userData?.userId !== undefined) && dispatch(getUserInfo(userData?.userId))
     }, [userData])
 
     const Drawer = createDrawerNavigator();
@@ -221,7 +233,7 @@ export default function MyDrawer({ navigation }) {
                                 marginLeft: 5,
                                 marginBottom: 10,
                             }}>
-                                500
+                                {mailsQuantity}
                             </Text>
                         </View>
                     ),
@@ -340,6 +352,34 @@ export default function MyDrawer({ navigation }) {
                 }}
             />
             <Drawer.Screen
+                name="My Shop Lists"
+                component={MyShopLists}
+                options={{
+                    drawerIcon: ({ focused }) => (
+                        <View
+                            style={{
+                                justifyContent: 'flex-start',
+                                alignItems: 'center',
+                                flexDirection: 'row',
+                            }}>
+                            <FontAwesome
+                                name="list"
+                                size={20}
+                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                            />
+                            <Text
+                                style={{
+                                    color: focused ? '#e32f45' : '#748c94',
+                                    fontSize: 12,
+                                    marginLeft: 20,
+                                }}>
+                                My Shop Lists
+                            </Text>
+                        </View>
+                    ),
+                }}
+            />
+            <Drawer.Screen
                 name="My Friends"
                 component={MyFriends}
                 options={{
@@ -426,6 +466,23 @@ export default function MyDrawer({ navigation }) {
             <Drawer.Screen
                 name="Share"
                 component={Share}
+                // listeners={async ({ navigation }) => {
+
+                //     const shareOptions = {
+                //         message: "test message",
+                //         // url: need to be on base64,
+                //         // urls: [the same]
+                //     }
+
+                //     try {
+
+                //         const ShareResponse = await Share2.open(shareOptions)
+                //         console.log(JSON.stringify(ShareResponse))
+                //     } catch (error) {
+
+                //         console.log("Error --> ", error)
+                //     }
+                // }}
                 options={{
                     drawerIcon: ({ focused }) => (
                         <View>
@@ -456,7 +513,7 @@ export default function MyDrawer({ navigation }) {
                                         fontSize: 12,
                                         marginLeft: 20,
                                     }}>
-                                    Share
+                                    Tell Your Friends
                                 </Text>
                             </View>
                         </View>

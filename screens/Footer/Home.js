@@ -1,5 +1,16 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, FlatList, RefreshControl, Dimensions } from 'react-native'
+//npx pod-install
 import React, { useState, useContext, useEffect, useCallback } from 'react'
+import {
+    StyleSheet,
+    Text,
+    View,
+    Image,
+    ScrollView,
+    TouchableOpacity,
+    FlatList,
+    RefreshControl,
+    Dimensions
+} from 'react-native'
 
 import { useIsFocused } from '@react-navigation/native';
 
@@ -13,6 +24,7 @@ import { Context } from "../../context/UserContext";
 import { getUserInfo, startFollowing } from '../../Redux/actions/auth';
 import { getotherusers } from '../../Redux/actions/others';
 import { getotherrecipes } from '../../Redux/actions/recipes';
+import { getMyMails } from '../../Redux/actions/mymails';
 
 import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
@@ -26,7 +38,6 @@ export default function Home({ navigation }) {
 
     var countRecipe = 0
 
-    const [userToken, setUserToken] = useState(null)
     const [userId, setUserId] = useState(null)
     const [popupModal, setPopupModal] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
@@ -35,7 +46,11 @@ export default function Home({ navigation }) {
     const isFocused = useIsFocused();
 
     const redux = useSelector((state) => state)
-    redux?.auth?.authData?.result?.recipesId?.map(recipe => !recipe.isDeleted && countRecipe++)
+    // console.log("Home redux", redux.recipe.recipes)
+
+    redux?.recipe?.recipes?.map(recipe => !recipe.isDeleted && countRecipe++)
+    // redux?.auth?.authData?.result?.recipesId?.map(recipe => !recipe.isDeleted && countRecipe++)
+    var otherUsersList = redux?.other?.otherUsers
 
     useEffect(() => {
         if (redux?.auth?.message) {
@@ -52,24 +67,25 @@ export default function Home({ navigation }) {
         redux?.auth?.authData?.result?.profile && setUserContext(redux.auth.authData.result.profile)
     }, [redux])
 
-    const otherUsersList = redux?.other?.otherUsers
-
     useEffect(() => {
-        getItem()
+        // getItem()
+        setUserId(redux.auth.authData.result._id)
     }, [userContext])
 
     async function getItem() {
         setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
     }
 
-    useEffect(() => {
-        dispatch(getotherusers(userId))//.then(dispatch(getotherrecipes()))
-        dispatch(getotherrecipes())
-    }, [userId, isFocused])
+    // useEffect(() => {
+    //     userId !== undefined && dispatch(getotherusers(userId))//.then(dispatch(getotherrecipes()))
+    //     dispatch(getotherrecipes())
+    //     userId !== undefined && dispatch(getMyMails(userId))
 
-    useEffect(() => {
-        userId && dispatch(getUserInfo(userId))
-    }, [userId, isFocused])
+    // }, [userId, isFocused])
+
+    // useEffect(() => {
+    //     userId !== undefined && dispatch(getUserInfo(userId))
+    // }, [userId, isFocused])
 
     const wait = (timeout) => {
         return new Promise(resolve => setTimeout(resolve, timeout));
@@ -82,13 +98,11 @@ export default function Home({ navigation }) {
     }, []);
 
     const openOtherUser = (userInfo) => {
-        console.log(userInfo)
         navigation.navigate("ShowOtherUser", { userInfo })
-
     }
 
     const openRecipe = (recipe) => {
-        navigation.push('RecipeDetail', { recipeData: recipe })
+        navigation.push('RecipeDetail', { recipeFromHome: recipe, recipeDetailFlag: true })
     }
 
     const startFollowingFn = (follow_id) => {
@@ -184,7 +198,17 @@ export default function Home({ navigation }) {
                 )}
             </ScrollView>
 
-            <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-around', alignSelf: 'center', height: 40, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'black', marginBottom: 15 }}>
+            <View style={{
+                flexDirection: 'row',
+                width: '80%',
+                justifyContent: 'space-around',
+                alignSelf: 'center',
+                height: 40,
+                alignItems: 'center',
+                borderBottomWidth: 2,
+                borderBottomColor: 'black',
+                marginBottom: 15
+            }}>
                 <TouchableOpacity onPress={() => setShowPictures("grid")}>
                     <MaterialIcons name="grid-on" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
                 </TouchableOpacity>
@@ -196,7 +220,7 @@ export default function Home({ navigation }) {
 
         </>)
     }
-
+    // console.log(redux?.auth?.authData?.result?.recipesId)
     return (
         // <ScrollView
         //     refreshControl={
@@ -216,7 +240,8 @@ export default function Home({ navigation }) {
                         />
                     }
                     ListHeaderComponent={<Header />}
-                    data={redux?.auth?.authData?.result?.recipesId}
+                    // data={redux?.auth?.authData?.result?.recipesId}
+                    data={redux?.recipe?.recipes}
                     showsVerticalScrollIndicator={false}
                     numColumns={3}
                     initialNumToRender={9}
@@ -225,7 +250,8 @@ export default function Home({ navigation }) {
                         (!item?.isDeleted) ?
                             <TouchableOpacity onPress={() => openRecipe(item)}>
                                 <View style={{ width: windowWidth / 3, height: windowWidth / 3, borderWidth: 0.2, borderColor: 'black' }}>
-                                    <Image source={{ uri: item?.recipePicture[0]?.base64 }} style={{ width: windowWidth / 3, height: windowWidth / 3 }} />
+                                    {/* <Image source={{ uri: item?.recipePicture[0]?.base64 }} style={{ width: windowWidth / 3, height: windowWidth / 3 }} /> */}
+                                    <Image source={{ uri: item?.recipePicture?.normal[0] }} style={{ width: windowWidth / 3, height: windowWidth / 3, resizeMode: "cover", }} />
                                 </View>
                             </TouchableOpacity>
                             : null
@@ -235,7 +261,8 @@ export default function Home({ navigation }) {
                 /> :
                 <FlatList
                     ListHeaderComponent={<Header />}
-                    data={redux?.auth?.authData?.result?.recipesId}
+                    // data={redux?.auth?.authData?.result?.recipesId}
+                    data={redux?.recipe?.recipes}
                     showsVerticalScrollIndicator={false}
                     initialNumToRender={6}
                     maxToRenderPerBatch={6}
@@ -243,7 +270,8 @@ export default function Home({ navigation }) {
                         (!item?.isDeleted) ?
                             <TouchableOpacity onPress={() => openRecipe(item)}>
                                 <View style={{ width: windowWidth, borderWidth: 1, borderColor: 'black' }}>
-                                    <Image source={{ uri: item?.recipePicture[0]?.base64 }} style={{ width: windowWidth, height: windowWidth * 3 / 4 }} />
+                                    {/* <Image source={{ uri: item?.recipePicture[0]?.base64 }} style={{ width: windowWidth, height: windowWidth * 3 / 4 }} /> */}
+                                    <Image source={{ uri: item?.recipePicture?.normal[0] }} style={{ width: windowWidth, height: windowWidth * 3 / 4, resizeMode: "cover", }} />
                                     <Text style={{ minHeight: 50, width: windowWidth * 0.9, alignSelf: 'center', paddingVertical: 10, textAlign: 'justify' }}>{item.freeText}</Text>
                                 </View>
                             </TouchableOpacity>

@@ -5,7 +5,8 @@ const reducer = (state = { meals: [], message: "" }, action) => {
     switch (action.type) {
         case CREATE_MEAL:
 
-            return { ...state, meals: [...state.meals, action.payload.meals], message: action.payload.message }
+            // return { ...state, meals: [...state.meals, action.payload.meals], message: action.payload.message }
+            return { ...state, meals: action.payload.meals, message: action.payload.message }
         case GET_MEALS:
 
             return { ...state, meals: action.payload.meals }

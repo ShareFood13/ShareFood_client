@@ -47,6 +47,8 @@ import { Context } from "../../context/UserContext";
 
 import MealCard from '../../components/MealCard';
 import PopupModal from '../../components/PopupModal';
+import Banner from '../../components/Banner';
+import ShowMealDetail from '../../components/ShowMealDetail';
 
 const initialState = {
     mealName: "",
@@ -114,6 +116,7 @@ export default function MyMeals({ navigation }) {
     const [sDietMeal, setSDietMeal] = useState()
     // const [modalVisible2, setModalVisible2] = useState(false)
     const [popupModal, setPopupModal] = useState(false)
+    const [mealList, setMealList] = useState()
 
 
     const dispatch = useDispatch();
@@ -125,15 +128,17 @@ export default function MyMeals({ navigation }) {
     const windowHeight = Dimensions.get('window').height;
 
     const redux = useSelector((state) => state)
-    const mealList = redux?.meal?.meals
+    // console.log("MyMeals redux", redux.meal.meals)
 
     useEffect(() => {
+        setMealList(redux?.meal?.meals)
         if (redux?.meal.message !== "") {
             setPopupModal(true)
             setTimeout(() => {
                 setPopupModal(false)
                 dispatch({ type: CLEAR_MSG })
-                redux?.meal.message.includes("Created") && navigation.navigate('MyBookStackScreen')
+                // redux?.meal.message.includes("Created") && navigation.navigate('MyBookStackScreen', { screen: 'MyBook', params: { fromMyMeals: true }, })
+                // navigation.navigate('Home1')
             }, 2500)
         }
     }, [redux?.meal, isFocused])
@@ -146,11 +151,13 @@ export default function MyMeals({ navigation }) {
         setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
     }
 
-    useEffect(() => {
-        onRefresh()
-        dispatch(getMeals(userId))
-        // dispatch(getMyRecipes(userId))
-    }, [userId, isFocused])
+    // useEffect(() => {
+    //     if (userId !== undefined) {
+    //         onRefresh()
+    //         dispatch(getMeals(userId))
+    //         // dispatch(getMyRecipes(userId))
+    //     }
+    // }, [userId, isFocused])
 
     // REFRESH FUNCTIONS //////////////////////////////////////////
     const wait = (timeout) => {
@@ -158,9 +165,12 @@ export default function MyMeals({ navigation }) {
     }
 
     const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        dispatch(getMyRecipes(userId))
-        wait(5000).then(() => setRefreshing(false))//.then(dispatch(getMyRecipes(userId)));
+        if (userId !== undefined) {
+            setRefreshing(true);
+            // console.log({ userId })
+            userId !== null && dispatch(getMeals(userId))
+            wait(3000).then(() => setRefreshing(false))//.then(dispatch(getMyRecipes(userId)));
+        }
     }, []);
 
 
@@ -193,15 +203,13 @@ export default function MyMeals({ navigation }) {
         setMealForm(initialState)
         setModalVisible(false)
         setModalVisible3(false)
+        setUpdate(false)
     }
 
     const saveMeal = () => {
         dispatch(createMeal(mealForm))
         closeModal()
         onRefresh()
-        // dispatch(getUserInfo(userId))
-        // dispatch(getMeals(userId))
-
     }
 
     const openMeal = (mealItem) => {
@@ -217,7 +225,6 @@ export default function MyMeals({ navigation }) {
             })
         )
         setSDietMeal(array)
-
     }
 
     const editMeal = (meal) => {
@@ -232,19 +239,20 @@ export default function MyMeals({ navigation }) {
         setModalVisible(false)
         setMealForm(initialState)
         // dispatch(getUserInfo(userId))
-        dispatch(getMeals(userId))
-
+        userId !== undefined &&
+            dispatch(getMeals(userId))
     }
 
     const delMeal = (meal) => {
         dispatch(deleteMeal(meal._id))
         // dispatch(getUserInfo(userId))
         dispatch(getMeals(userId))
-
     }
+
     //////////////////////
     const createShopList = () => {
         const mealToShopList = []
+        console.log("MyMeals createShopList meal", meal.mealName)
         meal?.recipesId.map(recipeId =>
             // userContext?.result?.recipesId.map
             redux?.recipe?.recipes?.map(item => {
@@ -253,7 +261,7 @@ export default function MyMeals({ navigation }) {
                 }
             })
         )
-        navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: mealToShopList, showType: "meals" } })
+        navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: mealToShopList, showType: "meals", mealName: meal.mealName } })
     }
     //////////////////////////////
     return (
@@ -276,7 +284,6 @@ export default function MyMeals({ navigation }) {
                             height: 40,
                             justifyContent: 'center',
                             alignItems: 'center',
-                            marginBottom: 20,
                             backgroundColor: '#2596be',
                             borderColor: 'black',
                             borderWidth: 1,
@@ -288,7 +295,7 @@ export default function MyMeals({ navigation }) {
                     </View>
                 </TouchableOpacity>
 
-                <Text style={styles.banner}>My Meals</Text>
+                <Banner title="My Meals" />
 
             </View>
             {/* <ScrollView
@@ -474,10 +481,13 @@ export default function MyMeals({ navigation }) {
                 transparent={false}
                 visible={modalVisible3}>
 
-                <View style={styles.centeredView}>
+                <ShowMealDetail meal={meal} recipes={redux?.recipe?.recipes} sDietMeal={sDietMeal} closeModal={closeModal} />
+
+                {/* <View style={styles.centeredView}>
                     <View style={styles.mealCard}>
                         <ImageBackground source={require('../../assets/images/linePaper.png')} style={{ width: '100%', height: 350 }}
                             imageStyle={{ resizeMode: 'cover' }}>
+
                             <TouchableOpacity onPress={() => closeModal()}
                                 style={{
                                     width: "100%",
@@ -488,6 +498,7 @@ export default function MyMeals({ navigation }) {
                                 }}>
                                 <EvilIcons name="close-o" size={30} color="black" />
                             </TouchableOpacity>
+
                             <View style={styles.mealShow}>
                                 <Text style={{ fontSize: 20, marginBottom: 18 }}>{meal?.mealName}</Text>
                                 <View style={{ height: 150, width: '90%', justifyContent: 'space-around', alignItems: 'center' }}>
@@ -499,10 +510,10 @@ export default function MyMeals({ navigation }) {
                                             }
                                         })
                                     )}
-                                </View>
+                                </View> */}
 
 
-                                {/* {meal?.recipesId?.map(recipe =>
+                {/* {meal?.recipesId?.map(recipe =>
                                         <View style={{
                                             width: '90%',
                                             height: 40,
@@ -512,7 +523,7 @@ export default function MyMeals({ navigation }) {
                                         }} key={uuid.v4()}>
                                             <Text>{recipe.recipeName}</Text>
                                         </View>)} */}
-                            </View>
+                {/* </View>
                         </ImageBackground>
                     </View>
                     <View style={{ flexDirection: 'row', marginBottom: 10 }}>
@@ -530,7 +541,7 @@ export default function MyMeals({ navigation }) {
                             )
                         })}
                     </View>
-                </View>
+                </View> */}
 
                 <View style={styles.button}>
                     <TouchableOpacity onPress={createShopList}>
@@ -547,22 +558,6 @@ export default function MyMeals({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    banner: {
-        width: 350,
-        height: 40,
-        justifyContent: 'center',
-        alignSelf: 'center',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        borderStyle: 'solid',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 20,
-        fontSize: 18,
-        marginBottom: 30,
-        backgroundColor: "orange",
-        // color: 'white',
-    },
     button: {
         position: 'absolute',
         width: 60,
@@ -577,7 +572,7 @@ const styles = StyleSheet.create({
         shadowOffset: { height: 3, width: 0 },
         elevation: 10,
         zIndex: 10,
-        bottom: 50,
+        bottom: 30,
         backgroundColor: 'white',
         borderColor: 'black', borderStyle: 'solid', borderWidth: 0.2,
     },

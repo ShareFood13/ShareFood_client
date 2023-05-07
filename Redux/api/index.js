@@ -2,7 +2,7 @@ import axios from "axios"
 
 import * as SecureStore from 'expo-secure-store';
 
-const API = axios.create({ baseURL: 'https://88a7-77-124-23-216.eu.ngrok.io' })
+const API = axios.create({ baseURL: 'https://5ccd-77-126-187-228.ngrok-free.app' })
 
 API.interceptors.request.use(async (req) => {
     if (await SecureStore.getItemAsync('storageData')) {
@@ -28,7 +28,8 @@ export const stopFollowing = (ids) => API.put(`/api/user/stopfollowing`, ids)
 
 export const createRecipe = (recipeForm) => API.post(`/api/recipes`, recipeForm)
 export const fetchMyRecipes = (_id) => API.get(`/api/recipes/${_id}`)
-export const updateRecipe = (_id, recipe) => API.patch(`/api/recipes/${_id}`, recipe)
+export const fetchRecipe = (_id) => API.get(`/api/recipes/detail/${_id}`)
+export const updateRecipe = (_id, data) => API.patch(`/api/recipes/${_id}`, data)
 export const deleteRecipe = (_id) => API.delete(`/api/recipes/${_id}`)
 export const getOtherRecipes = () => API.get(`/api/recipes/getotherrecipes`)
 
@@ -51,6 +52,15 @@ export const delMyMail = (mailId, listToDelete) => API.put(`/api/mymails/${mailI
 export const mailView = (mailId) => API.put(`/api/mymails/mailView/${mailId}`)
 
 export const saveProfile = (_id, profileForm) => API.put(`/api/user/userprofile/${_id}`, profileForm)
+
+export const saveShopList = (shopList) => API.post(`/api/shoplist/save`, shopList)
+export const updateShopList = (_id, updatedShopList) => API.patch(`/api/shoplist/update/${_id}`, updatedShopList)
+export const getAllShopList = (_id) => API.get(`/api/shoplist/getall/${_id}`)
+export const getShopList = (listId) => API.get(`/api/shoplist/getshoplist/${listId}`)
+export const delShopList = (listId) => API.delete(`/api/shoplist/getshoplist/${listId}`)
+
+// export const deleteFromCloudinary = (cloudinaryToDelete) => API.get(`/api/cludinary/delete`, cloudinaryToDelete)
+
 // export const userProfileUpdate = (_id, formData) = API.put(`api/user/userprofileupdate/${_id}`, formData)
 
 // const API = axios.create({baseURL: 'https://musicplyr13.herokuapp.com/'})

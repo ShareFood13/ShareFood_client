@@ -70,20 +70,6 @@ const Conversions = () => {
     const [value, setValue] = useState(0)
     const [show, setShow] = useState("mass")
 
-    // const pickerRef = useRef();
-
-    // const [selectedLanguage, setSelectedLanguage] = useState();
-
-    // if (show === "mass")
-    //     console.log(mass)
-
-    // function open() {
-    //     pickerRef.current.focus();
-    // }
-
-    // function close() {
-    //     pickerRef.current.blur();
-    // }
 
     const MeasureView = ({ measure, value, setValue }) => {
         const [fromUnit, setFromUnit] = useState("Grams")
@@ -119,8 +105,6 @@ const Conversions = () => {
 
         useEffect(() => {
 
-            // console.log(show, fromUnit, toUnit);
-
             const obj = (show === 'mass') ? mass.filter(elem => elem.unit === fromUnit)[0]
                 : (show === 'volume') ? volume.filter(elem => elem.unit === fromUnit)[0]
                     : temperature.filter(elem => elem.unit === fromUnit)[0]
@@ -130,7 +114,6 @@ const Conversions = () => {
             Object.keys(obj).forEach(key => {
                 let value = obj[key];
                 key === toUnit && setMulti(`${value}`);
-                // console.log(`${key}: ${value}`);
             });
         }, [fromUnit, toUnit])
 

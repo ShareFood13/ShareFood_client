@@ -26,6 +26,7 @@ import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAweso
 
 import uuid from 'react-native-uuid';
 import { useDispatch, useSelector } from 'react-redux';
+import Banner from '../../components/Banner';
 
 
 
@@ -42,6 +43,7 @@ const ShowEventDetail = ({ navigation, route }) => {
 
     const createShopList = () => {
         const mealToShopList = []
+        // console.log("eventData", eventData)
         eventData.recipesId.map(recipeId =>
             recipesList.map(item => {
                 if (item._id === recipeId && item.isDeleted === false) {
@@ -49,7 +51,7 @@ const ShowEventDetail = ({ navigation, route }) => {
                 }
             })
         )
-        navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: mealToShopList, showType: "meals" } })
+        navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: mealToShopList, showType: "meals", eventName: eventData.eventName } })
     }
 
     return (
@@ -61,7 +63,8 @@ const ShowEventDetail = ({ navigation, route }) => {
             // borderWidth: 1,
             marginTop: 50,
         }}>
-            <Text style={styles.banner} >Event Details</Text>
+
+            <Banner title="Event Details" />
 
             <Text style={{ fontSize: 24 }}>{eventData.eventName}</Text>
 
@@ -111,21 +114,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
-    },
-    banner: {
-        width: 350,
-        height: 40,
-        justifyContent: 'center',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        borderStyle: 'solid',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 20,
-        fontSize: 18,
-        marginVertical: 10,
-        backgroundColor: "orange",
-        // color: 'white',
     },
     button: {
         position: 'absolute',

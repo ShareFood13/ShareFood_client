@@ -39,6 +39,7 @@ import SwitchButton from '../../components/SwitchButton';
 import DatePicker from '../../components/DatePicker';
 import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
+import Banner from '../../components/Banner';
 
 const countries = [];
 let countryCodes = [];
@@ -143,13 +144,13 @@ const initialState = {
     },
 };
 
-export default MyProfile = () => {
+export default MyProfile = ({ navigation }) => {
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
 
     const { userContext, setUserContext } = useContext(Context)
 
-    const [profileForm, setProfileForm] = useState(initialState);
+    const [profileForm, setProfileForm] = useState();
     const [userData, setUserData] = useState();
     const [show, setShow] = useState("Public")
     const [refreshing, setRefreshing] = useState(false)
@@ -171,15 +172,21 @@ export default MyProfile = () => {
         }
     }, [redux?.auth?.message])
 
-    useEffect(() => {
-        userData && dispatch(getUserInfo(userData?.userId))
-    }, [userData, isFocused])
+    // useEffect(() => {
+    //     (userData && userData?.userId !== undefined) && dispatch(getUserInfo(userData?.userId))
+    // }, [userData, isFocused])
+
+    // useEffect(() => {
+    //     console.log("MyProfile isFocused", isFocused)
+    //     // setProfileForm(redux?.auth?.authData?.result?.profile)
+    //     // setProfileForm(userContext)
+    //     // setProfileForm({ ...profileForm, ...userContext })
+    //     setProfileForm((profileForm) => ({ ...profileForm, ...userContext }))
+    // }, [userData, isFocused])
 
     useEffect(() => {
-        // setProfileForm(redux?.auth?.authData?.result?.profile)
-        setProfileForm({ ...profileForm, ...userContext })
-        // setProfileForm({ ...profileForm, userContext })
-    }, [userContext])
+        navigation.addListener('focus', () => setProfileForm({ ...profileForm, ...userContext }))
+    }, [])
 
     ///// Countries list
     const [list, setList] = useState([])
@@ -334,7 +341,7 @@ export default MyProfile = () => {
                 />}>
             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
 
-                <Text style={styles.banner} >My Profile</Text>
+                <Banner title="My Profile" />
 
                 <ImageBackground
                     // source={require('../../assets/images/menu-bg.jpeg')}
@@ -731,19 +738,4 @@ export default MyProfile = () => {
 };
 
 const styles = StyleSheet.create({
-    banner: {
-        width: 350,
-        height: 40,
-        justifyContent: 'center',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        borderStyle: 'solid',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 20,
-        fontSize: 18,
-        marginVertical: 10,
-        backgroundColor: "orange",
-        // color: 'white',
-    },
 })

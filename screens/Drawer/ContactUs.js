@@ -27,6 +27,7 @@ import { useDispatch } from 'react-redux';
 import { sendToSharedFood } from '../../Redux/actions/auth';
 
 import * as SecureStore from 'expo-secure-store';
+import Banner from '../../components/Banner';
 
 const initialValue = {
     fromUserName: "",
@@ -37,7 +38,7 @@ const initialValue = {
 }
 
 export default function ContactUs({ navigation }) {
-    const [userId, setUserId] = useState()
+    const [user, setUser] = useState()
     const [contactUsForm, setContactUsForm] = useState(initialValue)
 
     const dispatch = useDispatch();
@@ -47,11 +48,11 @@ export default function ContactUs({ navigation }) {
     }, [])
 
     const getUser = async () => {
-        setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
+        setUser(JSON.parse(await SecureStore.getItemAsync('storageData')))
     }
 
     const handleOnChange = (name, text) => {
-        setContactUsForm({ ...contactUsForm, [name]: text, creatorId: userId })
+        setContactUsForm({ ...contactUsForm, [name]: text, creatorId: user.userId })
     }
 
     const sendContactUs = () => {
@@ -62,22 +63,23 @@ export default function ContactUs({ navigation }) {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
+                <Banner title="Constact Us" />
                 <Text style={{ marginVertical: 10 }}>Please Contact Us for any reason at all!!!</Text>
                 <Text style={{ marginVertical: 10 }}>We are here for You!!!</Text>
                 <View style={styles.viewInput}>
                     {/* <Text style={{ width: "20%", }}>From:</Text> */}
                     <TextInput
-                        value={user?.result.userName}
+                        value={user?.userUserName}
                         style={styles.input}
-                        placeholder={user?.result.userName}
+                        placeholder={user?.userUserName}
                         onChangeText={text => handleOnChange('fromUserName', text)} />
                 </View>
                 <View style={styles.viewInput}>
                     {/* <Text style={{ width: "20%", }}>E-mail:</Text> */}
                     <TextInput
-                        value={user?.result.email}
+                        value={user?.userEmail}
                         style={styles.input}
-                        placeholder={user?.result.email}
+                        placeholder={user?.userEmail}
                         onChangeText={text => handleOnChange('fromEmail', text)} />
                 </View>
                 <View style={styles.viewInput}>
@@ -119,7 +121,7 @@ export default function ContactUs({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center'
     },
     genericButton: {

@@ -24,6 +24,18 @@ export const getMyRecipes = (_id) => async (dispatch) => {
     }
 }
 
+export const getRecipe = (_id) => async (dispatch) => {
+    try {
+        const { data } = await api.fetchRecipe(_id)
+
+        // console.log("recipes getRecipe", data)
+        dispatch({ type: FETCH_RECIPE, payload: data })
+    } catch (error) {
+
+        dispatch({ type: ERROR_MSG, payload: error })
+    }
+}
+
 export const updateRecipe = (_id, recipe) => async (dispatch) => {
     try {
         const { data } = await api.updateRecipe(_id, recipe)

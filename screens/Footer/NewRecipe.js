@@ -39,6 +39,11 @@ import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
 
 import * as SecureStore from 'expo-secure-store';
 import { useIsFocused } from '@react-navigation/native';
+import Banner from '../../components/Banner';
+import { SelectList } from 'react-native-dropdown-select-list';
+import { SelectCountry } from 'react-native-element-dropdown';
+import ImagesSwipe from '../../components/ImagesSwipe';
+
 
 
 const initialPreparation = {
@@ -54,20 +59,21 @@ const initialIngredients = {
 }
 
 const initialValue = {
-    cookTime: 0,
+    cookTime: "0",
     creator: '',
     creatorId: '',
     difficulty: '',
     donwloads: [],
     foodCourse: "",
-    forHowMany: 0,
+    forHowMany: "0",
     freeText: "",
     ingredients: [],
     likes: [],
     preparation: [],
-    prepTime: 0,
+    prepTime: "0",
     recipeComments: [],
     recipeName: '',
+    // recipePicture: { normal: [], small: [] },
     recipePicture: [],
     specialDiet: [],
     status: "Public",
@@ -110,7 +116,7 @@ const logos = [
 ]
 
 const units = [
-    { unit: 'MilliLiter', abreviation: 'ml' },
+    { unit: 'MilliLiters', abreviation: 'ml' },
     { unit: 'Units', abreviation: 'un' },
     { unit: 'Grams', abreviation: 'gr' },
     { unit: 'KiloGrams', abreviation: 'Kg' },
@@ -142,7 +148,108 @@ const foodCourses = [
     { key: 18, value: "Pain (Bread)" },
 ]
 
-export default function NewRecipe({ navigation, route }) {
+const productList = [
+    { key: 1, value: 'Acorn Squash', weight: 600 },
+    { key: 2, value: 'Apple', weight: 150 },
+    { key: 3, value: 'Apricot', weight: 35 },
+    { key: 4, value: 'Artichoke', weight: 200 },
+    { key: 5, value: 'Asparagus', weight: 50 },
+    { key: 6, value: 'Avocado', weight: 150 },
+    { key: 7, value: 'Banana', weight: 120 },
+    { key: 8, value: 'Beet', weight: 150 },
+    { key: 9, value: 'Beetroot', weight: 150 },
+    { key: 10, value: 'Bell Pepper', weight: 150 },
+    { key: 11, value: 'Black Beans', weight: 100 },
+    { key: 12, value: 'Blackberries', weight: 75 },
+    { key: 13, value: 'Blueberries', weight: 50 },
+    { key: 14, value: 'Broccoli', weight: 500 },
+    { key: 15, value: 'Brussels Sprouts', weight: 20 },
+    { key: 16, value: 'Butternut Squash', weight: 1000 },
+    { key: 17, value: 'Cabbage', weight: 800 },
+    { key: 18, value: 'Cantaloupe', weight: 1000 },
+    { key: 19, value: 'Carambola (Starfruit)', weight: 120 },
+    { key: 20, value: 'Carrot', weight: 70 },
+    { key: 21, value: 'Cauliflower', weight: 700 },
+    { key: 22, value: 'Celery', weight: 150 },
+    { key: 23, value: 'Cherries', weight: 50 },
+    { key: 24, value: 'Cherry', weight: 5 },
+    { key: 25, value: 'Cherry Tomato', weight: 15 },
+    { key: 26, value: 'Chickpeas', weight: 100 },
+    { key: 27, value: 'Coconut', weight: 1400 },
+    { key: 28, value: 'Corn', weight: 150 },
+    { key: 29, value: 'Cucumber', weight: 150 },
+    { key: 30, value: 'Dates', weight: 12 },
+    { key: 31, value: 'Edamame', weight: 150 },
+    { key: 32, value: 'Eggplant', weight: 400 },
+    { key: 33, value: 'Fennel', weight: 200 },
+    { key: 34, value: 'Figs', weight: 50 },
+    { key: 35, value: 'Garlic', weight: 5 },
+    { key: 36, value: 'Ginger', weight: 25 },
+    { key: 37, value: 'Ginger Root', weight: 30 },
+    { key: 38, value: 'Grapefruit', weight: 400 },
+    { key: 39, value: 'Grapes', weight: 100 },
+    { key: 40, value: 'Green Apple', weight: 150 },
+    { key: 41, value: 'Green Beans', weight: 100 },
+    { key: 42, value: 'Green Bell Pepper', weight: 150 },
+    { key: 43, value: 'Green Onion', weight: 15 },
+    { key: 44, value: 'Green Peas', weight: 100 },
+    { key: 45, value: 'Hass Avocado', weight: 200 },
+    { key: 46, value: 'Honeydew Melon', weight: 1200 },
+    { key: 47, value: 'Jalapeno Pepper', weight: 15 },
+    { key: 48, value: 'Kale', weight: 100 },
+    { key: 49, value: 'Kidney Beans', weight: 100 },
+    { key: 50, value: 'Kiwi', weight: 75 },
+    { key: 51, value: 'Lemon', weight: 60 },
+    { key: 52, value: 'Lentils', weight: 50 },
+    { key: 53, value: 'Lettuce', weight: 150 },
+    { key: 54, value: 'Lime', weight: 30 },
+    { key: 55, value: 'Mango', weight: 300 },
+    { key: 56, value: 'Mung Beans', weight: 50 },
+    { key: 57, value: 'Mushroom', weight: 20 },
+    { key: 58, value: 'Navel Orange', weight: 150 },
+    { key: 59, value: 'Navy Beans', weight: 100 },
+    { key: 60, value: 'Nectarine', weight: 100 },
+    { key: 61, value: 'Onion', weight: 150 },
+    { key: 62, value: 'Orange', weight: 150 },
+    { key: 63, value: 'Papaya', weight: 800 },
+    { key: 64, value: 'Peach', weight: 150 },
+    { key: 65, value: 'Pear', weight: 180 },
+    { key: 66, value: 'Pineapple', weight: 1500 },
+    { key: 67, value: 'Pinto Beans', weight: 100 },
+    { key: 68, value: 'Plum', weight: 60 },
+    { key: 69, value: 'Pomegranate', weight: 250 },
+    { key: 70, value: 'Potato', weight: 150 },
+    { key: 71, value: 'Pumpkin', weight: 3000 },
+    { key: 72, value: 'Radish', weight: 20 },
+    { key: 73, value: 'Raspberries', weight: 50 },
+    { key: 74, value: 'Red Apple', weight: 180 },
+    { key: 75, value: 'Red Bell Pepper', weight: 150 },
+    { key: 76, value: 'Red Cabbage', weight: 700 },
+    { key: 77, value: 'Red Grapes', weight: 150 },
+    { key: 78, value: 'Red Onion', weight: 200 },
+    { key: 79, value: 'Red Potato', weight: 150 },
+    { key: 80, value: 'Red Radish', weight: 20 },
+    { key: 81, value: 'Red Seedless Grapes', weight: 150 },
+    { key: 82, value: 'Romaine Lettuce', weight: 450 },
+    { key: 83, value: 'Snow Peas', weight: 100 },
+    { key: 84, value: 'Spinach', weight: 100 },
+    { key: 85, value: 'Strawberries', weight: 25 },
+    { key: 86, value: 'Strawberry', weight: 12 },
+    { key: 87, value: 'Sugar Snap Peas', weight: 100 },
+    { key: 88, value: 'Sun-Dried Tomatoes', weight: 50 },
+    { key: 89, value: 'Sweet Potato', weight: 200 },
+    { key: 90, value: 'Tangerine', weight: 85 },
+    { key: 91, value: 'Tomato', weight: 150 },
+    { key: 92, value: 'Watermelon', weight: 5000 },
+    { key: 93, value: 'Yellow Bell Pepper', weight: 150 },
+    { key: 94, value: 'Yellow Onion', weight: 150 },
+    { key: 95, value: 'Yellow Potato', weight: 150 },
+    { key: 96, value: 'Yellow Squash', weight: 300 },
+    { key: 97, value: 'Yellow Tomato', weight: 100 },
+    { key: 98, value: 'Zucchini', weight: 200 },
+]
+
+export default function NewRecipe({ route, navigation }) {
     const [difficultyColor, setDifficultyColor] = useState("#66ccff")
     const [ingredients, setIngredients] = useState(initialIngredients)
     const [modalVisible, setModalVisible] = useState(false);
@@ -160,6 +267,9 @@ export default function NewRecipe({ navigation, route }) {
     const [popupModal, setPopupModal] = useState(false)
     const [showPopUp, setShowPopUp] = useState(false)
     const [userData, setUserData] = useState(null)
+    const [selected, setSelected] = useState('');
+    const [newObject, setNewObject] = useState();
+    const [cloudinaryToDelete, setCloudinaryToDelete] = useState([])
 
 
     // const gotoRef = useRef(null)
@@ -180,7 +290,8 @@ export default function NewRecipe({ navigation, route }) {
             setTimeout(() => {
                 setPopupModal(false)
                 dispatch({ type: CLEAR_MSG })
-                navigation.navigate('MyBookStackScreen')
+                // navigation.navigate('MyBookStackScreen', { fromNewRecipe: true })
+                navigation.navigate('MyBookStackScreen', { screen: 'MyBook', params: { fromNewRecipe: true }, })
                 // navigation.navigate('Home1')
             }, 2500)
         }
@@ -197,12 +308,57 @@ export default function NewRecipe({ navigation, route }) {
     }
 
     useEffect(() => {
-        route?.params !== undefined && setRecipeForm(route.params.recipe)
-    }, [route.params])
+        if (route?.params !== undefined) {
+            // console.log("NewRecipe", route?.params?.recipe?.recipePicture?.normal)
+            // const recipeToEdit = route?.params?.recipe
 
+            convertToBase64({ recipePicture: route?.params?.recipe?.recipePicture?.normal })
+                // .then((result) => setNewObject( result))
+                .then((result) => setRecipeForm({ ...route.params.recipe, ...result }))
+                .catch((err) => console.error(err));
+
+            // setRecipeForm(route.params.recipe)
+        }
+    }, [route.params])
+    // console.log("322", recipeForm)
     useEffect(() => {
         setRecipeForm({ ...recipeForm, status: show })
     }, [show])
+
+    useEffect(() => {
+        setCloudinaryToDelete([])
+    }, [])
+
+    // Função para converter uma URL do Cloudinary em uma representação base64
+    async function toBase64(url) {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = reject;
+            reader.onload = () => {
+                resolve(reader.result);
+            };
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    // Função principal para converter o objeto de URLs de imagem do Cloudinary em um objeto com representações base64 e caminhos originais
+    async function convertToBase64(obj) {
+        const keys = Object.keys(obj);
+        const result = {};
+        for (const key of keys) {
+            const urls = obj[key];
+            const base64Promises = urls.map((url) => toBase64(url));
+            const base64Array = await Promise.all(base64Promises);
+            const output = base64Array.map((base64, index) => ({
+                base64: base64,
+                path: urls[index],
+            }));
+            result[key] = output;
+        }
+        return result;
+    }
 
     ///// page 01 - general
     const handleOnChange = (name, text) => {
@@ -339,12 +495,17 @@ export default function NewRecipe({ navigation, route }) {
             setRecipeForm({ ...recipeForm, ingredients: result })
         }
         if (name === "picture") {
+            const result1 = recipeForm.recipePicture.filter((item, index) => item.path.includes("cloudinary") && index === product)
+            setCloudinaryToDelete([...cloudinaryToDelete, result1[0]?.path])
+            // console.log("NewRecipe1", result1[0].path)
             const result2 = recipeForm.recipePicture.filter((item, index) => index !== product)
+            // console.log("NewRecipe2", result2)
             setRecipeForm({ ...recipeForm, recipePicture: result2 })
             setShowImage(0)
         }
     }
-
+    // console.log("recipeForm", recipeForm)
+    // console.log("NewRecipe3", cloudinaryToDelete)
     ////// page 03 - preparation steps
     const handlePreparation = (text) => {
         setPreparation({ step: recipeForm.preparation.length + 1, preparation: text })
@@ -380,16 +541,19 @@ export default function NewRecipe({ navigation, route }) {
         setRecipeForm({ ...recipeForm, preparation: result })
     }
 
-    ///// backend CRUP
+    ///// backend CRUD
     const handleAdd = () => {
         // gotoRef.current.focus()
+        console.log(recipeForm)
 
         dispatch(createRecipe(recipeForm));
         clearForm()
     }
 
     const handleEdit = () => {
-        dispatch(updateRecipe(recipeForm._id, recipeForm));
+        console.log(recipeForm)
+        dispatch(updateRecipe(recipeForm._id, { recipeForm, cloudinaryToDelete }));
+        // dispatch(deleteFromCloudinary(cloudinaryToDelete))
         clearForm()
         route.params = undefined
 
@@ -402,6 +566,24 @@ export default function NewRecipe({ navigation, route }) {
         setTagsValue("")
         setDifficultyColor("#66ccff")
         route.params = undefined
+    }
+
+    const Footer = () => {
+        return (
+
+            <View style={[styles.outputTags, { marginBottom: 20, position: "relative" }]}>
+                <TextInput
+                    style={{ height: 120, textAlignVertical: 'top', }}
+                    placeholder='Free Text max 256 char.'
+                    value={recipeForm.freeText}
+                    onChangeText={text => handleOnChange('freeText', text)}
+                    keyboardType="default"
+                    maxLength={256}
+                    multiline={true}
+                />
+                <Text style={{ position: "absolute", bottom: 0, right: 0 }}>{recipeForm?.freeText?.length}/256</Text>
+            </View>
+        )
     }
 
     return (
@@ -432,7 +614,7 @@ export default function NewRecipe({ navigation, route }) {
 
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', width: windowWidth, position: 'relative' }}>
 
-                        <Text style={styles.banner} >New Recipe</Text>
+                        <Banner title={(route.params === undefined) ? "New Recipe" : "Update Recipe"} />
 
                         <View style={styles.inputLogo}>
                             <TextInput
@@ -444,71 +626,15 @@ export default function NewRecipe({ navigation, route }) {
                             />
                         </View>
 
-                        <View style={{
-                            flex: 0.05, alignItems: 'center', justifyContent: 'center', width: windowWidth * 0.9, height: windowWidth * 0.54, marginBottom: 10, borderStyle: 'solid',
-                            borderWidth: 1,
-                            borderColor: 'black',
-                            marginTop: 10,
-                            position: "relative", zIndex: 5
-                        }}>
-                            {recipeForm.recipePicture.length !== 0 &&
-                                <ScrollView
-                                    pagingEnabled
-                                    horizontal
-                                    showsHorizontalScrollIndicator={false}
-                                    style={{
-                                        width: windowWidth * 0.9,
-                                        height: windowWidth * 0.59,
-                                        marginBottom: 10,
-                                        position: 'absolute'
-                                    }}>
+                        {/* <Image source={{ uri: 'https://res.cloudinary.com/dqnf2qxk8/image/upload/v1681839804/sharefood_test/xewa0xxyffvayocvvtkx.png' }}
+                            style={{
+                                width: 113,
+                                height: 80,
+                                marginBottom: 10,
+                                position: 'absolute'
+                            }} /> */}
 
-                                    {recipeForm.recipePicture.map((image, index) =>
-                                        <View key={uuid.v4()}>
-                                            <Image source={{ uri: image.base64 }}
-                                                style={{
-                                                    width: windowWidth * 0.9,
-                                                    height: windowWidth * 0.54,
-                                                    left: -windowWidth * 0.9 * (showImage),
-                                                    resizeMode: "cover",
-                                                    marginVertical: 10,
-                                                    borderStyle: 'solid',
-                                                    borderWidth: 1,
-                                                    borderColor: 'black',
-                                                }} />
-                                            <TouchableOpacity style={styles.delImg} onPress={() => delIngredient(showImage, "picture")}>
-                                                <AntDesign name="delete" size={24} color="black" />
-                                            </TouchableOpacity>
-
-                                            {recipeForm.recipePicture.length > 1 &&
-                                                <View style={{ width: "100%", top: 10, left: 0, position: "absolute", zIndex: 5, elevation: 5, flexDirection: "row", justifyContent: 'space-between', alignSelf: 'center' }}>
-                                                    <View style={{ width: "50%", height: "100%" }}>
-                                                        {showImage > 0 &&
-                                                            <TouchableOpacity onPress={() => setShowImage(showImage => showImage - 1)}
-                                                                style={{
-                                                                    width: "100%",
-                                                                    height: windowWidth * 0.54,
-                                                                    // flexDirection: "row", justifyContent: 'flex-start',
-                                                                }}>
-                                                                {/* <AntDesign name="leftcircleo" size={24} color="orange" style={{ top: "55%", left: "5%" }} /> */}
-                                                            </TouchableOpacity>}
-                                                    </View>
-                                                    <View style={{ width: "50%", height: "100%" }}>
-                                                        {showImage < (recipeForm.recipePicture.length - 1) &&
-                                                            <TouchableOpacity onPress={() => setShowImage(showImage => showImage + 1)}
-                                                                style={{
-                                                                    width: "100%",
-                                                                    height: windowWidth * 0.54,
-                                                                    // flexDirection: "row", justifyContent: 'flex-end',
-                                                                }}>
-                                                                {/* <AntDesign name="rightcircleo" size={24} color="orange" style={{ top: "55%", right: -60 }} /> */}
-                                                            </TouchableOpacity>}
-                                                    </View>
-                                                </View>
-                                            }
-                                        </View>)}
-                                </ScrollView>}
-                        </View>
+                        <ImagesSwipe recipeFormRecipePicture={recipeForm.recipePicture} setShowImage={setShowImage} showImage={showImage} delIngredient={delIngredient} />
 
                         {recipeForm.recipePicture.length < 3 &&
                             <View style={[styles.genericButton, { marginTop: 0 }]}>
@@ -525,6 +651,7 @@ export default function NewRecipe({ navigation, route }) {
                                 <View style={styles.logoInput}>
                                     <Entypo name="stopwatch" size={24} color="black" />
                                     <TextInput
+                                        // value={JSON.stringify(recipeForm.prepTime)}
                                         value={recipeForm.prepTime}
                                         style={styles.numberInput}
                                         keyboardType='numeric'
@@ -539,6 +666,7 @@ export default function NewRecipe({ navigation, route }) {
                                 <View style={styles.logoInput}>
                                     <Entypo name="stopwatch" size={24} color="black" />
                                     <TextInput
+                                        // value={JSON.stringify(recipeForm.cookTime)}
                                         value={recipeForm.cookTime}
                                         style={styles.numberInput}
                                         keyboardType='numeric'
@@ -596,6 +724,7 @@ export default function NewRecipe({ navigation, route }) {
                                 <View style={styles.logoInput}>
                                     <Ionicons name="ios-people-circle-outline" size={24} color="black" />
                                     <TextInput
+                                        // value={JSON.stringify(recipeForm.forHowMany)}
                                         value={recipeForm.forHowMany}
                                         style={styles.numberInput}
                                         keyboardType='numeric'
@@ -725,7 +854,8 @@ export default function NewRecipe({ navigation, route }) {
                         </View>
 
                         <View style={styles.outputTags} >
-                            <FlatList
+                            {/* <FlatList
+                                // ListHeaderComponent={<Header />}
                                 data={recipeForm.tags}
                                 // horizontal={true}
                                 // showsHorizontalScrollIndicator={false}
@@ -733,8 +863,9 @@ export default function NewRecipe({ navigation, route }) {
                                 renderItem={({ item }) => <Text
                                     onPress={(text) => remove(text, "tags")}>{item}, </Text>}
                                 keyExtractor={item => item}
-                            />
-                            {/* {recipeForm.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)} */}
+                            // ListFooterComponent={<Footer />}
+                            /> */}
+                            {recipeForm.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
                         </View>
 
                         <View style={[styles.outputTags, { marginBottom: 20, position: "relative" }]}>
@@ -751,6 +882,7 @@ export default function NewRecipe({ navigation, route }) {
                         </View>
                     </View>
                 </ScrollView>
+
                 {/* /// ingredients */}
                 <View style={{
                     flex: 1,
@@ -758,10 +890,11 @@ export default function NewRecipe({ navigation, route }) {
                     justifyContent: 'flex-start',
                     height: windowHeight - 140,
                     // maxHeight: 500,
-                    width: windowWidth
+                    width: windowWidth,
+                    position: 'relative'
                 }}>
 
-                    <Text style={styles.banner}>Ingredients</Text>
+                    <Banner title="Ingredients" />
 
                     <SpSheet text={"Open Units Convertor"} heightValue={550}><Conversions /></SpSheet>
 
@@ -793,7 +926,7 @@ export default function NewRecipe({ navigation, route }) {
                                                 </Text>
                                             </Pressable>
                                             }
-                                            keyExtractor={item => item.product}
+                                            keyExtractor={item => uuid.v4()}
                                         />
                                     </View>
                                 </View>
@@ -810,11 +943,32 @@ export default function NewRecipe({ navigation, route }) {
                             </Pressable>
                         </View>
 
-                        <TextInput
+                        {/* <TextInput
                             value={ingredients.product}
                             style={styles.product}
                             placeholder='Ingredients'
-                            onChangeText={text => handleIngredients('product', text)} />
+                            onChangeText={text => handleIngredients('product', text)} /> */}
+
+                        <SelectCountry
+                            style={styles.dropdown}
+                            containerStyle={styles.containerList}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            placeholderStyle={styles.placeholderStyle}
+                            // imageStyle={styles.imageStyle}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            iconStyle={styles.iconStyle}
+                            search
+                            maxHeight={300}
+                            value={ingredients.product}
+                            data={productList}
+                            valueField="key"
+                            labelField="value"
+                            // imageField="image"
+                            placeholder={ingredients?.product === "" ? "ingredients" : ingredients?.product}
+                            searchPlaceholder="Search..."
+                            onChange={(item) => handleIngredients('product', item.value)}
+
+                        />
 
                         <TextInput
                             value={ingredients.remarks}
@@ -839,10 +993,8 @@ export default function NewRecipe({ navigation, route }) {
                         </TouchableOpacity>
                     </View>
 
-                    <FlatList
-                        data={recipeForm.ingredients}
-                        showsVerticalScrollIndicator={false}
-                        renderItem={({ item }) => <View style={styles.outputIngredients}>
+                    {recipeForm.ingredients.map(item =>
+                        <View style={styles.outputIngredients} key={uuid.v4()}>
                             <Text style={styles.quantity}>{item.quantity}</Text>
                             <Text style={styles.units}>{units.map(unit => unit.unit === item.units && unit.abreviation)}</Text>
                             <Text style={styles.product}>{item.product}</Text>
@@ -857,11 +1009,9 @@ export default function NewRecipe({ navigation, route }) {
                                 </TouchableOpacity>
                             </View>
 
-                        </View>
-                        }
-                        keyExtractor={item => item.product}
-                    />
+                        </View>)}
                 </View>
+
                 {/* /// preparation */}
                 <View style={{
                     flex: 1,
@@ -872,8 +1022,9 @@ export default function NewRecipe({ navigation, route }) {
                     width: windowWidth
                 }}>
 
-                    <View style={{ flex: 0.97 }}>
-                        <Text style={styles.banner}>Preparation</Text>
+                    <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', height: "80%" }}>
+
+                        <Banner title="Preparation" />
 
                         <View style={[styles.inputPreparation, styles.inputIngredients]}>
 
@@ -906,28 +1057,29 @@ export default function NewRecipe({ navigation, route }) {
                         <FlatList
                             data={recipeForm.preparation}
                             showsVerticalScrollIndicator={false}
-                            renderItem={({ item }) => <View style={styles.outputPreparation} >
-                                <Text style={styles.step} >Step {item.step}</Text>
-                                <Text style={styles.prep} >{item.preparation}</Text>
+                            renderItem={({ item }) =>
+                                <View style={styles.outputPreparation} >
+                                    <Text style={styles.step} >Step {item.step}</Text>
+                                    <Text style={styles.prep} >{item.preparation}</Text>
 
-                                <View style={styles.buttons} >
-                                    <TouchableOpacity style={styles.validation} onPress={() => editStep(item.step)}>
-                                        <Feather name="edit-3" size={24} color="black" />
-                                    </TouchableOpacity>
-                                    {(recipeForm.preparation[recipeForm.preparation.length - 1].step === item.step) &&
-                                        <TouchableOpacity style={styles.validation} onPress={() => delStep(item.step)}>
-                                            <AntDesign name="delete" size={24} color="black" />
+                                    <View style={styles.buttons} >
+                                        <TouchableOpacity style={styles.validation} onPress={() => editStep(item.step)}>
+                                            <Feather name="edit-3" size={24} color="black" />
                                         </TouchableOpacity>
-                                    }
-                                </View>
+                                        {(recipeForm.preparation[recipeForm.preparation.length - 1].step === item.step) &&
+                                            <TouchableOpacity style={styles.validation} onPress={() => delStep(item.step)}>
+                                                <AntDesign name="delete" size={24} color="black" />
+                                            </TouchableOpacity>
+                                        }
+                                    </View>
 
-                            </View>
+                                </View>
                             }
                             keyExtractor={item => item.preparation}
                         />
                     </View>
 
-                    <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
+                    <SwitchButton text01="Public" text02="Private" show={(route.params === undefined) ? show : recipeForm.status} setShow={setShow} />
 
                     < View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '90%' }} >
                         <TouchableOpacity style={styles.genericButton} onPress={clearForm}>
@@ -943,8 +1095,6 @@ export default function NewRecipe({ navigation, route }) {
                         }
                     </View>
 
-                    {/* {showPopUp && <PopUp message={redux?.recipe.message} type="success" />} */}
-                    {/* <PopUp message={redux?.recipe.message} type="success" /> */}
                 </View>
 
                 <PopupModal message={redux?.recipe.message} popupModal={popupModal} />
@@ -957,21 +1107,6 @@ export default function NewRecipe({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-    banner: {
-        width: 350,
-        height: 40,
-        justifyContent: 'center',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        borderStyle: 'solid',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 20,
-        fontSize: 18,
-        marginVertical: 10,
-        backgroundColor: "orange",
-        // color: 'white',
-    },
     button: {
         borderRadius: 20,
         padding: 10,
@@ -995,10 +1130,10 @@ const styles = StyleSheet.create({
         textAlignVertical: 'center'
     },
     buttons: {
-        width: 50,
+        width: 60,
         flexDirection: "row",
         alignSelf: 'center',
-        justifyContent: 'center'
+        justifyContent: 'space-around'
     },
     buttonClose: {
         backgroundColor: "#307ecc",
@@ -1071,12 +1206,12 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
     },
     inputIngredients: {
-        width: "90%",
+        width: "95%",
         backgroundColor: "white",
         flexDirection: "row",
         justifyContent: "space-between",
         height: 40,
-        marginBottom: 10,
+        marginVertical: 10,
         borderRadius: 10
     },
     inputLogo: {
@@ -1145,23 +1280,24 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     outputIngredients: {
-        width: "90%",
+        width: "95%",
         backgroundColor: "white",
         flexDirection: "row",
         justifyContent: "space-between",
-        height: 25,
+        height: 35,
         marginBottom: 5,
         borderRadius: 5,
     },
     outputPreparation: {
-        width: "90%",
+        width: "100%",
         backgroundColor: "white",
         flexDirection: "row",
-        justifyContent: "space-between",
+        // justifyContent: "space-between",
         minHeight: 25,
         marginBottom: 5,
         textAlignVertical: 'center',
         borderRadius: 5,
+        alignContent: "center"
     },
     outputTags: {
         minWidth: "90%",
@@ -1174,7 +1310,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     prep: {
-        width: 240,
+        width: 250,
         textAlignVertical: 'center',
         justifyContent: 'flex-start',
     },
@@ -1186,7 +1322,6 @@ const styles = StyleSheet.create({
         width: 110,
         paddingLeft: 5,
         textAlignVertical: 'center',
-
     },
     quantity: {
         width: 40,
@@ -1248,4 +1383,133 @@ const styles = StyleSheet.create({
         textAlign: 'center'
 
     },
+    dropdown: {
+        height: 40,
+        width: 130,
+        paddingLeft: 5,
+        // borderBottomColor: 'gray',
+        // borderBottomWidth: 0.5,
+        // backgroundColor: 'red',
+    },
+    containerList: {
+        // backgroundColor: "blue",
+        width: 200,
+    },
+    imageStyle: {
+        width: 24,
+        height: 24,
+    },
+    placeholderStyle: {
+        fontSize: 16,
+    },
+    selectedTextStyle: {
+        fontSize: 16,
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
+    },
+    inputSearchStyle: {
+        height: 40,
+        fontSize: 16,
+        width: "93%"
+    },
 })
+
+{/* <View style={{ position: 'absolute', zIndex: 999, }}>
+                        <SelectList
+                            onSelect={() => handleIngredients('product', selected)}
+
+                            setSelected={(val) => setSelected(val)}
+                            data={productList}
+                            save="value"
+                            dropdownStyles={{
+                                backgroundColor: 'white'
+                            }}
+                        />
+                    </View> */}
+
+{/* <FlatList
+                        data={recipeForm.ingredients}
+                        showsVerticalScrollIndicator={false}
+                        renderItem={({ item }) => <View style={styles.outputIngredients}>
+                            <Text style={styles.quantity}>{item.quantity}</Text>
+                            <Text style={styles.units}>{units.map(unit => unit.unit === item.units && unit.abreviation)}</Text>
+                            <Text style={styles.product}>{item.product}</Text>
+                            <Text style={styles.remarks}>{item.remarks}</Text>
+
+                            <View style={styles.buttons}>
+                                <TouchableOpacity style={styles.validation} onPress={() => editIngredient(item.product)}>
+                                    <Feather name="edit-3" size={24} color="black" />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.validation} onPress={() => delIngredient(item.product, "ingredient")}>
+                                    <AntDesign name="delete" size={24} color="black" />
+                                </TouchableOpacity>
+                            </View>
+
+                        </View>
+                        }
+                        keyExtractor={item => uuid.v4()}
+                    /> */}
+
+{/* <SelectList
+                            onSelect={() => handleIngredients('product', selected)}
+                            setSelected={setSelected}
+                            // placeholder={mailForm.reciverName ? mailForm.reciverName : "To:"}
+                            placeholder="Ingredients"
+                            // maxHeight="150"
+                            data={productList}
+                            search={true}
+                            // fontFamily="lato"
+                            save="value"
+                            boxStyles={{
+                                width: 130,
+                                borderWidth: 0,
+                                // borderBottomWidth: 2,
+                                // borderStyle: 'solid',
+                                // borderColor: 'black',
+
+                            }}
+                            dropdownItemStyles={{
+                                // width: 250,
+                                marginBottom: 10,
+
+                            }}
+                            dropdownStyles={{
+                                width: 250,
+                                height: 250,
+                                alignSelf: 'center',
+                                // backgroundColor: 'white',
+                                position: 'absolute',
+                                elevation: 999,
+                                zIndex: 999,
+                                top: 35,
+                                backgroundColor: 'cyan'
+                            }}
+                        // dropdownTextStyles={{
+
+                        //     // backgroundColor: 'red'
+                        // }}
+                        // arrowicon={
+                        //   <FontAwesome name="chevron-down" size={12} color={'black'} />
+                        // }
+                        // searchicon={
+                        //   <FontAwesome name="search" size={12} color={'black'} />
+                        // }
+                        /> */}
+{/* <View style={{ position: 'absolute', zIndex: 999, width: 130, left: 130 }}>
+                            <SelectList
+                                onSelect={() => handleIngredients('product', selected)}
+
+                                setSelected={(val) => setSelected(val)}
+                                data={productList}
+                                save="value"
+                                dropdownStyles={{
+                                    backgroundColor: 'white'
+                                }}
+                                boxStyles={{
+                                    backgroundColor: 'white'
+
+                                }}
+                            />
+                        </View> */}

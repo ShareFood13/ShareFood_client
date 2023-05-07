@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import ShowOtherUser from '../pages/ShowOtherUser'
 
 import { Context } from "../../context/UserContext";
+import Banner from '../../components/Banner';
 
 export default function MyFriends({ navigation }) {
     const windowWidth = Dimensions.get('window').width;
@@ -28,9 +29,6 @@ export default function MyFriends({ navigation }) {
     const redux = useSelector((state) => state)
 
     const otherUsersList = redux?.other?.otherUsers
-
-    // console.log("myFriends redux", redux)
-    // console.log("myFriends following", redux?.auth?.authData?.result?.profile?.following)
 
     const wait = (timeout) => {
         return new Promise(resolve => setTimeout(resolve, timeout));
@@ -54,6 +52,7 @@ export default function MyFriends({ navigation }) {
 
     return (
         <View style={styles.container}>
+            <Banner title="My Friends" />
             {/* {otherUsersList.map(user => redux?.auth?.authData?.result?.profile?.following?.includes(user._id) &&
                 <TouchableOpacity onPress={() => openOtherUser(user._id)} key={user._id}>
                     <View style={{ width: windowWidth / 3, height: 150, borderRadius: 10, borderWidth: 1, borderColor: 'black', marginHorizontal: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white' }}>
