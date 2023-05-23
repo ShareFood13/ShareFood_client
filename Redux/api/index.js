@@ -2,7 +2,7 @@ import axios from "axios"
 
 import * as SecureStore from 'expo-secure-store';
 
-const API = axios.create({ baseURL: 'https://5ccd-77-126-187-228.ngrok-free.app' })
+const API = axios.create({ baseURL: 'https://d5e5-77-124-25-20.ngrok-free.app' })
 
 API.interceptors.request.use(async (req) => {
     if (await SecureStore.getItemAsync('storageData')) {
@@ -58,6 +58,8 @@ export const updateShopList = (_id, updatedShopList) => API.patch(`/api/shoplist
 export const getAllShopList = (_id) => API.get(`/api/shoplist/getall/${_id}`)
 export const getShopList = (listId) => API.get(`/api/shoplist/getshoplist/${listId}`)
 export const delShopList = (listId) => API.delete(`/api/shoplist/getshoplist/${listId}`)
+
+export const superSearch = (text, restrictions) => API.post(`/api/supersearch/${text}`, restrictions)
 
 // export const deleteFromCloudinary = (cloudinaryToDelete) => API.get(`/api/cludinary/delete`, cloudinaryToDelete)
 

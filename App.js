@@ -107,7 +107,7 @@ const MainStackScreen = () => (
     <MainStack.Screen
       name="ShowOtherUser"
       component={ShowOtherUser}
-      options={{ title: "Show Other User" }}
+      options={{headerShown: true }}
     />
   </MainStack.Navigator>
 )

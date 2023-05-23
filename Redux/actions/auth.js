@@ -1,4 +1,4 @@
-import { AUTH, SENDPASS, USER_INFO, SEND_TO_US, AUTH_ERROR, SAVE_PROFILE, CLEAR_ERROR, START_FOLLOWING, STOP_FOLLOWING, FOLLOW_ERROR } from "../constants/constantsTypes"
+import { AUTH, SENDPASS, USER_INFO, SEND_TO_US, AUTH_ERROR, SAVE_PROFILE, CLEAR_ERROR, START_FOLLOWING, STOP_FOLLOWING, FOLLOW_ERROR,CLEAR_MSG } from "../constants/constantsTypes"
 import * as api from "../api"
 
 export const signin = (formData) => async (dispatch) => {
@@ -103,19 +103,19 @@ export const startFollowing = (ids) => async (dispatch) => {
         await dispatch({ type: START_FOLLOWING, data })
     } catch (error) {
 
-        dispatch({ type: FOLLOW_ERROR, message: "START_FOLLOWING ERROR" })
+        dispatch({ type: CLEAR_MSG, message: "START_FOLLOWING ERROR" })
     }
 }
 
-export const stopFollowing = (my_id, follow_id) => async (dispatch) => {
+export const stopFollowing = (ids) => async (dispatch) => {
 
     try {
 
-        const { data } = await api.stopFollowing(my_id, follow_id)
+        const { data } = await api.stopFollowing(ids)
 
-        await dispatch({ type: STOP_FOLLOWING, payload: data })
+        await dispatch({ type: STOP_FOLLOWING, data })
     } catch (error) {
 
-        dispatch({ type: FOLLOW_ERROR, message: "STOP_FOLLOWING ERROR" })
+        dispatch({ type: CLEAR_MSG, message: "STOP_FOLLOWING ERROR" })
     }
 }

@@ -17,6 +17,7 @@ import ShowOtherUser from '../pages/ShowOtherUser'
 
 import { Context } from "../../context/UserContext";
 import Banner from '../../components/Banner';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function MyFriends({ navigation }) {
     const windowWidth = Dimensions.get('window').width;
@@ -25,7 +26,7 @@ export default function MyFriends({ navigation }) {
 
     const [refreshing, setRefreshing] = useState(false)
     const [myFriends, setMyFriends] = useState([])
-
+    const isFocused = useIsFocused()
     const redux = useSelector((state) => state)
 
     const otherUsersList = redux?.other?.otherUsers
@@ -43,11 +44,16 @@ export default function MyFriends({ navigation }) {
     useEffect(() => {
         var result = []
         otherUsersList.map(user => redux?.auth?.authData?.result?.profile?.following?.includes(user._id) && result.push(user))
+        console.log(result)
         setMyFriends(result)
-    }, [otherUsersList])
+    }, [isFocused])
 
     const openOtherUser = (userInfo) => {
-        navigation.navigate("ShowOtherUser", { userInfo })
+        navigation.navigate("Main", { screen: "ShowOtherUser", params: { userInfo } })
+        // navigation.navigate("ShowOtherUser",{ userInfo })
+        // .setOptions({ title: 'Updated!' })
+        // navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: mealToShopList, showType: "meals", mealName: meal.mealName } })
+
     }
 
     return (
@@ -110,6 +116,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: 10,
+        paddingBottom: 0
     }
 })

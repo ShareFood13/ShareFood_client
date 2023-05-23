@@ -25,8 +25,11 @@ import {
 
 import uuid from 'react-native-uuid';
 
+const windowWidth = Dimensions.get('window').width
+
 
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
+import GlobalStyles from '../GlobalStyles';
 
 const logos = [
     { name: "Vegan", image: require('../assets/images/logo/vegan.png') },
@@ -56,7 +59,7 @@ const logos = [
 ]
 
 export default function MealCard({ meal, navigation, openMeal, remove, editMeal, delMeal }) {
-
+const [theme, setTheme] = useState('stylesLight')
 
     return (
         <View
@@ -65,13 +68,13 @@ export default function MealCard({ meal, navigation, openMeal, remove, editMeal,
                 justifyContent: 'space-between',
                 alignSelf: 'center',
                 alignItems: 'center',
-                width: '93%',
-                marginVertical: 5,
+                width: windowWidth - 20,
+                marginBottom: 10,
                 height: 90,
                 borderWidth: 0.5,
                 borderStyle: 'solid',
                 borderColor: 'black',
-                backgroundColor: 'white',
+                backgroundColor: GlobalStyles[theme].paperColor,
                 borderRadius: 10,
                 paddingHorizontal: 10
             }}>

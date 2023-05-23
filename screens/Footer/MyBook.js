@@ -24,6 +24,7 @@ import RecipeCard from '../../components/RecipeCard';
 import PopupModal from '../../components/PopupModal';
 
 import * as SecureStore from 'expo-secure-store';
+import GlobalStyles from '../../GlobalStyles';
 
 // import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
 
@@ -41,6 +42,7 @@ export default function MyBook({ route, navigation }) {
     const [refreshing, setRefreshing] = useState(false)
 
     const [filter, setFilter] = useState('All');
+    const [theme, setTheme] = useState('stylesLight')
     const [newList, setNewList] = useState([]);
 
 
@@ -63,7 +65,7 @@ export default function MyBook({ route, navigation }) {
     useEffect(() => {
         // getItem()
         // console.log("params", route.params.fromNewRecipe)
-        setUserId(redux.auth.authData.result._id)
+        setUserId(redux?.auth?.authData?.result?._id)
     }, [])
 
     async function getItem() {
@@ -132,12 +134,12 @@ export default function MyBook({ route, navigation }) {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: GlobalStyles[theme].background}]}>
 
             <TextInput
                 onChangeText={text => onChangeSearch(text)}
                 placeholder="Search for a recipe..."
-                style={styles.search}
+                style={[styles.search, {backgroundColor: GlobalStyles[theme].paperColor}]}
             />
 
             <ScrollView
@@ -149,12 +151,12 @@ export default function MyBook({ route, navigation }) {
                         key={item}
                         style={[
                             styles.page,
-                            { backgroundColor: filter === item ? 'blue' : 'cyan' },
-                            { borderBottomColor: filter === item ? 'blue' : 'black' },
+                            { backgroundColor: filter === item ? GlobalStyles[theme].buttonColor : GlobalStyles[theme].lightBlue },
+                            { borderBottomColor: filter === item ? GlobalStyles[theme].buttonColor : GlobalStyles[theme].fontColor },
                         ]}
                         // onPress={() => setFilter(item)}>
                         onPress={() => pageFilter(item)}>
-                        <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: filter === item ? 'white' : 'black' }}>
+                        <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: filter === item ? GlobalStyles[theme].fontColor : GlobalStyles[theme].fontColor }}>
                             {item}
                         </Text>
                     </TouchableOpacity>
@@ -191,16 +193,17 @@ const styles = StyleSheet.create({
         alignContent: 'flex-start',
         // paddingTop: Constants.statusBarHeight,
         backgroundColor: 'white',
+        padding: 10
     },
     search: {
         backgroundColor: 'white',
-        width: windowWidth * 0.9,
+        width: "100%",
         height: 40,
         paddingLeft: 15,
         borderBottomWidth: 2,
         borderBottomColor: 'black',
         borderRadius: 10,
-        marginBottom: 15,
+        marginBottom: 10,
         alignSelf: 'center',
         backgroundColor: '#eee',
         fontWeight: 'bold',
@@ -208,11 +211,12 @@ const styles = StyleSheet.create({
     },
     pagination: {
         height: 0,
+        width: windowWidth
     },
     page: {
         width: 130,
         height: 50,
-        backgroundColor: 'cyan',
+        // backgroundColor: 'cyan',
         justifyContent: 'center',
         alignItems: 'center',
         borderColor: 'black',

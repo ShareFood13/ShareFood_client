@@ -29,6 +29,7 @@ import * as SecureStore from 'expo-secure-store';
 import { useDispatch, useSelector } from 'react-redux';
 import { delShopList, saveShopList, updateShopList } from '../Redux/actions/shopList';
 import Banner from './Banner';
+import GlobalStyles from '../GlobalStyles';
 
 
 
@@ -39,7 +40,7 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
     const [modalVisible, setModalVisible] = useState(false)
     const [userId, setUserId] = useState("")
     const [toDelete, setToDelete] = useState(false)
-
+    const [theme, setTheme] = useState('stylesLight')
 
     const dispatch = useDispatch()
 
@@ -105,19 +106,19 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                 <View style={{
                     flexDirection: 'row', width: "100%", justifyContent: 'space-around', alignItems: 'center'
                 }}>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: "green" }]}
+                    <TouchableOpacity style={[styles.button, { backgroundColor: GlobalStyles[theme].yesColor }]}
                         onPress={saveShop}
                     >
                         <Text style={{ fontWeight: 'bold', color: "white" }}>Save Shop List!</Text>
                     </TouchableOpacity>
                     {answer?.list?.some(item => item.isDone === true || item.isDone === false) &&
-                        <TouchableOpacity style={[styles.button, { backgroundColor: "red" }]}
+                        <TouchableOpacity style={[styles.button, { backgroundColor: GlobalStyles[theme].noColor }]}
                             onPress={openDeleteModal}>
                             <Text style={{ fontWeight: 'bold', color: "white" }}>Delete Shop List!</Text>
                         </TouchableOpacity>}
                 </View>
                 <View>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: "blue" }]}
+                    <TouchableOpacity style={[styles.button, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                         onPress={() => navigation.navigate('MyDrawer', { screen: 'Home' })}
                     >
                         <Text style={{ fontWeight: 'bold', color: "white" }}>Back Home!</Text>
@@ -155,12 +156,12 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                 ItemSeparatorComponent={ItemSeparatorView}
                 // ListHeaderComponent={<Header />}
                 renderItem={({ item }) =>
-                    <TouchableOpacity style={{ flexDirection: 'row', height: 35, width: "90%", justifyContent: 'center', alignSelf: 'center', alignItems: 'center', backgroundColor: 'white' }}
+                    <TouchableOpacity style={{ flexDirection: 'row', height: 35, width: "90%", justifyContent: 'center', alignSelf: 'center', alignItems: 'center', backgroundColor: GlobalStyles[theme].paperColor }}
                         // onPress={() => setChecked(!checked)}>
                         onPress={() => handleCheck(item._id)}>
                         {item.isDone ?
-                            <MaterialIcons name="check-box" size={30} color="green" style={{ width: "15%", height: 30, justifyContent: 'center', backgroundColor: 'white' }} />
-                            : <MaterialIcons name="check-box-outline-blank" size={30} color="red" style={{ width: "15%", height: 30, justifyContent: 'center', backgroundColor: 'white' }} />}
+                            <MaterialIcons name="check-box" size={30} color={GlobalStyles[theme].yesColor} style={{ width: "15%", height: 30, justifyContent: 'center', backgroundColor: GlobalStyles[theme].paperColor }} />
+                            : <MaterialIcons name="check-box-outline-blank" size={30} color={GlobalStyles[theme].noColor} style={{ width: "15%", height: 30, justifyContent: 'center', backgroundColor: GlobalStyles[theme].paperColor }} />}
                         <View style={{ flexDirection: 'row', width: "85%", justifyContent: 'center', }}>
                             <Text style={{ width: "100%", textAlign: 'left', textAlignVertical: 'center', textDecorationLine: item.isDone ? 'line-through' : 'none' }}>
                                 {/* Qty: {item.quantity} Un: {item.units} Prod: {item.product} */}
@@ -171,7 +172,7 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                 keyExtractor={item => item._id}
                 // extraData={selectedId}
                 // ListFooterComponent={<Footer />}
-                ListFooterComponentStyle={{ flex: 1, justifyContent: "flex-end", backgroundColor: 'red' }}
+                ListFooterComponentStyle={{ flex: 1, justifyContent: "flex-end", backgroundColor: GlobalStyles[theme].noColor }}
             />
             <Footer />
             <Modal
@@ -208,10 +209,10 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                                         height: 30,
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        borderColor: 'red',
+                                        borderColor: GlobalStyles[theme].noColor,
                                         borderWidth: 1,
                                         borderRadius: 10,
-                                        backgroundColor: "red",
+                                        backgroundColor: GlobalStyles[theme].noColor,
 
                                     }}
                                         onPress={() => { setModalVisible(false), setToDelete(false) }
@@ -224,10 +225,10 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                                         height: 30,
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        borderColor: 'green',
+                                        borderColor: GlobalStyles[theme].yesColor,
                                         borderWidth: 1,
                                         borderRadius: 10,
-                                        backgroundColor: "green",
+                                        backgroundColor: GlobalStyles[theme].yesColor,
 
                                     }}
                                         onPress={deleteShop}>

@@ -47,8 +47,9 @@ import { useIsFocused } from '@react-navigation/native';
 
 import { getMyRecipes } from '../../Redux/actions/recipes';
 import Banner from '../../components/Banner';
+import GlobalStyles from '../../GlobalStyles';
 
-
+const windowWidth = Dimensions.get('window').width
 
 const timeToString = (time) => {
     const date = new Date(time);
@@ -95,6 +96,7 @@ const Mycallendar = ({ navigation }) => {
     const [popupModal, setPopupModal] = useState(false)
     const [fromDate, setFromDate] = useState()
     const [toDate, setToDate] = useState()
+    const [theme, setTheme] = useState('stylesLight')
 
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
@@ -332,16 +334,50 @@ const Mycallendar = ({ navigation }) => {
 
     }
 
+    const Footer = () => {
+        return <View style={{
+            // position: 'absolute',
+            width: windowWidth,
+            // height: 120,
+            // alignSelf: 'center',
+            // justifyContent: 'flex-end',
+            // elevation: 5,
+            // zIndex: 5,
+
+        }}>
+            <TouchableOpacity
+                    onPress={() => setModalVisible(true)}> 
+                <View
+                    // value={mealForm.mealName}
+                    style={{
+                        width: windowWidth,
+                        height: 40,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderColor: 'black',
+                        borderWidth: 0.5,
+                        borderStyle: 'solid',
+                        backgroundColor: GlobalStyles[theme].buttonColor
+                    }}>
+                    <Text style={{ color: 'white', fontWeight: '700', fontSize: 20, }}>Add new Event</Text>
+
+                </View>
+            </TouchableOpacity>
+        </View>
+    }
     return (
 
         < View style={styles.container} >
-            < View style={{ alignItems: 'center' }} >
-                <View style={{ width: '100%' }}>
-                    <Button title='Add new Event' onPress={() => setModalVisible(true)} />
-                </View>
+
+            < View style={{ alignItems: 'center', padding: 10 }} >
+
                 <Banner title="My Calendar" />
 
-                <SpSheet text={"Create Shop List"} heightValue={370} style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: '100%' }}>
+                <SpSheet
+                    text={"Create Shop List"}
+                    heightValue={370}
+                    style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: '100%' }}
+                >
                     <View style={{ alignItems: 'center' }}>
                         <Text>From Date:</Text>
                         <DatePicker2
@@ -358,9 +394,23 @@ const Mycallendar = ({ navigation }) => {
                             formTypeInput="toDate"
                         />
                         <TouchableOpacity
-                            style={[styles.genericButton, { width: 180 }]}
+                            style={[{
+                                marginTop: 15,
+                                marginBottom: 30,
+                                // width: 100,
+                                // height: 40,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 30,
+                                borderStyle: 'solid',
+                                borderColor: 'black',
+                                borderWidth: 0.5,
+                                backgroundColor: GlobalStyles[theme].buttonColor,
+                                paddingHorizontal: 20,
+                                paddingVertical: 10
+                            }]}
                             onPress={() => createShopList()}>
-                            <Text>Create Shop List</Text>
+                            <Text style={{ fontSize: 16, fontWeight: '500', color: 'white' }}>Create Shop List</Text>
                         </TouchableOpacity>
                     </View>
                 </SpSheet>
@@ -391,7 +441,7 @@ const Mycallendar = ({ navigation }) => {
             //     agendaKnobColor: 'blue'
             // }}
             // Agenda container style
-            // style={{ height: 350, }}
+            // style={{}}
             />
 
             <Modal
@@ -478,12 +528,12 @@ const Mycallendar = ({ navigation }) => {
 
                         {!modalFromEdit ?
                             <TouchableOpacity
-                                style={styles.genericButton}
+                                style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                                 onPress={() => addNewEvent()}>
                                 <Text style={{ color: 'white', fontWeight: '700' }}>Save</Text>
                             </TouchableOpacity>
                             : <TouchableOpacity
-                                style={styles.genericButton}
+                                style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                                 onPress={() => updatEvent()}>
                                 <Text style={{ color: 'white', fontWeight: '700' }}>Update</Text>
                             </TouchableOpacity>
@@ -495,6 +545,10 @@ const Mycallendar = ({ navigation }) => {
 
             <PopupModal message={redux?.event.message} popupModal={popupModal} />
 
+            {/* <View style={{ width: '100%', backgroundColor: GlobalStyles[theme].buttonColor }}>
+                <Button title='Add new Event' onPress={() => setModalVisible(true)} />
+            </View> */}
+            <Footer />
         </View >
 
     );
@@ -521,7 +575,9 @@ const styles = StyleSheet.create({
         borderStyle: 'solid',
         borderColor: 'black',
         borderWidth: 1,
-        backgroundColor: '#66ccff',
+        paddingHorizontal: 20,
+        paddingVertical: 10
+        // backgroundColor: '#66ccff',
     },
     item: {
         flex: 1,

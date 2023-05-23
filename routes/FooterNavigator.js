@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Image } from 'react-native';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -9,21 +9,30 @@ import LovedOnes from '../screens/Footer/LovedOnes';
 import MyBook from '../screens/Footer/MyBook';
 import NewRecipe from '../screens/Footer/NewRecipe';
 import Search from '../screens/Footer/Search';
+import Feed from '../screens/Footer/Feed'
 
 import RecipeDetail from '../screens/Footer/RecipeDetail';
 
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 
+import { useDispatch, useSelector } from 'react-redux';
+
 const Tab = createBottomTabNavigator();
 
 export default function HomeScreen() {
+    const dispatch = useDispatch()
+    const redux = useSelector((state) => state)
+    // console.log("Home redux", redux?.auth?.authData?.result?.profile?.profilePicture)
+
+
     return (
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
                 tabBarShowLabel: false,
                 tabBarStyle: {
-                    height: 80,
+                    height: 60,
+                    // height: 80,
                     headerShown: false,
                 },
                 headerLeftLabelVisibler: false,
@@ -35,18 +44,25 @@ export default function HomeScreen() {
                     //Home2
                     tabBarIcon: ({ focused }) => (
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                            <AntDesign
+                            {/* <AntDesign
                                 name="home"
-                                size={35}
+                                size={40}
                                 style={{ color: focused ? '#e32f45' : '#748c94' }}
+                            /> */}
+                            <Image
+                                // source={require("../assets/images/user-profile.jpeg")}
+                                source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture.base64 }}
+                                // source={{ uri: userContext?.profilePicture }}
+                                style={{ height: 40, width: 40, borderRadius: 45 }}
+
                             />
-                            <Text
+                            {/* <Text
                                 style={{
                                     color: focused ? '#e32f45' : '#748c94',
                                     fontSize: 12,
                                 }}>
                                 HOME
-                            </Text>
+                            </Text> */}
                         </View>
                     ),
                 }}
@@ -59,16 +75,16 @@ export default function HomeScreen() {
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                             <AntDesign
                                 name="search1"
-                                size={35}
+                                size={40}
                                 style={{ color: focused ? '#e32f45' : '#748c94' }}
                             />
-                            <Text
+                            {/* <Text
                                 style={{
                                     color: focused ? '#e32f45' : '#748c94',
                                     fontSize: 12,
                                 }}>
                                 SEARCH
-                            </Text>
+                            </Text> */}
                         </View>
                     ),
                 }}
@@ -78,34 +94,57 @@ export default function HomeScreen() {
                 component={NewRecipe}
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ justifyContent: 'center', alignItems: 'center', bottom: 15, backgroundColor: 'white', borderRadius: 50 }}>
                             {focused ? (
-                                <AntDesign name="pluscircle" size={35} color="#e32f45" />
+                                <AntDesign name="pluscircle" size={55} color="#e32f45" />
                             ) : (
-                                <AntDesign name="pluscircleo" size={35} color="#748c94" />
+                                <AntDesign name="pluscircleo" size={55} color="#748c94" />
                             )}
-                            <Text
+                            {/* <Text
                                 style={{
                                     color: focused ? '#e32f45' : '#748c94',
                                     fontSize: 12,
                                 }}>
                                 NEW RECIPE
-                            </Text>
+                            </Text> */}
                         </View>
                     ),
                     // title: 'New Recipe'
                 }}
             />
             <Tab.Screen
+                name="Feed"
+                component={Feed}
+                options={{
+                    //Home2
+                    tabBarIcon: ({ focused }) => (
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <AntDesign
+                                name="home"
+                                size={40}
+                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                            />
+                            {/* <Text
+                                style={{
+                                    color: focused ? '#e32f45' : '#748c94',
+                                    fontSize: 12,
+                                }}>
+                                Feed
+                            </Text> */}
+                        </View>
+                    ),
+                }}
+            />
+            {/* <Tab.Screen
                 name="LovedOnes"
                 component={LovedOnes}
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                             {focused ? (
-                                <AntDesign name="heart" size={35} color="#e32f45" />
+                                <AntDesign name="heart" size={40} color="#e32f45" />
                             ) : (
-                                <AntDesign name="hearto" size={35} color="#748c94" />
+                                <AntDesign name="hearto" size={40} color="#748c94" />
                             )}
                             <Text
                                 style={{
@@ -117,7 +156,7 @@ export default function HomeScreen() {
                         </View>
                     ),
                 }}
-            />
+            /> */}
             <Tab.Screen
                 name="MyBookStackScreen"
                 component={MyBookStackScreen}
@@ -127,16 +166,16 @@ export default function HomeScreen() {
                         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                             <MaterialIcons
                                 name="menu-book"
-                                size={35}
+                                size={40}
                                 style={{ color: focused ? '#e32f45' : '#748c94' }}
                             />
-                            <Text
+                            {/* <Text
                                 style={{
                                     color: focused ? '#e32f45' : '#748c94',
                                     fontSize: 12,
                                 }}>
                                 MY BOOK
-                            </Text>
+                            </Text> */}
                         </View>
                     ),
                     title: 'My Book',
@@ -161,7 +200,7 @@ const MyBookStackScreen = () => (
                     <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                         <MaterialIcons
                             name="menu-book"
-                            size={35}
+                            size={40}
                             style={{ color: focused ? '#e32f45' : '#748c94' }}
                         />
                         <Text

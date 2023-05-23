@@ -7,7 +7,8 @@ import meal from "./meal"
 import myMail from "./myMail"
 import other from "./other"
 import shopList from "./shopList"
+import superSearch from "./superSearch"
 
 export default combineReducers({
-    auth, recipe, event, meal, myMail, other, shopList
+    auth, recipe, event, meal, myMail, other, shopList, superSearch
 })

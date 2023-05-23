@@ -21,6 +21,7 @@ import { DataTable } from 'react-native-paper';
 import uuid from 'react-native-uuid';
 import { ScrollView } from 'react-native-gesture-handler';
 import Banner from '../../components/Banner';
+import GlobalStyles from '../../GlobalStyles';
 
 const mainColor = '#052F5F'
 
@@ -210,6 +211,7 @@ export default function Conversions() {
     const [toUnitShow, setToUnitShow] = useState('');
     const [value, setValue] = useState(0);
     const [multi, setMulti] = useState(1);
+    const [theme,setTheme] = useState('stylesLight')
 
     const [test, setTest] = useState(1);
     var array = [];
@@ -289,10 +291,11 @@ export default function Conversions() {
 
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: GlobalStyles[theme].background,}]}>
+
             <Banner title="Units Convertor" />
-            <ScrollView showsVerticalScrollIndicator={false}
-            >
+
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.switch}>
                     <View
                         style={{
@@ -353,6 +356,7 @@ export default function Conversions() {
                         </TouchableOpacity>
                     </View>
                 </View>
+                
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                     <View>
                         <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
@@ -360,11 +364,11 @@ export default function Conversions() {
                                 value={value}
                                 keyboardType={'numeric'}
                                 onChangeText={(text) => setValue(text)}
-                                style={{ backgroundColor: 'white', width: 80, height: 55, textAlign: 'center', fontSize: 18, marginRight: 20, borderRadius: 15, borderColor: 'black', borderWidth: 1, borderStyle: 'solid' }}
+                                style={{ backgroundColor: GlobalStyles[theme].paperColor, width: 80, height: 55, textAlign: 'center', fontSize: 18, marginRight: 20, borderRadius: 15, borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid' }}
                             />
                             <View style={{ borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid' }}>
                                 <Picker
-                                    style={{ width: 150, height: 55, alignSelf: 'center', paddingLeft: 10, backgroundColor: 'white', }}
+                                    style={{ width: 150, height: 55, alignSelf: 'center', paddingLeft: 10, backgroundColor: GlobalStyles[theme].paperColor }}
                                     selectedValue={fromUnit}
                                     onValueChange={(text) => setFromUnitHandler(text)}>
                                     <Picker.Item label="From..." value="From..." />
@@ -392,7 +396,7 @@ export default function Conversions() {
 
                         <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
                             <Text
-                                style={{ backgroundColor: 'white', width: 80, height: 55, textAlign: 'center', fontSize: 18, marginRight: 20, textAlignVertical: 'center', borderRadius: 15, borderColor: 'black', borderWidth: 1, borderStyle: 'solid' }}>
+                                style={{ backgroundColor: GlobalStyles[theme].paperColor, width: 80, height: 55, textAlign: 'center', fontSize: 18, marginRight: 20, textAlignVertical: 'center', borderRadius: 15, borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid' }}>
                                 {show !== 'temperature'
                                     ? (value * multi).toFixed(3)
                                     : toUnit === 'toCelsius'
@@ -402,7 +406,7 @@ export default function Conversions() {
 
                             <View style={{ borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid' }}>
                                 <Picker
-                                    style={{ width: 150, height: 55, alignSelf: 'center', paddingLeft: 10, backgroundColor: 'white' }} selectedValue={toUnitShow}
+                                    style={{ width: 150, height: 55, alignSelf: 'center', paddingLeft: 10, backgroundColor: GlobalStyles[theme].paperColor}}  selectedValue={toUnitShow}
                                     onValueChange={(text) => setTo(text)}>
                                     <Picker.Item label="To..." value="To..." />
                                     {show === 'mass'
@@ -421,7 +425,7 @@ export default function Conversions() {
                         </View>
                     </View>
                     <TouchableOpacity onPress={() => result()} style={{
-                        width: 40, height: 160, backgroundColor: '#30D5C8', marginLeft: 30, justifyContent: 'center', borderRadius: 15,
+                        width: 40, height: 160, backgroundColor: GlobalStyles[theme].buttonColor, marginLeft: 30, justifyContent: 'center', borderRadius: 15,
                         borderColor: 'black', borderWidth: 1, borderStyle: 'solid'
                     }}>
                         {convert.map(elem => <Text key={uuid.v4()} style={{ fontSize: 14, fontWeight: 'bold', color: 'white', width: '100%', textAlign: 'center' }}>{elem}</Text>)}
@@ -433,8 +437,9 @@ export default function Conversions() {
                     borderStyle: 'solid',
                     borderColor: 'black',
                     borderWidth: 0.5,
-                    width: '90%',
-                    marginTop: 15
+                    width: '100%',
+                    marginTop: 15,
+                    backgroundColor: GlobalStyles[theme].paperColor
                 }}>
                     <DataTable style={{ width: '100%' }}>
                         <DataTable.Header style={{ width: '100%' }}>
@@ -480,9 +485,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignContent: 'center',
-        // paddingTop: Constants.statusBarHeight,
-        backgroundColor: '#ecf0f1',
-        // padding: 8,
+        padding: 10,
     },
     paragraph: {
         margin: 24,
@@ -495,7 +498,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        width: '90%',
+        width: '100%',
         height: 30,
         marginVertical: 15,
         borderRadius: 10,
@@ -504,13 +507,5 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffcc80',
         // opacity: 0.2,
         // position: 'relative'
-    },
-    container2: {
-        // paddingTop: 100,
-        // paddingHorizontal: 30,
-        borderStyle: 'solid',
-        borderColor: 'black',
-        borderWidth: 0.5,
-        width: '90%',
     },
 });

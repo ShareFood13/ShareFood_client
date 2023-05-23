@@ -43,7 +43,8 @@ import Banner from '../../components/Banner';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { SelectCountry } from 'react-native-element-dropdown';
 import ImagesSwipe from '../../components/ImagesSwipe';
-
+import GlobalStyles from '../../GlobalStyles';
+import GlobalTextStyles from '../../GlobalTextStyles';
 
 
 const initialPreparation = {
@@ -249,6 +250,9 @@ const productList = [
     { key: 98, value: 'Zucchini', weight: 200 },
 ]
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 export default function NewRecipe({ route, navigation }) {
     const [difficultyColor, setDifficultyColor] = useState("#66ccff")
     const [ingredients, setIngredients] = useState(initialIngredients)
@@ -262,25 +266,18 @@ export default function NewRecipe({ route, navigation }) {
     const [showImage, setShowImage] = useState(0)
     const [show, setShow] = useState("Public")
     const [tagsValue, setTagsValue] = useState("")
-    const [user, setUser] = useState("");
-    const [message, setMessage] = useState("")
     const [popupModal, setPopupModal] = useState(false)
-    const [showPopUp, setShowPopUp] = useState(false)
     const [userData, setUserData] = useState(null)
-    const [selected, setSelected] = useState('');
-    const [newObject, setNewObject] = useState();
     const [cloudinaryToDelete, setCloudinaryToDelete] = useState([])
-
+    const [theme, setTheme] = useState('stylesLight')
+    const [text, setText] = useState('normalText')
 
     // const gotoRef = useRef(null)
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
 
-
     const redux = useSelector((state) => state)
 
-    const windowWidth = Dimensions.get('window').width;
-    const windowHeight = Dimensions.get('window').height;
 
     const { userContext, setUserContext } = useContext(Context)
 
@@ -564,26 +561,8 @@ export default function NewRecipe({ route, navigation }) {
         setIngredients(initialIngredients)
         setPreparation(initialPreparation)
         setTagsValue("")
-        setDifficultyColor("#66ccff")
+        setDifficultyColor(GlobalStyles[theme]?.buttonColor)
         route.params = undefined
-    }
-
-    const Footer = () => {
-        return (
-
-            <View style={[styles.outputTags, { marginBottom: 20, position: "relative" }]}>
-                <TextInput
-                    style={{ height: 120, textAlignVertical: 'top', }}
-                    placeholder='Free Text max 256 char.'
-                    value={recipeForm.freeText}
-                    onChangeText={text => handleOnChange('freeText', text)}
-                    keyboardType="default"
-                    maxLength={256}
-                    multiline={true}
-                />
-                <Text style={{ position: "absolute", bottom: 0, right: 0 }}>{recipeForm?.freeText?.length}/256</Text>
-            </View>
-        )
     }
 
     return (
@@ -592,62 +571,55 @@ export default function NewRecipe({ route, navigation }) {
             {/* <ScrollView
                 showsVerticalScrollIndicator={false}
             > */}
-            {/* <KeyboardAvoidingView
-                    style={styles.container}
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                > */}
+            <KeyboardAvoidingView
+                    // style={styles.container}
+                    style={{
+                        width: windowWidth, 
+                        maxHeight: windowHeight - 118,
+                        backgroundColor: GlobalStyles[theme].background
+                        // borderStyle: 'solid',
+                        // borderWidth: 1,
+                        // borderColor: 'black',
+    
+                    }}
+                    // behavior={Platform.OS === "ios" ? "padding" : "height"}
+                >
             <ScrollView
                 // scrollView das 3 paginas
                 pagingEnabled
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                style={{
-                    width: windowWidth, maxHeight: windowHeight - 140,
-                    borderStyle: 'solid',
-                    borderWidth: 1,
-                    borderColor: 'black',
-
-                }}
+                
             >
                 {/* /// general */}
                 <ScrollView showsVerticalScrollIndicator={false}>
 
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', width: windowWidth, position: 'relative' }}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', width: windowWidth, position: 'relative', padding: 10 }}>
 
                         <Banner title={(route.params === undefined) ? "New Recipe" : "Update Recipe"} />
 
-                        <View style={styles.inputLogo}>
-                            <TextInput
-                                // ref={gotoRef}
-                                value={recipeForm.recipeName}
-                                style={styles.input}
-                                placeholder='Recipe Name'
-                                onChangeText={text => handleOnChange('recipeName', text)}
-                            />
-                        </View>
-
-                        {/* <Image source={{ uri: 'https://res.cloudinary.com/dqnf2qxk8/image/upload/v1681839804/sharefood_test/xewa0xxyffvayocvvtkx.png' }}
-                            style={{
-                                width: 113,
-                                height: 80,
-                                marginBottom: 10,
-                                position: 'absolute'
-                            }} /> */}
+                        <TextInput
+                            value={recipeForm.recipeName}
+                            style={[styles.inputLogo, { backgroundColor: GlobalStyles[theme].paperColor }]}
+                            // style={styles.input}
+                            placeholder='Recipe Name'
+                            onChangeText={text => handleOnChange('recipeName', text)}
+                        />
 
                         <ImagesSwipe recipeFormRecipePicture={recipeForm.recipePicture} setShowImage={setShowImage} showImage={showImage} delIngredient={delIngredient} />
 
                         {recipeForm.recipePicture.length < 3 &&
-                            <View style={[styles.genericButton, { marginTop: 0 }]}>
+                            <View style={[styles.genericButton, { marginTop: 0, backgroundColor: GlobalStyles[theme].buttonColor }]}>
                                 {recipeForm.recipePicture.length < 3 &&
                                     <TouchableOpacity>
-                                        <Text onPress={pickImage}>Add an image. {recipeForm.recipePicture.length}/3</Text>
+                                        <Text style={{ fontSize: GlobalTextStyles[text].fontSize, fontWeight: '500' }} onPress={pickImage}>Add an image! {recipeForm.recipePicture.length}/3</Text>
                                     </TouchableOpacity>}
                             </View>
                         }
 
-                        <View style={styles.cookInfo}>
+                        <View style={[styles.cookInfo, { backgroundColor: GlobalStyles[theme].paperColor }]}>
                             <View style={styles.cookItem}>
-                                <Text>Prep.Time</Text>
+                                <Text style={{ marginBottom: 10 }}>Prep.Time</Text>
                                 <View style={styles.logoInput}>
                                     <Entypo name="stopwatch" size={24} color="black" />
                                     <TextInput
@@ -662,7 +634,7 @@ export default function NewRecipe({ route, navigation }) {
                             </View>
 
                             <View style={styles.cookItem}>
-                                <Text>Cook Time</Text>
+                                <Text style={{ marginBottom: 10 }}>Cook Time</Text>
                                 <View style={styles.logoInput}>
                                     <Entypo name="stopwatch" size={24} color="black" />
                                     <TextInput
@@ -677,7 +649,7 @@ export default function NewRecipe({ route, navigation }) {
                             </View>
 
                             <View style={styles.cookItem}>
-                                <Text style={styles.cookText}>Difficulty</Text>
+                                <Text style={{ marginBottom: 5 }}>Difficulty</Text>
                                 <View style={styles.logoInput}>
                                     <MaterialCommunityIcons name="chef-hat" size={24} color="black" />
 
@@ -693,7 +665,7 @@ export default function NewRecipe({ route, navigation }) {
                                                         data={difficulty}
                                                         showsVerticalScrollIndicator={false}
                                                         renderItem={({ item }) => <Pressable
-                                                            style={[styles.button, styles.buttonClose]}
+                                                            style={[styles.button, styles.buttonClose, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                                                         >
                                                             <Text style={styles.textStyle}
                                                                 onPress={(text) => handleDifficulty(text)}
@@ -720,7 +692,7 @@ export default function NewRecipe({ route, navigation }) {
                             </View>
 
                             <View style={styles.cookItem}>
-                                <Text style={styles.cookText}>Serves</Text>
+                                <Text style={{ marginBottom: 10 }}>Serves</Text>
                                 <View style={styles.logoInput}>
                                     <Ionicons name="ios-people-circle-outline" size={24} color="black" />
                                     <TextInput
@@ -739,20 +711,21 @@ export default function NewRecipe({ route, navigation }) {
                             <View style={styles.specialDietLogo}>
                                 {recipeForm.specialDiet.map(item => {
                                     return logos.map(logo =>
-                                        (logo.name === item) ?
-                                            <TouchableOpacity key={uuid.v4()}
-                                                onPress={() => remove(`${logo.name}`, "specialDiet")}>
-                                                <Image
-                                                    resizeMode='contain'
-                                                    source={logo.image}
-                                                    style={{ height: 45, width: 45, margin: 5 }}
-                                                /></TouchableOpacity> : null
+                                        (logo.name === item) &&
+                                        <TouchableOpacity key={uuid.v4()}
+                                            onPress={() => remove(`${logo.name}`, "specialDiet")}>
+                                            <Image
+                                                resizeMode='contain'
+                                                source={logo.image}
+                                                style={{ height: 45, width: 45, margin: 5 }}
+                                            />
+                                        </TouchableOpacity>
                                     )
                                 })}
                             </View>
 
                             <Pressable
-                                style={[styles.button, styles.buttonOpen2]}
+                                style={[styles.button, styles.buttonOpen2, {backgroundColor: GlobalStyles[theme].buttonColor}]}
                                 onPress={() => setModalVisible2(true)}>
 
                                 <Text style={[styles.textStyle, styles.textStyle2]}>S.Diet</Text>
@@ -769,7 +742,7 @@ export default function NewRecipe({ route, navigation }) {
                                             data={logos}
                                             showsVerticalScrollIndicator={false}
                                             renderItem={({ item }) => <Pressable
-                                                style={[styles.button, styles.buttonClose]}>
+                                                style={[styles.button, styles.buttonClose, {backgroundColor: GlobalStyles[theme].buttonColor}]}>
 
                                                 <Text style={[styles.textStyle]}
                                                     onPress={(text) => handleSpecialDiet(text)}>
@@ -783,8 +756,8 @@ export default function NewRecipe({ route, navigation }) {
                             </Modal>
                         </View>
 
-                        <View style={{ flexDirection: "row", width: '90%', marginBottom: 10 }}>
-                            <View style={{ backgroundColor: 'white', width: '78%', height: 40, borderRadius: 10 }}>
+                        <View style={{ flexDirection: "row", width: '100%', marginBottom: 10, justifyContent: 'space-between' }}>
+                            <View style={{ backgroundColor: GlobalStyles[theme].paperColor, width: '79%', height: 40, borderRadius: 10 }}>
                                 <Pressable onPress={() => setRecipeForm({ ...recipeForm, foodCourse: "" })}>
                                     <Text style={{ width: '100%', height: '100%', textAlign: 'center', textAlignVertical: 'center', fontSize: 16, fontWeight: '500' }}>
                                         {recipeForm.foodCourse}
@@ -793,7 +766,7 @@ export default function NewRecipe({ route, navigation }) {
                             </View>
 
                             <Pressable
-                                style={[styles.button, styles.buttonOpen2, { width: 70, marginLeft: 10 }]}
+                                style={[styles.button, styles.buttonOpen2, { width: 70, backgroundColor: GlobalStyles[theme].buttonColor }]}
                                 onPress={() => setModalVisible4(true)}>
 
                                 <Text style={[styles.textStyle, styles.textStyle2, { width: 70 }]}>Course</Text>
@@ -812,12 +785,12 @@ export default function NewRecipe({ route, navigation }) {
                                             renderItem={({ item }) => <Pressable
                                                 style={{
                                                     width: 280,
-                                                    height: 45,
-                                                    borderColor: '#307ecc',
-                                                    borderWidth: 1,
+                                                    height: 40,
+                                                    borderColor: 'black',
+                                                    borderWidth: 0.5,
                                                     borderRadius: 30,
                                                     marginVertical: 5,
-                                                    backgroundColor: '#307ecc',
+                                                    backgroundColor: GlobalStyles[theme].buttonColor,
                                                     // borderWidth: 0,
                                                     color: '#FFFFFF',
                                                     alignItems: 'center',
@@ -847,28 +820,17 @@ export default function NewRecipe({ route, navigation }) {
 
                             <TextInput
                                 value={tagsValue}
-                                style={{ width: "90%", paddingLeft: 10 }}
+                                style={{ width: "100%", paddingLeft: 10 }}
                                 placeholder='Enter Your Tags'
                                 maxLength={21}
                                 onChangeText={text => handleOnChange('tags', text)} />
                         </View>
 
-                        <View style={styles.outputTags} >
-                            {/* <FlatList
-                                // ListHeaderComponent={<Header />}
-                                data={recipeForm.tags}
-                                // horizontal={true}
-                                // showsHorizontalScrollIndicator={false}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={({ item }) => <Text
-                                    onPress={(text) => remove(text, "tags")}>{item}, </Text>}
-                                keyExtractor={item => item}
-                            // ListFooterComponent={<Footer />}
-                            /> */}
+                        <View style={[styles.outputTags, {backgroundColor: GlobalStyles[theme].paperColor}]} >
                             {recipeForm.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
                         </View>
 
-                        <View style={[styles.outputTags, { marginBottom: 20, position: "relative" }]}>
+                        <View style={[styles.outputTags, { marginBottom: 0, position: "relative", backgroundColor: GlobalStyles[theme].paperColor }]}>
                             <TextInput
                                 style={{ height: 120, textAlignVertical: 'top', }}
                                 placeholder='Free Text max 256 char.'
@@ -878,7 +840,7 @@ export default function NewRecipe({ route, navigation }) {
                                 maxLength={256}
                                 multiline={true}
                             />
-                            <Text style={{ position: "absolute", bottom: 0, right: 0 }}>{recipeForm?.freeText?.length}/256</Text>
+                            <Text style={{ position: "absolute", bottom: 5, right: 10 }}>{recipeForm?.freeText?.length}/256</Text>
                         </View>
                     </View>
                 </ScrollView>
@@ -891,14 +853,16 @@ export default function NewRecipe({ route, navigation }) {
                     height: windowHeight - 140,
                     // maxHeight: 500,
                     width: windowWidth,
-                    position: 'relative'
+                    position: 'relative',
+                    padding: 10,
+                    backgroundColor: GlobalStyles[theme].background
                 }}>
 
                     <Banner title="Ingredients" />
 
                     <SpSheet text={"Open Units Convertor"} heightValue={550}><Conversions /></SpSheet>
 
-                    <View style={styles.inputIngredients}>
+                    <View style={[styles.inputIngredients,{backgroundColor: GlobalStyles[theme].paperColor}]}>
 
                         <TextInput
                             value={ingredients.quantity}
@@ -919,7 +883,7 @@ export default function NewRecipe({ route, navigation }) {
                                             data={units}
                                             showsVerticalScrollIndicator={false}
                                             renderItem={({ item }) => <Pressable
-                                                style={[styles.button, styles.buttonClose]}>
+                                                style={[styles.button, styles.buttonClose, {backgroundColor: GlobalStyles[theme].buttonColor}]}>
                                                 <Text style={styles.textStyle}
                                                     onPress={(text) => handleIngredients('units', text)}>
                                                     {item.unit}
@@ -981,7 +945,9 @@ export default function NewRecipe({ route, navigation }) {
                             style={{
                                 width: 45,
                                 height: '100%',
-                                backgroundColor: '#66ccff'
+                                backgroundColor: GlobalStyles[theme].buttonColor,
+                                borderTopRightRadius: 10,
+                                borderBottomRightRadius: 10,
                             }}>
                             <Text style={{
                                 width: '100%',
@@ -994,7 +960,7 @@ export default function NewRecipe({ route, navigation }) {
                     </View>
 
                     {recipeForm.ingredients.map(item =>
-                        <View style={styles.outputIngredients} key={uuid.v4()}>
+                        <View style={[styles.outputIngredients, {backgroundColor: GlobalStyles[theme].paperColor}]} key={uuid.v4()}>
                             <Text style={styles.quantity}>{item.quantity}</Text>
                             <Text style={styles.units}>{units.map(unit => unit.unit === item.units && unit.abreviation)}</Text>
                             <Text style={styles.product}>{item.product}</Text>
@@ -1019,14 +985,16 @@ export default function NewRecipe({ route, navigation }) {
                     justifyContent: 'space-between',
                     minHeight: windowHeight - 400,
                     // height: 650,
-                    width: windowWidth
+                    width: windowWidth,
+                    backgroundColor: GlobalStyles[theme].background,
+                    padding: 10
                 }}>
 
                     <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', height: "80%" }}>
 
                         <Banner title="Preparation" />
 
-                        <View style={[styles.inputPreparation, styles.inputIngredients]}>
+                        <View style={[styles.inputPreparation, styles.inputIngredients, {backgroundColor: GlobalStyles[theme].paperColor}]}>
 
                             <TextInput
                                 value={preparation.preparation}
@@ -1042,7 +1010,9 @@ export default function NewRecipe({ route, navigation }) {
                                 style={{
                                     width: 45,
                                     height: '100%',
-                                    backgroundColor: '#66ccff'
+                                    backgroundColor: GlobalStyles[theme].buttonColor,
+                                    borderTopRightRadius: 10,
+                                    borderBottomRightRadius: 10,
                                 }}>
                                 <Text style={{
                                     width: '100%',
@@ -1058,7 +1028,7 @@ export default function NewRecipe({ route, navigation }) {
                             data={recipeForm.preparation}
                             showsVerticalScrollIndicator={false}
                             renderItem={({ item }) =>
-                                <View style={styles.outputPreparation} >
+                                <View style={[styles.outputPreparation,{backgroundColor: GlobalStyles[theme].paperColor}]} >
                                     <Text style={styles.step} >Step {item.step}</Text>
                                     <Text style={styles.prep} >{item.preparation}</Text>
 
@@ -1081,16 +1051,16 @@ export default function NewRecipe({ route, navigation }) {
 
                     <SwitchButton text01="Public" text02="Private" show={(route.params === undefined) ? show : recipeForm.status} setShow={setShow} />
 
-                    < View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '90%' }} >
-                        <TouchableOpacity style={styles.genericButton} onPress={clearForm}>
-                            <Text>Clear Form</Text>
+                    < View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }} >
+                        <TouchableOpacity style={[styles.genericButton,{backgroundColor: GlobalStyles[theme].noColor}]} onPress={clearForm}>
+                            <Text style={{fontWeight: '500'}}>Clear Form</Text>
                         </TouchableOpacity>
                         {(route.params === undefined)
-                            ? <TouchableOpacity style={styles.genericButton} onPress={handleAdd}>
-                                <Text>Add Recipe to My Book</Text>
+                            ? <TouchableOpacity style={[styles.genericButton,{backgroundColor: GlobalStyles[theme].buttonColor}]} onPress={handleAdd}>
+                                <Text style={{fontWeight: '500'}}>Add Recipe to My Book</Text>
                             </TouchableOpacity>
-                            : <TouchableOpacity style={styles.genericButton} onPress={handleEdit}>
-                                <Text>Update Recipe</Text>
+                            : <TouchableOpacity style={[styles.genericButton,{backgroundColor: GlobalStyles[theme].buttonColor}]} onPress={handleEdit}>
+                                <Text style={{fontWeight: '500'}}>Update Recipe</Text>
                             </TouchableOpacity>
                         }
                     </View>
@@ -1100,7 +1070,7 @@ export default function NewRecipe({ route, navigation }) {
                 <PopupModal message={redux?.recipe.message} popupModal={popupModal} />
 
             </ScrollView>
-            {/* </KeyboardAvoidingView> */}
+            </KeyboardAvoidingView>
             {/* </ScrollView > */}
         </TouchableWithoutFeedback >
     )
@@ -1111,14 +1081,18 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 10,
         elevation: 2,
-        width: 150
+        width: 150,
+        borderWidth: 0.5,
+        borderColor: 'black'
     },
     buttonOpen: {
         width: 40,
-        height: 40, fontWeight: '500', fontSize: 18
+        height: 40,
+        fontWeight: '500',
+        fontSize: 18
     },
     buttonOpen2: {
-        backgroundColor: "#66ccff",
+        // backgroundColor: "#66ccff",
         width: 70,
         height: 40,
 
@@ -1136,7 +1110,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around'
     },
     buttonClose: {
-        backgroundColor: "#307ecc",
+        // backgroundColor: "#307ecc",
         marginVertical: 5
     },
     buttonStyle: {
@@ -1166,19 +1140,22 @@ const styles = StyleSheet.create({
     },
     cookInfo: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        width: "90%",
-        height: 80,
+        width: "100%",
+        height: 90,
         borderRadius: 10,
-        backgroundColor: "white",
+        padding: 10
         // marginTop: 10
     },
     cookItem: {
-        width: 70,
-    },
-    cookText: {
-        alignSelf: 'center'
+        width: (windowWidth - 40) / 4,
+        height: '100%',
+        // borderColor: 'black',
+        // borderWidth: 0.2,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        // backgroundColor: 'blue'
     },
     delImg: {
         position: 'absolute',
@@ -1187,27 +1164,27 @@ const styles = StyleSheet.create({
         zIndex: 10, elevation: 10,
     },
     genericButton: {
-        marginVertical: 15,
-        width: 170,
-        height: 40,
+        marginBottom: 10,
+        // width: 170,
+        // height: 40,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 30,
         borderStyle: 'solid',
         borderColor: 'black',
-        borderWidth: 1,
-        backgroundColor: '#66ccff',
+        borderWidth: 0.5,
+        paddingVertical: 10,
+        paddingHorizontal: 30
     },
     input: {
         width: "100%",
         height: 40,
         borderRadius: 10,
-        backgroundColor: "white",
+        // backgroundColor: "white",
         paddingLeft: 10,
     },
     inputIngredients: {
-        width: "95%",
-        backgroundColor: "white",
+        width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
         height: 40,
@@ -1218,9 +1195,10 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: "90%",
+        width: "100%",
         minHeight: 45,
         borderRadius: 10,
+        paddingLeft: 10
     },
     inputPreparation: {
         minHeight: 40
@@ -1229,7 +1207,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         minWidth: "90%",
-        width: "90%",
+        width: "100%",
         backgroundColor: "white",
         height: 45,
         borderRadius: 10,
@@ -1240,7 +1218,10 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: "100%"
+        width: "90%",
+        height: 40,
+        // backgroundColor: 'red',
+        // height: '100%'
     },
     mainBody: {
         flex: 1,
@@ -1273,36 +1254,34 @@ const styles = StyleSheet.create({
     },
     numberInput: {
         width: 30,
-        height: 40,
+        // height: 30,
         borderStyle: 'solid',
         borderBottomWidth: 1,
         borderBottomColor: 'black',
-        textAlign: "center"
+        textAlign: "center",
     },
     outputIngredients: {
-        width: "95%",
-        backgroundColor: "white",
+        width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
         height: 35,
-        marginBottom: 5,
-        borderRadius: 5,
+        marginBottom: 10,
+        borderRadius: 10,
     },
     outputPreparation: {
         width: "100%",
-        backgroundColor: "white",
+        height: 35,
         flexDirection: "row",
         // justifyContent: "space-between",
         minHeight: 25,
-        marginBottom: 5,
+        marginBottom: 10,
         textAlignVertical: 'center',
-        borderRadius: 5,
+        borderRadius: 10,
         alignContent: "center"
     },
     outputTags: {
-        minWidth: "90%",
-        maxWidth: "90%",
-        backgroundColor: "white",
+        minWidth: "100%",
+        maxWidth: "100%",
         minHeight: 45,
         borderRadius: 10,
         marginTop: 10,
@@ -1338,12 +1317,12 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         flexDirection: "row",
         alignItems: 'center',
-        width: "90%",
+        width: "100%",
         justifyContent: 'space-between'
     },
     specialDietLogo: {
         justifyContent: 'flex-start',
-        width: "78%",
+        width: "79%",
         backgroundColor: "white",
         borderRadius: 10,
         paddingHorizontal: 5,

@@ -1,36 +1,26 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
     View,
-    Text,
-    Button,
     StyleSheet,
-    TextInput,
-    TouchableWithoutFeedback,
     TouchableOpacity,
-    KeyboardAvoidingView,
-    Keyboard,
-    Platform,
-    Pressable,
-    Modal,
     ScrollView,
     Image,
     Dimensions,
-    Alert,
-    FlatList
 } from 'react-native'
 
-import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
-
+import { AntDesign } from '@expo/vector-icons';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+import GlobalStyles from '../GlobalStyles';
 
 const ImagesSwipe = ({ showImage, setShowImage, recipeFormRecipePicture, delIngredient }) => {
     // console.log("ImagesSwipe showImage", showImage)
+    const [theme, setTheme] = useState('stylesLight')
 
     return (
         <View style={styles.container}>
-            {recipeFormRecipePicture.length !== 0 &&
+            {recipeFormRecipePicture.length !== 0 ?
                 <ScrollView
                     pagingEnabled
                     horizontal
@@ -41,7 +31,7 @@ const ImagesSwipe = ({ showImage, setShowImage, recipeFormRecipePicture, delIngr
                         <View key={image.path ? image.path : image}>
                             <Image source={{ uri: image.path ? image.path : image }}
                                 style={[styles.image, {
-                                    left: -windowWidth * 0.9 * (showImage),
+                                    left: -(windowWidth - 20) * (showImage),
                                 }]} />
                             {delIngredient && <TouchableOpacity style={styles.delImg} onPress={() => delIngredient(showImage, "picture")}>
                                 <AntDesign name="delete" size={24} color="black" />
@@ -54,7 +44,7 @@ const ImagesSwipe = ({ showImage, setShowImage, recipeFormRecipePicture, delIngr
                                             <TouchableOpacity onPress={() => setShowImage(showImage => showImage - 1)}
                                                 style={{
                                                     width: "100%",
-                                                    height: windowWidth * 0.54,
+                                                    height: windowWidth * 0.61,
                                                 }}>
                                             </TouchableOpacity>}
                                     </View>
@@ -63,14 +53,15 @@ const ImagesSwipe = ({ showImage, setShowImage, recipeFormRecipePicture, delIngr
                                             <TouchableOpacity onPress={() => setShowImage(showImage => showImage + 1)}
                                                 style={{
                                                     width: "100%",
-                                                    height: windowWidth * 0.54,
+                                                    height: windowWidth * 0.61,
                                                 }}>
                                             </TouchableOpacity>}
                                     </View>
                                 </View>
                             }
                         </View>)}
-                </ScrollView>}
+                </ScrollView>
+                : <View style={{ height: '100%', width: '100%', backgroundColor: GlobalStyles[theme].paperColor }} />}
         </View>
 
     )
@@ -84,8 +75,9 @@ const styles = StyleSheet.create({
         flex: 0.05,
         alignItems: 'center',
         justifyContent: 'center',
-        width: windowWidth * 0.9,
-        height: windowWidth * 0.54,
+        // width: windowWidth * 0.9,
+        width: "100%",
+        height: windowWidth * 0.61,
         marginVertical: 10,
         borderStyle: 'solid',
         borderWidth: 1,
@@ -101,13 +93,13 @@ const styles = StyleSheet.create({
         elevation: 10,
     },
     image: {
-        width: windowWidth * 0.9,
-        height: windowWidth * 0.54,
+        width: windowWidth - 20,
+        height: windowWidth * 0.61,
         resizeMode: "cover",
         borderStyle: 'solid',
-        borderWidth: 1,
+        borderWidth: 0.5,
         borderColor: 'black',
-        marginVertical: 10,
+        // marginVertical: 10,
     },
     imageScreen: {
         position: "absolute",
@@ -122,8 +114,8 @@ const styles = StyleSheet.create({
     },
     scrollImage: {
         position: 'absolute',
-        width: windowWidth * 0.9,
-        height: windowWidth * 0.59,
+        width: "100%",
+        height: windowWidth * 0.61,
         marginBottom: 10,
     }
 })

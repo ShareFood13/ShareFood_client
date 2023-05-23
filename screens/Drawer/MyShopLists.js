@@ -25,6 +25,7 @@ import Banner from '../../components/Banner';
 
 import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
+import GlobalStyles from '../../GlobalStyles';
 
 
 export default function MyShopLists({ navigation }) {
@@ -34,6 +35,8 @@ export default function MyShopLists({ navigation }) {
 
     const [userId, setUserId] = useState("")
     const [popupModal, setPopupModal] = useState(false)
+    const [theme, setTheme] = useState('stylesLight')
+
 
     useEffect(() => {
         if (redux?.shopList.message !== "") {
@@ -74,9 +77,9 @@ export default function MyShopLists({ navigation }) {
             />
         );
     };
-
+    console.log("redux.shopList.shopLists", redux.shopList.shopLists)
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
             {/* <Header /> */}
             <Banner title="My Shop Lists" />
             <FlatList
@@ -86,11 +89,33 @@ export default function MyShopLists({ navigation }) {
                 // ListHeaderComponent={<Header />}
                 ItemSeparatorComponent={ItemSeparatorView}
 
-                renderItem={({ item }) =>
-                    <TouchableOpacity style={{ flexDirection: 'row', height: 30, width: "90%", justifyContent: 'center', alignSelf: 'center', alignItems: 'center', backgroundColor: 'white' }}
+                renderItem={({ item, index }) =>
+                    <TouchableOpacity style={[{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: "100%",
+                        justifyContent: 'center',
+                        alignSelf: 'center',
+                        alignItems: 'center',
+                        backgroundColor: GlobalStyles[theme].paperColor,
+                        // {index} === 0)&& borderTopLeftRadius:  10,
+                        // borderTopRightRadius: ({index} === 0) && 10,
+                        // borderBottomLeftRadius:({index} === redux.shopList.shopLists.lenght -1) &&  10,
+                        // borderBottomRightRadius: ({index} === redux.shopList.shopLists.lenght -1)  && 10
+                    }, (index === 0) &&
+                    {
+                        borderTopRightRadius: 10,
+                        borderTopLeftRadius: 10
+                    },
+                    (index === redux.shopList.shopLists.length - 1) &&
+                    {
+                        borderBottomLeftRadius: 10,
+                        borderBottomRightRadius: 10
+                    }
+                    ]}
                         // onPress={() => setChecked(!checked)}>
                         onPress={() => openShopList(item)}>
-                        <Text>{item.shopListName}</Text>
+                        <Text>{item.shopListName} - {index}</Text>
                     </TouchableOpacity>}
                 keyExtractor={item => item._id}
             // extraData={selectedId}
@@ -107,6 +132,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: 10,
+
     },
 })

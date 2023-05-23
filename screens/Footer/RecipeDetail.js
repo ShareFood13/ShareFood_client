@@ -44,6 +44,7 @@ import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
 import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 import ImagesSwipe from '../../components/ImagesSwipe';
 import Banner from '../../components/Banner';
+import GlobalStyles from '../../GlobalStyles';
 
 const logos = [
     { name: "Vegan", image: require('../../assets/images/logo/vegan.png') },
@@ -74,13 +75,14 @@ const logos = [
 
 export default function RecipeDetail({ navigation, route }) {
     const { recipeFromHome, recipeDetailFlag } = route.params
-    console.log("RecipeDetail recipeFromHome", recipeFromHome, recipeDetailFlag)
+    // console.log("RecipeDetail recipeFromHome", recipeFromHome, recipeDetailFlag)
     const [show, setShow] = useState('ingredients')
     const [modalVisible, setModalVisible] = useState(false)
     const [addTo, setAddTo] = useState(null)
     const [popupModal, setPopupModal] = useState(false)
     const [userId, setUserId] = useState()
     const [showImage, setShowImage] = useState(false)
+    const [theme, setTheme] = useState('stylesLight')
 
     var difficultyColor = ""
 
@@ -206,13 +208,13 @@ export default function RecipeDetail({ navigation, route }) {
         <ScrollView style={{ marginTop: recipeDetailFlag ? 40 : 0 }}
             showsVerticalScrollIndicator={false}
         >
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
 
-                <View style={{ height: 45 }}>
+                <View style={{ height: 45, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontSize: 30 }}>{recipeData?.recipeName}</Text>
                 </View>
 
-                <View style={{ height: 30, width: "90%", alignItems: "flex-end" }}>
+                <View style={{ height: 30, width: "100%", alignItems: "flex-end" }}>
                     <Text>by_{recipeData?.creator}</Text>
                 </View>
 
@@ -237,26 +239,40 @@ export default function RecipeDetail({ navigation, route }) {
                     <Text><AntDesign name="hearto" size={24} color="black" /> {recipeData?.downloads?.length} </Text>
                 </View>
 
-                <View style={styles.cookInfo}>
+                <View style={[styles.cookInfo, { backgroundColor: GlobalStyles[theme].paperColor }]}>
                     <View style={styles.cookItem}>
-                        <Text>Prep.Time</Text>
+                        <Text style={{ marginBottom: 10 }}>Prep.Time</Text>
                         <View style={styles.logoInput}>
                             <Entypo name="stopwatch" size={24} color="black" />
-                            <Text>{recipeData?.prepTime}</Text>
+                            <Text style={{
+                                width: 30,
+                                // height: 20,
+                                borderStyle: 'solid',
+                                borderBottomWidth: 1,
+                                borderBottomColor: 'black',
+                                textAlign: "center",
+                            }}>{recipeData?.prepTime}</Text>
                             <Text>min</Text>
                         </View>
                     </View>
                     <View style={styles.cookItem}>
-                        <Text>Cook Time</Text>
+                        <Text style={{ marginBottom: 10 }}>Cook Time</Text>
                         <View style={styles.logoInput}>
                             <Entypo name="stopwatch" size={24} color="black" />
-                            <Text>{recipeData?.cookTime}</Text>
+                            <Text style={{
+                                width: 30,
+                                // height: 30,
+                                borderStyle: 'solid',
+                                borderBottomWidth: 1,
+                                borderBottomColor: 'black',
+                                textAlign: "center",
+                            }}>{recipeData?.cookTime}</Text>
                             <Text>min</Text>
                         </View>
                     </View>
 
                     <View style={styles.cookItem}>
-                        <Text style={styles.cookText}>Difficulty</Text>
+                        <Text style={{ marginBottom: 10 }}>Difficulty</Text>
                         <View style={styles.logoInput}>
                             <MaterialCommunityIcons name="chef-hat" size={24} color="black" />
 
@@ -274,16 +290,23 @@ export default function RecipeDetail({ navigation, route }) {
                     </View>
 
                     <View style={styles.cookItem}>
-                        <Text style={styles.cookText}>Serves</Text>
+                        <Text style={{ marginBottom: 10 }}>Serves</Text>
                         <View style={styles.logoInput}>
                             <Ionicons name="ios-people-circle-outline" size={24} color="black" />
-                            <Text>{recipeData?.prepTime}</Text>
+                            <Text style={{
+                                width: 30,
+                                // height: 30,
+                                borderStyle: 'solid',
+                                borderBottomWidth: 1,
+                                borderBottomColor: 'black',
+                                textAlign: "center",
+                            }}>{recipeData?.prepTime}</Text>
                             <Text>ppl.</Text>
                         </View>
                     </View>
                 </View>
 
-                <View style={styles.specialDietLogo}>
+                <View style={[styles.specialDietLogo, { backgroundColor: GlobalStyles[theme].paperColor }]}>
                     {recipeData?.specialDiet?.map(item => {
                         return logos.map(logo =>
                             (logo.name === item) ?
@@ -300,11 +323,11 @@ export default function RecipeDetail({ navigation, route }) {
                     )}
                 </View>
 
-                <Text style={styles.outputTags} >
+                <Text style={[styles.outputTags, { backgroundColor: GlobalStyles[theme].paperColor }]} >
                     <Text >{recipeData?.foodCourse}</Text>
                 </Text>
 
-                <Text style={styles.outputTags} >
+                <Text style={[styles.outputTags, { backgroundColor: GlobalStyles[theme].paperColor }]} >
                     <FontAwesome5 name="hashtag" size={24} color="black" />
                     {recipeData?.tags?.map(item => <Text key={uuid.v4()}
                     // onPress={(text) => remove(text, "tags")}
@@ -315,7 +338,7 @@ export default function RecipeDetail({ navigation, route }) {
                     flexDirection: 'row',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    width: '90%',
+                    width: '100%',
                     height: 30,
                     marginVertical: 10,
                     borderRadius: 10,
@@ -360,7 +383,7 @@ export default function RecipeDetail({ navigation, route }) {
                 </View>
 
                 {show === "ingredients"
-                    ? <View style={{ width: windowWidth, alignItems: 'center', minHeight: 200 }}>
+                    ? <View style={{ width: "100%", alignItems: 'center', minHeight: 200 }}>
                         {recipeData?.ingredients?.map(item =>
                             <View style={styles.outputIngredients} key={uuid.v4()}>
                                 <Text style={styles.quantity}>{item.quantity}</Text>
@@ -370,7 +393,7 @@ export default function RecipeDetail({ navigation, route }) {
                             </View>
                         )}
                     </View>
-                    : <View style={{ width: windowWidth, alignItems: 'center', minHeight: 200 }}>
+                    : <View style={{ width: "100%", alignItems: 'center', minHeight: 200 }}>
                         {recipeData?.preparation.map(item =>
                             <View style={styles.outputPreparation} key={uuid.v4()}>
                                 <Text style={styles.step} key={uuid.v4()}>Step {item.step}</Text>
@@ -394,12 +417,12 @@ export default function RecipeDetail({ navigation, route }) {
                             {addTo === null ?
                                 <View >
                                     <TouchableOpacity
-                                        style={styles.genericButton}
+                                        style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                                         onPress={() => setAddTo("meal")}>
                                         <Text style={{ color: 'white', fontWeight: '700' }}>To Meal</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
-                                        style={styles.genericButton}
+                                        style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                                         onPress={() => setAddTo("event")}>
                                         <Text style={{ color: 'white', fontWeight: '700' }}>To Event</Text>
                                     </TouchableOpacity>
@@ -414,7 +437,7 @@ export default function RecipeDetail({ navigation, route }) {
                                             contentContainerStyle={{ alignContent: 'center' }}
                                             renderItem={({ item }) =>
                                                 !item.isDeleted && <TouchableOpacity
-                                                    style={styles.genericButton}
+                                                    style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                                                     onPress={() => addRecipeToFc(item)}>
                                                     <Text >{item.mealName}</Text>
                                                 </TouchableOpacity>
@@ -432,7 +455,7 @@ export default function RecipeDetail({ navigation, route }) {
                                             renderItem={({ item }) =>
                                                 // item.eventDate >= todayDate &&
                                                 <TouchableOpacity
-                                                    style={styles.genericButton}
+                                                    style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                                                     onPress={() => addRecipeToFc(item)}>
                                                     <Text >{item.eventName}</Text>
                                                 </TouchableOpacity>
@@ -459,26 +482,32 @@ export default function RecipeDetail({ navigation, route }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: StatusBar.currentHeight - 10,
         justifyContent: 'flex-start',
         alignItems: 'center',
+        padding: 10
+        // marginTop: StatusBar.currentHeight - 20,
         // height: windowHeight,
         // position: 'relative'
     },
     cookInfo: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        width: "90%",
-        height: 80,
+        width: "100%",
+        height: 90,
         borderRadius: 10,
-        backgroundColor: "white",
+        // backgroundColor: "white",
+        padding: 10
         // marginTop: 10
     },
     cookItem: {
-        width: 70,
-        height: 60,
-        justifyContent: 'space-around',
+        width: (windowWidth - 40) / 4,
+        // width: 70,
+        height: '100%',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        // backgroundColor: 'blue',
+
     },
     cookText: {
         alignSelf: 'center'
@@ -487,12 +516,17 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: "100%"
+        width: "90%", 
+        height: 40,
+        // backgroundColor: 'red',
+
     },
     outputTags: {
-        minWidth: "90%",
-        maxWidth: "90%",
-        backgroundColor: "white",
+        // height: '100%',
+        minWidth: "100%",
+        maxWidth: "100%",
+        textAlignVertical: 'center',
+        // backgroundColor: "white",
         minHeight: 45,
         borderRadius: 10,
         marginTop: 10,
@@ -504,7 +538,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         textAlignVertical: 'center',
         justifyContent: 'flex-start',
-        width: "90%",
+        width: "100%",
         minHeight: 40,
         backgroundColor: "white",
         borderRadius: 10,
@@ -512,7 +546,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     outputIngredients: {
-        width: "90%",
+        width: "100%",
         backgroundColor: "white",
         flexDirection: "row",
         justifyContent: "space-between",
@@ -549,7 +583,7 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
     },
     outputPreparation: {
-        width: "90%",
+        width: "100%",
         backgroundColor: "white",
         flexDirection: "row",
         justifyContent: "space-between",
@@ -596,13 +630,13 @@ const styles = StyleSheet.create({
         borderStyle: 'solid',
         borderColor: 'black',
         borderWidth: 1,
-        backgroundColor: '#66ccff',
+        // backgroundColor: '#66ccff',
 
     },
     specialDietLogo: {
         justifyContent: 'flex-start',
-        width: "90%",
-        backgroundColor: "white",
+        width: "100%",
+        // backgroundColor: "white",
         borderRadius: 10,
         paddingHorizontal: 5,
         minHeight: 55,

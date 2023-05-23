@@ -59,6 +59,8 @@ export default function MyDrawer({ navigation }) {
     const isFocused = useIsFocused();
 
     const redux = useSelector(state => state)
+    // console.log(redux?.auth?.authData?.result?.profile?.profilePicture.base64)
+    // console.log(redux?.auth?.authData?.result?.profile?.backgroundPicture.base64)
 
     const window = Dimensions.get('window');
 
@@ -88,14 +90,14 @@ export default function MyDrawer({ navigation }) {
                 contentContainerStyle={{ backgroundColor: 'white' }}>
                 <ImageBackground
                     // source={require('../assets/images/menu-bg.jpeg')}
-                    // source={{ uri: redux?.auth?.authData?.result?.profile?.backgroundPicture }}
-                    source={{ uri: userContext?.backgroundPicture?.base64 }}
+                    source={{ uri: redux?.auth?.authData?.result?.profile?.backgroundPicture.base64 }}
+                    // source={{ uri: userContext?.backgroundPicture?.base64 }}
                     style={{ padding: 20, marginBottom: 10 }}
                 >
                     <Image
                         // source={require("../assets/images/user-profile.jpeg")}
-                        // source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture }}
-                        source={{ uri: userContext?.profilePicture?.base64 }}
+                        source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture.base64 }}
+                        // source={{ uri: userContext?.profilePicture?.base64 }}
                         style={{ height: 90, width: 90, borderRadius: 45, marginBottom: 10 }}
                     />
                 </ImageBackground>

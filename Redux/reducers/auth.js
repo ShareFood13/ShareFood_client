@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-import { AUTH, LOGOUT, SENDPASS, USER_INFO, SEND_TO_US, SAVE_PROFILE, START_FOLLOWING, AUTH_ERROR, CLEAR_ERROR, CLEAR_STATE, CLEAR_MSG } from "../constants/constantsTypes"
+import { AUTH, LOGOUT, SENDPASS, USER_INFO, SEND_TO_US, SAVE_PROFILE, START_FOLLOWING, STOP_FOLLOWING, AUTH_ERROR, CLEAR_ERROR, CLEAR_STATE, CLEAR_MSG } from "../constants/constantsTypes"
 
 const reducer = (state = { authData: {}, message: "" }, action) => {
     switch (action.type) {
@@ -50,7 +50,6 @@ const reducer = (state = { authData: {}, message: "" }, action) => {
         case CLEAR_ERROR:
 
             return { ...state, auth_msg: "" }
-
         case CLEAR_STATE:
 
             return state = ""
@@ -58,10 +57,15 @@ const reducer = (state = { authData: {}, message: "" }, action) => {
 
             return { ...state, authData: action?.data.result, message: action?.data.message }
         case START_FOLLOWING:
+            console.log("START_FOLLOWING", action.data.result.profile.following)
 
-            return { ...state, authData: action.data.result, message: action.data.message }
+            return { ...state, authData: action.data, message: action.data.message }
+        case STOP_FOLLOWING:
+            console.log("START_FOLLOWING", action.data.result.profile.following)
+
+            return { ...state, authData: action.data, message: action.data.message }
         case CLEAR_MSG:
-
+console.log("Auth CLEAR_MSG")
             return { ...state, message: "" }
         default:
             return state

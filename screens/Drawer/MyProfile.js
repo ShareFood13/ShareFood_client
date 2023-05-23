@@ -40,6 +40,7 @@ import DatePicker from '../../components/DatePicker';
 import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
 import Banner from '../../components/Banner';
+import GlobalStyles from '../../GlobalStyles';
 
 const countries = [];
 let countryCodes = [];
@@ -155,6 +156,7 @@ export default MyProfile = ({ navigation }) => {
     const [show, setShow] = useState("Public")
     const [refreshing, setRefreshing] = useState(false)
     const [popupModal, setPopupModal] = useState(false)
+    const [theme, setTheme] = useState('stylesLight')
 
 
     const isFocused = useIsFocused()
@@ -328,412 +330,708 @@ export default MyProfile = ({ navigation }) => {
     };
 
     return (
-        <ScrollView style={{
-            width: windowWidth, height: windowHeight,
-            borderStyle: 'solid',
-            borderWidth: 1,
-            borderColor: 'black',
-        }}
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={() => onRefresh()}
-                />}>
-            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <KeyboardAvoidingView
+            // style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{
+                width: windowWidth,
+                // height: windowHeight,
+                // borderStyle: 'solid',
+                // borderWidth: 1,
+                // borderColor: 'black',
+                padding: 10,
+                backgroundColor: GlobalStyles[theme].background,
 
-                <Banner title="My Profile" />
+            }}
+        >
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => onRefresh()}
+                    />}>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
 
-                <ImageBackground
-                    // source={require('../../assets/images/menu-bg.jpeg')}
-                    // source={{ uri: redux?.auth?.authData?.result?.profile?.backgroundPicture }}
-                    // source={userContext?.backgroundPicture ? { uri: userContext?.backgroundPicture } : require('../../assets/images/menu-bg.jpeg')}
-                    source={{ uri: profileForm?.backgroundPicture?.base64 }}
-                    style={{ marginBottom: 10, width: '100%', height: 150, alignSelf: 'center', justifyContent: 'center', borderColor: 'black', borderWidth: 0.5 }}>
-                    <Image
-                        // source={require("../../assets/images/user-profile.jpeg")}
-                        // source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture }}
-                        // source={userContext?.profilePicture ? { uri: userContext?.profilePicture } : require("../../assets/images/user-profile.jpeg")}
-                        source={{ uri: profileForm?.profilePicture?.base64 }}
-                        style={{ height: 90, width: 90, borderRadius: 45, marginLeft: 30, borderColor: 'black', borderWidth: 0.5 }}
-                    />
-                    <TouchableOpacity onPress={() => pickImageAsync('profilePicture')} style={{ flexDirection: 'row', position: 'absolute', zIndex: 5, elevation: 5, left: 90, top: 90 }}>
-                        <FontAwesome name="camera-retro" size={30} color="black" style={{ width: 32, height: 30, textAlign: 'center', backgroundColor: 'white' }} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => pickImageAsync('backgroundPicture')} style={{ flexDirection: 'row', position: 'absolute', zIndex: 5, elevation: 5, right: 20, top: 110 }}>
-                        <FontAwesome name="camera-retro" size={30} color="black" style={{ width: 32, height: 30, textAlign: 'center', backgroundColor: 'white' }} />
-                    </TouchableOpacity>
-                </ImageBackground>
+                    <Banner title="My Profile" />
 
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'center', marginVertical: 10 }}>
-                    <Text>Name:</Text>
-                    <Text style={{ width: '33%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}>
-                        {profileForm?.name?.split(" ")[0]}</Text>
-                    {/* {userContext?.name?.split(" ")[0]}</Text> */}
-                    {/* <TextInput
-                        style={{ width: '33%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        // value={profileForm?.name}
-                        defaultValue={profileForm?.name?.split(" ")[0]}
-                        onChangeText={(text) => handleChange('name', text)}
-                    /> */}
-                    <Text>Surname:</Text>
-                    <Text style={{ width: '33%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}>
-                        {profileForm?.name?.split(" ")[1]}</Text>
-                    {/* {userContext?.name?.split(" ")[1]}</Text> */}
-                    {/* <TextInput
-                        style={{ width: '33%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        // value={profileForm?.surname}
-                        defaultValue={profileForm?.name?.split(" ")[1]}
-                        onChangeText={(text) => handleChange('surname', text)}
-                    /> */}
-                </View>
+                    <ImageBackground
+                        // source={require('../../assets/images/menu-bg.jpeg')}
+                        // source={{ uri: redux?.auth?.authData?.result?.profile?.backgroundPicture }}
+                        // source={userContext?.backgroundPicture ? { uri: userContext?.backgroundPicture } : require('../../assets/images/menu-bg.jpeg')}
+                        source={{ uri: profileForm?.backgroundPicture?.base64 }}
+                        style={{ marginBottom: 0, width: '100%', height: 150, alignSelf: 'center', justifyContent: 'center', borderColor: 'black', borderWidth: 0.5 }}>
+                        <Image
+                            // source={require("../../assets/images/user-profile.jpeg")}
+                            // source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture }}
+                            // source={userContext?.profilePicture ? { uri: userContext?.profilePicture } : require("../../assets/images/user-profile.jpeg")}
+                            source={{ uri: profileForm?.profilePicture?.base64 }}
+                            style={{ height: 90, width: 90, borderRadius: 45, marginLeft: 30, borderColor: 'black', borderWidth: 0.5 }}
+                        />
+                        <TouchableOpacity onPress={() => pickImageAsync('profilePicture')} style={{ flexDirection: 'row', position: 'absolute', zIndex: 5, elevation: 5, left: 90, top: 90 }}>
+                            <FontAwesome name="camera-retro" size={30} color="black" style={{ width: 32, height: 30, textAlign: 'center', backgroundColor: 'white' }} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => pickImageAsync('backgroundPicture')} style={{ flexDirection: 'row', position: 'absolute', zIndex: 5, elevation: 5, right: 10, top: 110 }}>
+                            <FontAwesome name="camera-retro" size={30} color="black" style={{ width: 32, height: 30, textAlign: 'center', backgroundColor: 'white' }} />
+                        </TouchableOpacity>
+                    </ImageBackground>
 
-                {/* {!redux?.auth?.authData?.result?.profile?.birthDate ? */}
-                {!userContext?.birthDate ?
-                    < DatePicker
-                        pickerType="date"
-                        // setInfoPicked={setInfoPicked}
-                        infoPickerFunction={infoPickerFunction}
-                        formTypeInput="birthDate"
-                        birthDay="true"
-                    />
-                    : <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                        <Text style={{ width: '30%' }}>BirthDate:</Text>
-                        <Text style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}>
-                            {profileForm?.birthDate}</Text>
+                    <View style={{ flexDirection: 'row', height: 35, width: '100%', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+                        <Text>Name:</Text>
+                        <Text style={{
+                            width: '34%',
+                            height: '100%',
+                            textAlignVertical: 'center',
+                            paddingLeft: 10,
+                            backgroundColor: GlobalStyles[theme].paperColor,
+                            borderRadius: 10,
+
+                        }}>
+                            {profileForm?.name?.split(" ")[0]}
+                        </Text>
+
+                        <Text>Surname:</Text>
+                        <Text style={{
+                            width: '34%',
+                            height: '100%',
+                            textAlignVertical: 'center',
+                            paddingLeft: 10,
+                            backgroundColor: GlobalStyles[theme].paperColor,
+                            borderRadius: 10,
+                            marginLeft: 5
+                        }}>
+                            {profileForm?.name?.split(" ")[1]}
+                        </Text>
                     </View>
-                }
 
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>UserName:</Text>
-                    <Text style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}>
-                        {userData?.userUserName}</Text>
-                    {/* {userContext?.userName}</Text> */}
-                </View>
+                    {!userContext?.birthDate ?
+                        < DatePicker
+                            pickerType="date"
+                            // setInfoPicked={setInfoPicked}
+                            infoPickerFunction={infoPickerFunction}
+                            formTypeInput="birthDate"
+                            birthDay="true"
+                        />
+                        : <View style={{
+                            flexDirection: 'row',
+                            height: 35,
+                            width: '100%',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginTop: 10
+                        }}>
+                            <Text style={{ width: '30%' }}>BirthDate:</Text>
+                            <Text style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                                // 
+                            }}>
+                                {profileForm?.birthDate}</Text>
+                        </View>
+                    }
 
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>E-mail:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        // value={profileForm?.email}
-                        // defaultValue={userData?.userEmail}
-                        defaultValue={profileForm?.email}
-                        onChangeText={(text) => handleChange('email', text)}
-                    />
-                </View>
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        <Text style={{ width: '30%' }}>UserName:</Text>
+                        <Text style={{
+                            width: '70%',
+                            height: '100%',
+                            textAlignVertical: 'center',
+                            paddingLeft: 10,
+                            backgroundColor: GlobalStyles[theme].paperColor,
+                            borderRadius: 10,
+                            // 
+                        }}>
+                            {userData?.userUserName}</Text>
+                        {/* {userContext?.userName}</Text> */}
+                    </View>
 
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'center', marginVertical: 10 }}>
-                    <Text style={{ width: '17%' }}>Address:</Text>
-                    <TextInput
-                        keyboardType='ascii-capable'
-                        style={{ width: '69%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.fullAddress?.address}
-                        onChangeText={(text) => handleChange('address', text)}
-                    />
-                    {/* <Text>Number:</Text> */}
-                    <TextInput
-                        placeholder='num'
-                        keyboardType='numeric'
-                        style={{ width: '12%', height: '100%', textAlignVertical: 'center', paddingHorizontal: 5, backgroundColor: 'white', borderRadius: 10 }}
-                        value={profileForm?.fullAddress?.addNumber}
-                        onChangeText={(text) => handleChange('addNumber', text)}
-                    />
-                </View>
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 15
+                    }}>
+                        <Text style={{ width: '30%' }}>Gender: </Text>
+                        <SelectList
+                            setSelected={(val) => handleChange('gender', val)}
+                            data={gender}
+                            placeholder={profileForm?.gender}
+                            save="value"
+                            boxStyles={{
+                                width: windowWidth * 0.66,
+                                borderWidth: 0,
+                                borderBottomWidth: 2,
+                                borderStyle: 'solid',
+                                borderColor: 'black',
+                                backgroundColor: GlobalStyles[theme].paperColor,
 
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'center', marginVertical: 10 }}>
-                    <Text style={{ width: '15%' }}>Country:</Text>
-                    <SelectList
-                        setSelected={(val) => handleChange('country', val)}
-                        data={countries}
-                        placeholder={profileForm?.fullAddress?.country ? profileForm?.fullAddress?.country : "Country"}
-                        save="value"
-                        boxStyles={{
-                            width: 140,
-                            borderWidth: 0,
-                            borderBottomWidth: 2,
-                            borderStyle: 'solid',
+                            }}
+                            dropdownItemStyles={{
+                                width: windowWidth * 0.66,
+                                // marginBottom: 10,
+                            }}
+                            dropdownStyles={{
+                                width: windowWidth * 0.66,
+                                alignSelf: 'center',
+                                backgroundColor: 'white',
+                                position: 'absolute',
+                                elevation: 10,
+                                zIndex: 10,
+                                top: 40
+                            }}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 15
+                    }}>
+                        <Text style={{ width: '30%' }}>E-mail:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            // value={profileForm?.email}
+                            // defaultValue={userData?.userEmail}
+                            defaultValue={profileForm?.email}
+                            onChangeText={(text) => handleChange('email', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10,
+                    }}>
+                        <Text style={{ width: '17%' }}>Address:</Text>
+                        <TextInput
+                            keyboardType='ascii-capable'
+                            style={{
+                                width: '69%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.fullAddress?.address}
+                            onChangeText={(text) => handleChange('address', text)}
+                        />
+                        <TextInput
+                            placeholder='num'
+                            keyboardType='numeric'
+                            style={{
+                                width: '12%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingHorizontal: 5,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                                textAlign: 'center'
+                            }}
+                            value={profileForm?.fullAddress?.addNumber}
+                            onChangeText={(text) => handleChange('addNumber', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 15
+                    }}>
+                        <Text style={{ width: '17%' }}>Country:</Text>
+                        <SelectList
+                            setSelected={(val) => handleChange('country', val)}
+                            data={countries}
+                            placeholder={profileForm?.fullAddress?.country ? profileForm?.fullAddress?.country : "Country"}
+                            save="value"
+                            inputStyles={{ height: 20 }}
+                            boxStyles={{
+                                width: 180,
+                                borderWidth: 0,
+                                borderBottomWidth: 2,
+                                borderStyle: 'solid',
+                                borderColor: 'black',
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                // height: 40,
+                            }}
+                            dropdownItemStyles={{
+                                width: 300,
+                                marginBottom: 10,
+                            }}
+                            dropdownStyles={{
+                                width: windowWidth * 0.80,
+                                backgroundColor: 'white',
+                                position: 'absolute',
+                                elevation: 10,
+                                zIndex: 10,
+                                top: 40,
+                                left: -25
+                            }}
+                        />
+                        <Text style={{ width: '10%' }}>ZIP:</Text>
+                        <TextInput
+                            keyboardType='numeric'
+                            style={{
+                                width: '20%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                textAlign: 'center',
+                                // paddingLeft: 10, 
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.fullAddress?.zipCode}
+                            onChangeText={(text) => handleChange('zipCode', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 20
+                    }}>
+                        <Text style={{ width: '28%' }}>Phone Number:</Text>
+                        <SelectList
+                            setSelected={(val) => handleChange('countryCode', val)}
+                            data={countryCodes}
+                            placeholder={profileForm?.phone?.countryCode ? profileForm?.phone?.countryCode : "Country Code"}
+                            save="value"
+                            boxStyles={{
+                                width: 150,
+                                borderWidth: 0,
+                                borderBottomWidth: 2,
+                                borderStyle: 'solid',
+                                borderColor: 'black',
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                // height: 35
+                            }}
+                            dropdownItemStyles={{
+                                width: 150,
+                                // marginBottom: 10,
+                            }}
+                            dropdownStyles={{
+                                position: 'absolute',
+                                width: 150,
+                                backgroundColor: 'white',
+                                elevation: 10,
+                                zIndex: 10,
+                                top: 40,
+                                // left: -25
+                            }}
+                        />
+                        <TextInput
+                            keyboardType='numeric'
+                            style={{
+                                width: '28%',
+                                height: '100%',
+                                textAlign: 'center',
+                                textAlignVertical: 'center',
+                                // paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.phone?.phoneNumber}
+                            onChangeText={(text) => handleChange('phoneNumber', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 15
+                    }}>
+                        <Text style={{ width: '30%' }}>Profession:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.profession}
+                            onChangeText={(text) => handleChange('profession', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 15
+                    }}>
+                        <Text style={{ width: '30%' }}>Skills: </Text>
+                        <SelectList
+                            setSelected={(val) => handleChange('cookingSkills', val)}
+                            data={cookingSkills}
+                            placeholder={profileForm?.cookingSkills ? profileForm?.cookingSkills : "Cooking Skills"}
+                            save="value"
+                            boxStyles={{
+                                width: windowWidth * 0.66,
+                                borderWidth: 0,
+                                borderBottomWidth: 2,
+                                borderStyle: 'solid',
+                                borderColor: 'black',
+                                backgroundColor: GlobalStyles[theme].paperColor,
+
+                            }}
+                            dropdownItemStyles={{
+                                width: windowWidth * 0.66,
+                                marginBottom: 10,
+                            }}
+                            dropdownStyles={{
+                                width: windowWidth * 0.66,
+                                alignSelf: 'center',
+                                backgroundColor: 'white',
+                                position: 'absolute',
+                                elevation: 10,
+                                zIndex: 10,
+                                top: 40
+                            }}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 20
+                    }}>
+                        <Text style={{ width: '30%' }}>Diet: </Text>
+                        <SelectList
+                            setSelected={(val) => handleChange('dietaryRestrictions', val)}
+                            data={dietaryRestrictions}
+                            placeholder="Dietary Restrictions"
+                            save="value"
+                            boxStyles={{
+                                width: windowWidth * 0.66,
+                                borderWidth: 0,
+                                borderBottomWidth: 2,
+                                borderStyle: 'solid',
+                                borderColor: 'black',
+                                backgroundColor: GlobalStyles[theme].paperColor,
+
+                            }}
+                            dropdownItemStyles={{
+                                width: windowWidth * 0.66,
+                                // marginBottom: 10,
+                            }}
+                            dropdownStyles={{
+                                width: windowWidth * 0.66,
+                                alignSelf: 'center',
+                                backgroundColor: 'white',
+                                position: 'absolute',
+                                elevation: 10,
+                                zIndex: 10,
+                                top: 40
+                            }}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignContent: 'center',
+                        marginTop: 15,
+                        backgroundColor: GlobalStyles[theme].paperColor,
+                        borderRadius: 10
+                    }}>
+                        {profileForm?.dietaryRestrictions?.map(item => <Text key={uuid.v4()} style={{ paddingLeft: 5, textAlignVertical: 'center' }} onPress={(text) => remove(text, "dietaryRestrictions")}>{item},</Text>)}
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        <Text style={{ width: '30%' }}>Favorite Food:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.favoriteFood}
+                            onChangeText={(text) => handleChange('favoriteFood', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        <Text style={{ width: '30%' }}>Favorite Restaurants:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.favoriteRestaurants}
+                            onChangeText={(text) => handleChange('favoriteRestaurants', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        <Text style={{ width: '30%' }}>Meal Preferences:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.mealPreferences}
+                            onChangeText={(text) => handleChange('mealPreferences', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        <Text style={{ width: '30%' }}>Food Interests:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.foodInterests}
+                            onChangeText={(text) => handleChange('foodInterests', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        minHeight: 100,
+                        maxHeight: 200,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        <Text style={{ width: '30%', height: '100%' }}>About me:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'top',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                                paddingBottom: 20
+                            }}
+                            placeholder='Free Text max 256 char.'
+                            value={profileForm?.personalDescription}
+                            onChangeText={text => handleChange('personalDescription', text)}
+                            keyboardType="default"
+                            maxLength={256}
+                            multiline={true}
+                        />
+                        <Text style={{ position: "absolute", bottom: 5, right: 10 }}>{profileForm?.personalDescription?.length}/256</Text>
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        <Text style={{ width: '30%' }}>Instagram:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.socialMediaHandles?.instagram}
+                            onChangeText={(text) => handleSocialMediaChange('instagram', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        <Text style={{ width: '30%' }}>TikTok:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.socialMediaHandles?.tiktok}
+                            onChangeText={(text) => handleSocialMediaChange('tiktok', text)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        <Text style={{ width: '30%' }}>FaceBook:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+
+                            }}
+                            value={profileForm?.socialMediaHandles?.facebook}
+                            onChangeText={(text) => handleSocialMediaChange('facebook', text)}
+                        />
+                    </View>
+
+                    <View style={{ flexDirection: 'row', height: 35, width: '100%', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+                        <Text style={{ width: '30%' }}>Pinterest:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.socialMediaHandles?.pinterest}
+                            onChangeText={(text) => handleSocialMediaChange('pinterest', text)}
+                        />
+                    </View>
+
+                    <View style={{ flexDirection: 'row', height: 35, width: '100%', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+                        <Text style={{ width: '30%' }}>Blog:</Text>
+                        <TextInput
+                            style={{
+                                width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: GlobalStyles[theme].paperColor,
+                                borderRadius: 10,
+                            }}
+                            value={profileForm?.socialMediaHandles?.blog}
+                            onChangeText={(text) => handleSocialMediaChange('blog', text)}
+                        />
+                    </View>
+
+                    <View style={{ height: 35, width: '100%', alignItems: 'center', justifyContent: 'flex-start', marginTop: 10, marginBottom: 50 }}>
+                        <Text> Global Status:</Text>
+                        <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
+                    </View>
+
+                    <TouchableOpacity
+                        onPress={() => saveProfileSubmit()}
+                        style={{
+                            // width: 100, 
+                            height: 40,
                             borderColor: 'black',
-                        }}
-                        dropdownItemStyles={{
-                            width: 300,
-                            marginBottom: 10,
-                        }}
-                        dropdownStyles={{
-                            width: windowWidth * 0.80,
-                            backgroundColor: 'white',
-                            position: 'absolute',
-                            elevation: 10,
-                            zIndex: 10,
-                            top: 40,
-                            left: -25
-                        }}
-                    />
-                    <Text style={{ width: '20%' }}>ZIP Code:</Text>
-                    <TextInput
-                        keyboardType='numeric'
-                        style={{ width: '25%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.fullAddress?.zipCode}
-                        onChangeText={(text) => handleChange('zipCode', text)}
-                    />
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            // marginBottom: 20,
+                            backgroundColor: GlobalStyles[theme].yesColor,
+                            paddingHorizontal: 20
+                        }}>
+                        <Text style={{ 
+                            textAlignVertical: 'center', 
+                            height: '100%', 
+                            width: '100%', 
+                            textAlign: 'center', 
+                            fontWeight: '500' }}>Save profile</Text>
+                    </TouchableOpacity>
+
+                    {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 20 }}>
+                        <Button title="Save profile" onPress={() => saveProfileSubmit()} />
+                        <Button title="Submit profile" onPress={() => submitProfile()} />
+                        <Button title="Clear profile" onPress={() => clearProfile()} />
+                    </View> */}
+
+                    <PopupModal message={redux?.auth?.message} popupModal={popupModal} />
+
                 </View>
-
-                <View style={{ width: '90%', height: 30, justifyContent: 'flex-end' }}>
-                    <Text style={{ width: '30%' }}>Phone Number:</Text>
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <SelectList
-                        setSelected={(val) => handleChange('countryCode', val)}
-                        data={countryCodes}
-                        placeholder={profileForm?.phone?.countryCode ? profileForm?.phone?.countryCode : "Country Code"}
-                        save="value"
-                        boxStyles={{
-                            width: 150,
-                            borderWidth: 0,
-                            borderBottomWidth: 2,
-                            borderStyle: 'solid',
-                            borderColor: 'black',
-                        }}
-                        dropdownItemStyles={{
-                            width: 150,
-                            marginBottom: 10,
-                        }}
-                        dropdownStyles={{
-                            // width: windowWidth * 0.80,
-                            width: 150,
-                            backgroundColor: 'white',
-                            position: 'absolute',
-                            elevation: 10,
-                            zIndex: 10,
-                            top: 40,
-                            // left: -25
-                        }}
-                    />
-                    <TextInput
-                        keyboardType='numeric'
-                        style={{ width: '57.5%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.phone?.phoneNumber}
-                        onChangeText={(text) => handleChange('phoneNumber', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>Profession:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.profession}
-                        onChangeText={(text) => handleChange('profession', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 10 }}>
-                    <Text style={{ width: 50 }}>Skills: </Text>
-                    <SelectList
-                        setSelected={(val) => handleChange('cookingSkills', val)}
-                        data={cookingSkills}
-                        placeholder={profileForm?.cookingSkills ? profileForm?.cookingSkills : "Cooking Skills"}
-                        save="value"
-                        boxStyles={{
-                            width: 300,
-                            borderWidth: 0,
-                            borderBottomWidth: 2,
-                            borderStyle: 'solid',
-                            borderColor: 'black',
-                        }}
-                        dropdownItemStyles={{
-                            width: 250,
-                            marginBottom: 10,
-                        }}
-                        dropdownStyles={{
-                            width: windowWidth * 0.75,
-                            alignSelf: 'center',
-                            backgroundColor: 'white',
-                            position: 'absolute',
-                            elevation: 10,
-                            zIndex: 10,
-                            top: 40
-                        }}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 10 }}>
-                    <Text style={{ width: 50 }}>Gender: </Text>
-                    <SelectList
-                        setSelected={(val) => handleChange('gender', val)}
-                        data={gender}
-                        placeholder={profileForm?.gender}
-                        save="value"
-                        boxStyles={{
-                            width: 300,
-                            borderWidth: 0,
-                            borderBottomWidth: 2,
-                            borderStyle: 'solid',
-                            borderColor: 'black',
-                        }}
-                        dropdownItemStyles={{
-                            width: 250,
-                            marginBottom: 10,
-                        }}
-                        dropdownStyles={{
-                            width: windowWidth * 0.75,
-                            alignSelf: 'center',
-                            backgroundColor: 'white',
-                            position: 'absolute',
-                            elevation: 10,
-                            zIndex: 10,
-                            top: 40
-                        }}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 10 }}>
-                    <Text style={{ width: 50 }}>Diet: </Text>
-                    <SelectList
-                        setSelected={(val) => handleChange('dietaryRestrictions', val)}
-                        data={dietaryRestrictions}
-                        placeholder="Dietary Restrictions"
-                        save="value"
-                        boxStyles={{
-                            width: 300,
-                            borderWidth: 0,
-                            borderBottomWidth: 2,
-                            marginBottom: 10,
-                            borderStyle: 'solid',
-                            borderColor: 'black',
-                        }}
-                        dropdownItemStyles={{
-                            width: 250,
-                            marginBottom: 10,
-                        }}
-                        dropdownStyles={{
-                            width: windowWidth * 0.75,
-                            alignSelf: 'center',
-                            backgroundColor: 'white',
-                            position: 'absolute',
-                            elevation: 10,
-                            zIndex: 10,
-                            top: 40
-                        }}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignContent: 'center', marginVertical: 10, backgroundColor: 'white', borderRadius: 10 }}>
-                    {profileForm?.dietaryRestrictions?.map(item => <Text key={uuid.v4()} style={{ paddingLeft: 5, textAlignVertical: 'center' }} onPress={(text) => remove(text, "dietaryRestrictions")}>{item},</Text>)}
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>Favorite Food:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.favoriteFood}
-                        onChangeText={(text) => handleChange('favoriteFood', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>Favorite Restaurants:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.favoriteRestaurants}
-                        onChangeText={(text) => handleChange('favoriteRestaurants', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>Meal Preferences:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.mealPreferences}
-                        onChangeText={(text) => handleChange('mealPreferences', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>Food Interests:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.foodInterests}
-                        onChangeText={(text) => handleChange('foodInterests', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', minHeight: 100, maxHeight: 200, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%', height: '100%' }}>About me:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'top', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5, paddingBottom: 20 }}
-                        placeholder='Free Text max 256 char.'
-                        value={profileForm?.personalDescription}
-                        onChangeText={text => handleChange('personalDescription', text)}
-                        keyboardType="default"
-                        maxLength={256}
-                        multiline={true}
-                    />
-                    <Text style={{ position: "absolute", bottom: 0, right: 0 }}>{profileForm?.personalDescription?.length}/256</Text>
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>Instagram:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.socialMediaHandles?.instagram}
-                        onChangeText={(text) => handleSocialMediaChange('instagram', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>TikTok:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.socialMediaHandles?.tiktok}
-                        onChangeText={(text) => handleSocialMediaChange('tiktok', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>FaceBook:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.socialMediaHandles?.facebook}
-                        onChangeText={(text) => handleSocialMediaChange('facebook', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>Pinterest:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.socialMediaHandles?.pinterest}
-                        onChangeText={(text) => handleSocialMediaChange('pinterest', text)}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                    <Text style={{ width: '30%' }}>Blog:</Text>
-                    <TextInput
-                        style={{ width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}
-                        value={profileForm?.socialMediaHandles?.blog}
-                        onChangeText={(text) => handleSocialMediaChange('blog', text)}
-                    />
-                </View>
-
-                <View style={{ height: 35, width: '90%', alignItems: 'center', justifyContent: 'flex-start', marginVertical: 10, marginBottom: 40 }}>
-                    <Text> Data Status:</Text>
-                    <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
-                </View>
-
-                <TouchableOpacity onPress={() => saveProfileSubmit()} style={{ width: 100, height: 40, borderColor: 'black', borderWidth: 1, borderRadius: 10, marginBottom: 20 }}>
-                    <Text style={{ textAlignVertical: 'center', height: '100%', width: '100%', textAlign: 'center' }}>Save profile</Text>
-                </TouchableOpacity>
-
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 20 }}>
-                    <Button title="Save profile" onPress={() => saveProfileSubmit()} />
-                    <Button title="Submit profile" onPress={() => submitProfile()} />
-                    <Button title="Clear profile" onPress={() => clearProfile()} />
-                </View>
-
-                <PopupModal message={redux?.auth?.message} popupModal={popupModal} />
-
-            </View>
-        </ScrollView >
+            </ScrollView >
+        </KeyboardAvoidingView>
     );
 };
 

@@ -1,9 +1,11 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import { Root, SPSheet } from 'react-native-popup-confirm-toast'
 
-import React from 'react'
+import React, {useState} from 'react'
+import GlobalStyles from '../GlobalStyles'
 
 const SpSheet = ({ text, children, heightValue }) => {
+const [theme, setTheme] = useState('stylesLight')
 
     const TestComp = () => {
         return (
@@ -14,7 +16,7 @@ const SpSheet = ({ text, children, heightValue }) => {
         <Root>
             <View>
                 <TouchableOpacity
-                    style={styles.genericButton}
+                    style={[styles.genericButton, {backgroundColor: GlobalStyles[theme].buttonColor}]}
                     onPress={() => {
                         const spSheet = SPSheet;
                         spSheet.show({
@@ -41,7 +43,7 @@ const SpSheet = ({ text, children, heightValue }) => {
                     }}
                 >
 
-                    <Text style={{ color: 'black', fontWeight: '500' }}>{text}</Text>
+                    <Text style={{ color: 'white', fontWeight: '500', fontSize: 16 }}>{text}</Text>
                 </TouchableOpacity>
             </View>
         </Root>
@@ -52,7 +54,7 @@ export default SpSheet
 
 const styles = StyleSheet.create({
     genericButton: {
-        marginBottom: 10,
+        marginBottom: 0,
         width: 190,
         height: 40,
         alignItems: 'center',
@@ -60,8 +62,10 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         borderStyle: 'solid',
         borderColor: 'black',
-        borderWidth: 1,
-        backgroundColor: '#66ccff',
+        borderWidth: 0.5,
+        paddingHorizontal: 20,
+
+        // backgroundColor: '#66ccff',
 
     },
 })

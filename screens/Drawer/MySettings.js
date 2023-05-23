@@ -22,7 +22,6 @@ export default function MySettings({ navigation }) {
             <Text>Location: automatico eu acho</Text>
 
 
-            <Button title='Click Me' onPress={() => alert('ToDo')} />
         </View>
     )
 }
@@ -30,7 +29,8 @@ export default function MySettings({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        padding: 10
     }
 })

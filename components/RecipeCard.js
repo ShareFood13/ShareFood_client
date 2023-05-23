@@ -53,9 +53,11 @@ const logos = [
 ]
 import { useDispatch, useSelector } from 'react-redux';
 import { getRecipe } from '../Redux/actions/recipes';
+import GlobalStyles from '../GlobalStyles';
 
 export default function RecipeCard({ recipe, navigation }) {
     const dispatch = useDispatch()
+    const [theme,setTheme] = useState('stylesLight')
 
     const openRecipe = (recipe) => {
         // navigation.push('RecipeDetail', { recipeData: recipe })
@@ -69,7 +71,7 @@ export default function RecipeCard({ recipe, navigation }) {
     // console.log(recipe?.recipePicture?.small)
     return (
         <View style={styles.container}>
-            <View style={styles.recipeCard}>
+            <View style={[styles.recipeCard, {backgroundColor: GlobalStyles[theme].paperColor}]}>
                 <View style={styles.subCard}>
 
                     <Pressable style={styles.left} onPress={() => openRecipe(recipe)}>
@@ -139,9 +141,10 @@ const styles = StyleSheet.create({
     },
     image: {
         borderRadius: 10,
-        borderWidth: 1,
+        borderWidth: 0.1,
         borderStyle: 'solid',
-        height: "100%"
+        height: "100%",
+        // width: "40%"
     },
     left: {
         justifyContent: 'space-around',
@@ -149,7 +152,7 @@ const styles = StyleSheet.create({
         height: "95%"
     },
     recipeCard: {
-        width: "90%",
+        width: "100%",
         height: 100,
         borderRadius: 10,
         borderStyle: 'solid',
@@ -157,8 +160,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         alignSelf: 'center',
-        marginVertical: 10,
-        backgroundColor: 'white',
+        marginTop: 10,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -169,7 +171,7 @@ const styles = StyleSheet.create({
     },
     subCard: {
         flexDirection: "row",
-        width: "98%",
+        width: "100%",
         height: "100%",
         justifyContent: 'space-between'
     },

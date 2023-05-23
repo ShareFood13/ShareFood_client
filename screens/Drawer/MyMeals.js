@@ -49,6 +49,7 @@ import MealCard from '../../components/MealCard';
 import PopupModal from '../../components/PopupModal';
 import Banner from '../../components/Banner';
 import ShowMealDetail from '../../components/ShowMealDetail';
+import GlobalStyles from '../../GlobalStyles';
 
 const initialState = {
     mealName: "",
@@ -117,6 +118,7 @@ export default function MyMeals({ navigation }) {
     // const [modalVisible2, setModalVisible2] = useState(false)
     const [popupModal, setPopupModal] = useState(false)
     const [mealList, setMealList] = useState()
+    const [theme, setTheme] = useState('stylesLight')
 
 
     const dispatch = useDispatch();
@@ -264,40 +266,46 @@ export default function MyMeals({ navigation }) {
         navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: mealToShopList, showType: "meals", mealName: meal.mealName } })
     }
     //////////////////////////////
+
+    const Header = () => {
+        return <Banner title="My Meals" />
+    }
+
+    const Footer = () => {
+        return <View style={{
+            // position: 'absolute',
+            width: windowWidth,
+            // height: 120,
+            // alignSelf: 'center',
+            // justifyContent: 'flex-end',
+            // elevation: 5,
+            // zIndex: 5,
+
+        }}>
+            <TouchableOpacity
+                onPress={() => setModalVisible(true)} >
+                <View
+                    value={mealForm.mealName}
+                    style={{
+                        width: windowWidth,
+                        height: 40,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: '#2596be',
+                        borderColor: 'black',
+                        borderWidth: 1,
+                        borderStyle: 'solid',
+
+                    }}>
+                    <Text style={{ color: 'white', fontWeight: '700', fontSize: 20 }} value={mealForm.specialDiet}>Create a Meal</Text>
+
+                </View>
+            </TouchableOpacity>
+        </View>
+    }
+
     return (
         <View style={styles.container}>
-            <View style={{
-                position: 'absolute',
-                width: windowWidth,
-                height: 120,
-                alignSelf: 'center',
-                elevation: 5,
-                zIndex: 5
-
-            }}>
-                <TouchableOpacity
-                    onPress={() => setModalVisible(true)} >
-                    <View
-                        value={mealForm.mealName}
-                        style={{
-                            width: windowWidth,
-                            height: 40,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor: '#2596be',
-                            borderColor: 'black',
-                            borderWidth: 1,
-                            borderStyle: 'solid',
-
-                        }}>
-                        <Text style={{ color: 'white', fontWeight: '700', fontSize: 20 }} value={mealForm.specialDiet}>Create a Meal</Text>
-
-                    </View>
-                </TouchableOpacity>
-
-                <Banner title="My Meals" />
-
-            </View>
             {/* <ScrollView
                 style={{ width: windowWidth }}
                 refreshControl={
@@ -308,12 +316,18 @@ export default function MyMeals({ navigation }) {
                     />
                 }
             > */}
-
+            <Header />
 
             <FlatList
                 data={mealList}
                 showsVerticalScrollIndicator={false}
-                style={{ width: '100%', marginTop: 120 }}
+                // ListHeaderComponent={<Header />}
+                // ListHeaderComponentStyle={{ backgroundColor: 'red', padding: 10, paddingBottom: 0}}
+                // ListFooterComponent={<Footer />}
+                // ListFooterComponentStyle={{ backgroundColor: 'blue' }}
+                // contentContainerStyle={{ height: windowHeight- 100, backgroundColor: 'grey' }}
+                style={{ flex: 1 }}
+                contentContainerStyle={{ backgroundColor: GlobalStyles[theme].background }}
                 renderItem={({ item }) => !item?.isDeleted &&
                     <MealCard
                         meal={item}
@@ -333,7 +347,7 @@ export default function MyMeals({ navigation }) {
                 keyExtractor={item => item?._id}
             // extraData={selectedId}
             />
-
+            <Footer />
             {/* <View style={{ width: '100%', marginTop: 120 }}>
                      {userInfo?.result?.mealsId?.map(meal => 
                     {mealList.map(meal =>
@@ -584,7 +598,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'flex-start',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: 10,
+        paddingBottom: 0
     },
     genericButton: {
         marginBottom: 10,

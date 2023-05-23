@@ -1,17 +1,22 @@
-import { StyleSheet, Text, View, Modal } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
+import { StyleSheet, Text, View, Modal, Dimensions } from 'react-native'
+import GlobalStyles from '../GlobalStyles'
+
+const windowHeight = Dimensions.get("window").height
+
 
 const PopupModal = ({ message, popupModal }) => {
+    const [theme, setTheme] = useState("stylesLight")
+
     return (
         <Modal
-            animationType="slide"
+            animationType="none"
             transparent={true}
             visible={popupModal}
         >
-            <View style={{ flex: 1, top: 550, alignItems: 'center' }}>
+            <View style={{ flex: 1, top: windowHeight * 0.75, alignItems: 'center' }}>
                 <View style={{
                     flexDirection: 'row',
-                    backgroundColor: 'white',
                     width: '90%',
                     height: 100,
                     justifyContent: 'center',
@@ -20,13 +25,10 @@ const PopupModal = ({ message, popupModal }) => {
                     borderColor: 'black',
                     borderWidth: 1,
                     borderStyle: 'solid',
-                    borderRadius: 20
+                    borderRadius: 20,
+                    backgroundColor: GlobalStyles[theme].paperColor,
                 }}>
-                    <Text style={{ fontSize: 24 }}>{message}</Text>
-                    {/* {message?.includes("Recipe") || message?.includes("Meal") || message?.includes("Event") ?
-                        <><Text style={{ width: 50, height: 50, fontSize: 30 }}>👍</Text><Text style={{ fontSize: 24 }}>{message}</Text></>
-                        : <><Text style={{ width: 50, height: 50, fontSize: 30 }}>👎 </Text><Text style={{ fontSize: 24 }}>Something went wrong</Text></>} */}
-
+                    <Text style={{ fontSize: 20 }}>{message}</Text>
                 </View>
             </View>
         </Modal>

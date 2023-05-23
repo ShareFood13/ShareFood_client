@@ -24,52 +24,141 @@ import {
 
 import { useDispatch, useSelector } from 'react-redux';
 import * as SecureStore from 'expo-secure-store';
+import Banner from '../../components/Banner';
 
 
 import { Context } from "../../context/UserContext";
-import { startFollowing } from '../../Redux/actions/auth';
+import { startFollowing, stopFollowing } from '../../Redux/actions/auth';
+import GlobalStyles from '../../GlobalStyles';
+import BannerFollowers from '../../components/BannerFollowers';
+import UserAbout from '../../components/UserAbout';
+import { useIsFocused } from '@react-navigation/native';
+
+
+import { useFonts } from 'expo-font';
+import StylesText from "../../components/StylesText"
+import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
+import PopupModal from '../../components/PopupModal';
 
 const ShowOtherUser = ({ navigation, route }) => {
+    var countRecipe = 0
     const { userInfo } = route.params
+    navigation.setOptions({ title: userInfo.userName }) // causa um warning Cannot update a component while rendering a diff comp
     const { userContext, setUserContext } = useContext(Context)
-    const [userId, setUserId] = useState()
+    const isFocused = useIsFocused();
     const dispatch = useDispatch()
 
-
+    const [userId, setUserId] = useState()
+    const [popupModal, setPopupModal] = useState(false)
+    const [theme, setTheme] = useState("stylesLight")
     const [showPictures, setShowPictures] = useState("grid")
     const [moreHeight, setMoreHeight] = useState(true)
-
-    var countRecipe = 0
 
     const redux = useSelector((state) => state)
     userInfo.recipesId?.map(recipe => !recipe.isDeleted && countRecipe++)
 
-    useEffect(() => {
-        getItem()
-    }, [userContext])
+    console.log("ShowOtherUsers", userInfo)
+    console.log("ShowOtherUser redux", redux?.auth?.authData?.message)
 
-    async function getItem() {
-        setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
-    }
+    useEffect(() => {
+        if (redux?.auth?.message !== "") {
+            setPopupModal(true)
+            setTimeout(async () => {
+                dispatch({ type: CLEAR_MSG })
+                setPopupModal(false)
+                navigation.navigate("Home")
+            }, 2500)
+        }
+    }, [redux, isFocused])
+
+    useEffect(() => {
+        // getItem()
+        setUserId(redux.auth.authData.result._id)
+    }, [redux])
+
+    // async function getItem() {
+    //     setUserId(JSON.parse(await SecureStore.getItemAsync('storageData')).userId)
+    // }
 
     const startFollowingFn = (follow_id) => {
         dispatch(startFollowing({ userId, follow_id }))
-        navigation.navigate("Home")
+    }
+
+    const stopFollowingFn = (follow_id) => {
+        dispatch(stopFollowing({ userId, follow_id }))
     }
 
     const Header = () => {
-        return (<SafeAreaView style={{ flex: 1, justifyContent: 'flex-start', alignContent: 'center' }}>
-            {!userContext.following.includes(userInfo._id) &&
-                <TouchableOpacity onPress={() => startFollowingFn(userInfo._id)} style={{ height: 30, borderWidth: 1, borderColor: 'black', paddingHorizontal: 7, backgroundColor: 'cyan' }}>
-                    <Text style={{ height: '100%', fontSize: 18, fontWeight: '500', textAlign: 'center', textAlignVertical: 'center' }}>Start Following</Text>
-                </TouchableOpacity>}
-            <Banner title={userInfo.userName} />
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: 'flex-start', alignContent: 'center' }}>
 
-            <View style={{ flexDirection: "row", height: 100, width: "100%", justifyContent: 'space-around', alignItems: 'center', marginTop: 0, backgroundColor: 'white', alignContent: 'center' }}>
+                {!userContext.following.includes(userInfo._id)
+                    ? <TouchableOpacity
+                        onPress={() => startFollowingFn(userInfo._id)}
+                        style={{
+                            height: 30,
+                            borderWidth: 1,
+                            borderColor: 'black',
+                            paddingHorizontal: 7,
+                            backgroundColor: GlobalStyles[theme].lightBlue,
+                            // marginBottom: 20
+                        }}>
+                        <Text style={{ height: '100%', fontSize: 18, fontWeight: '500', textAlign: 'center', textAlignVertical: 'center' }}>Start Following</Text>
+                    </TouchableOpacity>
+                    : <TouchableOpacity
+                        onPress={() => stopFollowingFn(userInfo._id)}
+                        style={{
+                            height: 30,
+                            borderWidth: 1,
+                            borderColor: 'black',
+                            paddingHorizontal: 7,
+                            backgroundColor: GlobalStyles[theme].lightBlue,
+                            // marginBottom: 20
+                        }}>
+                        <Text style={{ height: '100%', fontSize: 18, fontWeight: '500', textAlign: 'center', textAlignVertical: 'center' }}>Stop Following</Text>
+                    </TouchableOpacity>
+                }
+
+                {/* <Banner title={userInfo.userName} /> */}
+
+                {/* <View style={{
+                    height: 40,
+                    left: 100,
+                    position: 'absolute',
+                    top: 35,
+                    zIndex: 100,
+                    margin: 10,
+                    // justifyContent: 'center',
+                    // alignItems: 'flex-start',
+                    // alignSelf: 'center',
+                    // backgroundColor: "red"
+                }}> */}
+                {/* <StylesText title={userInfo.userName} style00={{ fontFamily: "Miniver_400Regular" }} /> */}
+                {/* <Text style={{ fontSize: 30, fontFamily: 'BalsamiqSans_400Regular', letterSpacing: 1.3 }}>{userInfo.userName}</Text> */}
+                {/* </View> */}
+
+                <BannerFollowers
+                    countRecipe={countRecipe}
+                    userInfo={userInfo}
+                // userImage={redux?.auth?.authData?.result?.profile?.profilePicture.base64}
+                // userContext={userContext}
+                />
+
+                {/* OLD BannerFollowers */}
+                {/* <View style={{ 
+                flexDirection: "row", 
+                height: 100, 
+                width: "100%", 
+                justifyContent: 'space-around', 
+                alignItems: 'center', 
+                marginTop: 0, 
+                backgroundColor: 'white', 
+                alignContent: 'center' 
+                }}>
                 <Image
                     source={require("../../assets/images/user-profile.jpeg")}
                     // source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture }}
-                    // source={{ uri: userInfo?.profile?.profilePicture }}
+                    // source={{ uri: userInfo?.profile?.profilePicture.base64 }}
                     style={{ height: 90, width: 90, borderRadius: 45 }}
                 />
                 <View style={{ alignItems: 'center' }}>
@@ -84,68 +173,71 @@ const ShowOtherUser = ({ navigation, route }) => {
                     <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{userInfo?.profile?.following?.length}</Text>
                     <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Following</Text>
                 </View>
-            </View>
+            </View> */}
 
-            <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10, paddingVertical: 10 }}>
-                <View style={moreHeight && { maxHeight: 100, overflow: 'hidden' }}>
-                    <Text style={{ width: '95%', textAlign: 'justify', alignSelf: 'center', marginBottom: 5 }}>
-                        {userInfo?.profile?.personalDescription}
-                    </Text>
+                <UserAbout userContext={userInfo?.profile} setMoreHeight={setMoreHeight} moreHeight={moreHeight} />
 
-                    {userInfo?.profile?.socialMediaHandles?.facebook &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <Entypo name="facebook" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userInfo?.profile?.socialMediaHandles?.facebook}</Text>
-                        </View>
-                    }
-                    {userInfo?.profile?.socialMediaHandles?.instagram &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <Entypo name="instagram" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userInfo?.profile?.socialMediaHandles?.instagram}</Text>
-                        </View>
-                    }
-                    {userInfo?.profile?.socialMediaHandles?.pinterest &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <Entypo name="pinterest" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userInfo?.profile?.socialMediaHandles?.pinterest}</Text>
-                        </View>
-                    }
-                    {userInfo?.profile?.socialMediaHandles?.tiktok &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <FontAwesome5 name="tiktok" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userInfo?.profile?.socialMediaHandles?.tiktok}</Text>
-                        </View>
-                    }
-                    {userInfo?.profile?.socialMediaHandles?.blog &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <FontAwesome5 name="blogger" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userInfo?.profile?.socialMediaHandles?.blog}</Text>
-                        </View>
-                    }
+                {/* OLD userAbout */}
+                {/* <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10, paddingVertical: 10 }}>
+                    <View style={moreHeight && { maxHeight: 100, overflow: 'hidden' }}>
+                        <Text style={{ width: '95%', textAlign: 'justify', alignSelf: 'center', marginBottom: 5 }}>
+                            {userInfo?.profile?.personalDescription}
+                        </Text>
+
+                        {userInfo?.profile?.socialMediaHandles?.facebook &&
+                            <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                                <Entypo name="facebook" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                                <Text>{userInfo?.profile?.socialMediaHandles?.facebook}</Text>
+                            </View>
+                        }
+                        {userInfo?.profile?.socialMediaHandles?.instagram &&
+                            <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                                <Entypo name="instagram" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                                <Text>{userInfo?.profile?.socialMediaHandles?.instagram}</Text>
+                            </View>
+                        }
+                        {userInfo?.profile?.socialMediaHandles?.pinterest &&
+                            <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                                <Entypo name="pinterest" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                                <Text>{userInfo?.profile?.socialMediaHandles?.pinterest}</Text>
+                            </View>
+                        }
+                        {userInfo?.profile?.socialMediaHandles?.tiktok &&
+                            <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                                <FontAwesome5 name="tiktok" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                                <Text>{userInfo?.profile?.socialMediaHandles?.tiktok}</Text>
+                            </View>
+                        }
+                        {userInfo?.profile?.socialMediaHandles?.blog &&
+                            <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
+                                <FontAwesome5 name="blogger" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                                <Text>{userInfo?.profile?.socialMediaHandles?.blog}</Text>
+                            </View>
+                        }
+                    </View>
+                    <TouchableOpacity onPress={() => setMoreHeight(!moreHeight)} style={{ width: "100%", alignContent: 'flex-end' }}>
+                        {moreHeight
+                            ? <Text style={{ width: "95%", textAlign: 'right' }}>...more</Text>
+                            : <Text style={{ width: "95%", textAlign: 'right' }}>...less</Text>}
+                    </TouchableOpacity>
+                </View> */}
+
+                <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-around', alignSelf: 'center', height: 40, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'black', marginBottom: 15 }}>
+                    <TouchableOpacity onPress={() => setShowPictures("grid")}>
+                        <MaterialIcons name="grid-on" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setShowPictures("list")}>
+                        <Foundation name="list" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                    </TouchableOpacity>
+
                 </View>
-                <TouchableOpacity onPress={() => setMoreHeight(!moreHeight)} style={{ width: "100%", alignContent: 'flex-end' }}>
-                    {moreHeight
-                        ? <Text style={{ width: "95%", textAlign: 'right' }}>...more</Text>
-                        : <Text style={{ width: "95%", textAlign: 'right' }}>...less</Text>}
-                </TouchableOpacity>
-            </View>
 
-            <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-around', alignSelf: 'center', height: 40, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'black', marginBottom: 15 }}>
-                <TouchableOpacity onPress={() => setShowPictures("grid")}>
-                    <MaterialIcons name="grid-on" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setShowPictures("list")}>
-                    <Foundation name="list" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                </TouchableOpacity>
-
-            </View>
-
-        </SafeAreaView>)
+            </SafeAreaView>)
     }
 
     return (
 
-        <View style={{ flex: 1, marginTop: 50 }}>
+        <View style={{ flex: 1, marginTop: 0 }}>
             {showPictures === "grid" ?
                 <FlatList
                     ListHeaderComponent={<Header />}
@@ -186,7 +278,7 @@ const ShowOtherUser = ({ navigation, route }) => {
                     keyExtractor={item => "#" + item._id}
                 />
             }
-
+            <PopupModal message={redux?.auth?.authData?.message} popupModal={popupModal} />
         </View>
     )
 }
