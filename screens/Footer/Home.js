@@ -5,7 +5,6 @@ import {
     Text,
     View,
     Image,
-    ScrollView,
     TouchableOpacity,
     FlatList,
     RefreshControl,
@@ -14,17 +13,11 @@ import {
 
 import { useIsFocused } from '@react-navigation/native';
 
-import { Entypo, MaterialIcons, Foundation, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
-
 import * as SecureStore from 'expo-secure-store';
 
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Context } from "../../context/UserContext";
-import { getUserInfo, startFollowing } from '../../Redux/actions/auth';
-import { getotherusers } from '../../Redux/actions/others';
-import { getotherrecipes } from '../../Redux/actions/recipes';
-import { getMyMails } from '../../Redux/actions/mymails';
 
 import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
@@ -34,30 +27,58 @@ import BannerFollowers from '../../components/BannerFollowers';
 import UserAbout from '../../components/UserAbout';
 import UserCarrousel from '../../components/UserCarrousel';
 
+import { useFonts } from 'expo-font';
+import {
+    // Roboto_400Regular,
+    // Lato_400Regular,
+    Montserrat_400Regular,
+    // Oswald_400Regular,
+    // SourceCodePro_400Regular,
+    // Slabo27px_400Regular,
+    // Poppins_400Regular,
+    // Lora_400Regular,
+    // Rubik_400Regular,
+    // PTSans_400Regular,
+    // Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
+import GridList from '../../components/GridList';
+
+import * as SplashScreen from 'expo-splash-screen';
 
 export default function Home({ navigation }) {
     const { userContext, setUserContext } = useContext(Context)
     const dispatch = useDispatch()
     const [showPictures, setShowPictures] = useState("grid")
     const windowWidth = Dimensions.get('window').width;
-console.log(windowWidth)
     var countRecipe = 0
+    const isFocused = useIsFocused();
 
     const [userId, setUserId] = useState(null)
     const [popupModal, setPopupModal] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
     const [moreHeight, setMoreHeight] = useState(true)
     const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        // Roboto_400Regular,
+        // Lato_400Regular,
+        Montserrat_400Regular,
+        // Oswald_400Regular,
+        // SourceCodePro_400Regular,
+        // Slabo27px_400Regular,
+        // Poppins_400Regular,
+        // Lora_400Regular,
+        // Rubik_400Regular,
+        // PTSans_400Regular,
+        // Karla_400Regular
+    })
 
-
-    const isFocused = useIsFocused();
+    SplashScreen.preventAutoHideAsync();
 
     const redux = useSelector((state) => state)
-    console.log("Home redux", redux?.auth?.authData?.result?._id)
-    console.log("Home redux", redux?.auth?.message)
 
     redux?.recipe?.recipes?.map(recipe => !recipe.isDeleted && countRecipe++)
-    // redux?.auth?.authData?.result?.recipesId?.map(recipe => !recipe.isDeleted && countRecipe++)
     var otherUsersList = redux?.other?.otherUsers
 
     useEffect(() => {
@@ -102,7 +123,7 @@ console.log(windowWidth)
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         // setMyRecipes(userContext?.result?.recipesId)
-        console.log("userId",userId)
+        // console.log("userId", userId)
         // userId !== null && dispatch(getotherusers(userId))
         // userId !== null && dispatch(getUserInfo(userId))
         wait(3000).then(() => setRefreshing(false))//.then(() => dispatch(getUserInfo(userId)))
@@ -120,6 +141,16 @@ console.log(windowWidth)
         navigation.push('RecipeDetail', { recipeFromHome: recipe, recipeDetailFlag: true })
     }
 
+    const onLayoutRootView = useCallback(async () => {
+        if (fontsLoaded) {
+            await SplashScreen.hideAsync();
+        }
+    }, [fontsLoaded]);
+
+    if (!fontsLoaded) {
+        return null;
+    }
+
     const Header = () => {
         return (<>
 
@@ -129,185 +160,16 @@ console.log(windowWidth)
                 userContext={userContext}
             />
 
-            {/* OLD BannerFollowers */}
-            {/* <View style={{
-                flexDirection: "row",
-                height: 60,
-                width: "100%",
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                marginVertical: 25,
-                backgroundColor: GlobalStyles[theme].background,
-                alignContent: 'center',
-                position: 'relative',
-            }}>
-                <Image
-                    // source={require("../../assets/images/user-profile.jpeg")}
-                    // source={{ uri: userContext?.profilePicture }}
-                    source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture.base64 }}
-                    style={{ height: 90, width: 90, borderRadius: 45, position: 'absolute', left: 20 }}
-                />
-                <View style={{ flexDirection: 'row', width: windowWidth - 150, justifyContent: 'space-between', right: 20 }}>
-                    <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{countRecipe}</Text>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Recipes</Text>
-                    </View>
-                    <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{userContext?.followers?.length}</Text>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Followers</Text>
-                    </View>
-                    <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{userContext?.following?.length}</Text>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Following</Text>
-                    </View>
-                </View>
-            </View> */}
-
             <UserAbout userContext={userContext} setMoreHeight={setMoreHeight} moreHeight={moreHeight} />
 
-            {/* OLF+D User About */}
-            {/* <View style={{
-                backgroundColor: GlobalStyles[theme].background,
-                marginHorizontal: 10,
-                borderRadius: 10,
-                marginBottom: 10,
-                borderWidth: 0.5,
-                borderColor: 'black',
-                // paddingVertical: 10
-            }}>
-                <View style={moreHeight && { maxHeight: 100, overflow: 'hidden' }}>
-                    <Text style={{ width: '95%', textAlign: 'justify', alignSelf: 'center', marginBottom: 5 }}>
-                        {userContext?.personalDescription}
-                    </Text>
-
-                    {userContext?.socialMediaHandles?.facebook &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <Entypo name="facebook" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userContext?.socialMediaHandles?.facebook}</Text>
-                        </View>
-                    }
-                    {userContext?.socialMediaHandles?.instagram &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <Entypo name="instagram" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userContext?.socialMediaHandles?.instagram}</Text>
-                        </View>
-                    }
-                    {userContext?.socialMediaHandles?.pinterest &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <Entypo name="pinterest" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userContext?.socialMediaHandles?.pinterest}</Text>
-                        </View>
-                    }
-                    {userContext?.socialMediaHandles?.tiktok &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <FontAwesome5 name="tiktok" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userContext?.socialMediaHandles?.tiktok}</Text>
-                        </View>
-                    }
-                    {userContext?.socialMediaHandles?.blog &&
-                        <View style={{ flexDirection: 'row', marginVertical: 5, paddingLeft: 10 }}>
-                            <FontAwesome5 name="blogger" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                            <Text>{userContext?.socialMediaHandles?.blog}</Text>
-                        </View>
-                    }
-                </View>
-                <TouchableOpacity onPress={() => setMoreHeight(!moreHeight)} style={{ width: "100%", alignContent: 'flex-end' }}>
-                    {moreHeight
-                        ? <Text style={{ width: "95%", textAlign: 'right' }}>...more</Text>
-                        : <Text style={{ width: "95%", textAlign: 'right' }}>...less</Text>}
-                </TouchableOpacity>
-            </View> */}
-
             <UserCarrousel otherUsersList={otherUsersList} following={redux?.auth?.authData?.result?.profile?.following} navigation={navigation} userId={userId} />
-            
-            {/* <ScrollView
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                style={{ marginLeft: 5, marginBottom: 10 }}
-            >
-                {otherUsersList.map(user => !redux?.auth?.authData?.result?.profile?.following?.includes(user._id) &&
-                    <TouchableOpacity onPress={() => openOtherUser(user)} key={user._id}>
-                        <View style={{
-                            width: 90,
-                            height: 150,
-                            borderRadius: 10,
-                            borderWidth: 0.5,
-                            borderColor: 'black',
-                            marginHorizontal: 5,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: GlobalStyles[theme].paperColor
-                        }}>
-                            <Image
-                                source={require("../../assets/images/user-profile.jpeg")}
-                                // source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture }}
-                                // source={{ uri: userContext?.profilePicture }}
-                                style={{ height: 70, width: 70, borderRadius: 35, marginBottom: 5, borderWidth: 0.5, borderColor: 'black' }}
-                            />
 
-                            <Text style={{ marginBottom: 5 }}>{user.userName}</Text>
-
-                            <TouchableOpacity
-                                onPress={() => startFollowingFn(user._id)}
-                                style={{
-                                    borderWidth: 0.5,
-                                    borderColor: 'black',
-                                    borderRadius: 5,
-                                    paddingHorizontal: 15,
-                                    marginBottom: 5,
-                                    backgroundColor: GlobalStyles[theme].lightBlue
-                                }}>
-                                <Text style={{ fontWeight: '400', }}>Follow</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </TouchableOpacity>
-                )}
-            </ScrollView> */}
-
-            <View
-                style={{
-                    flexDirection: 'row',
-                    width: '70%',
-                    justifyContent: 'space-around',
-                    alignSelf: 'center',
-                    height: 30,
-                    alignItems: 'flex-start',
-                    marginBottom: 10,
-                }}
-            >
-                <View style={{
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    height: '100%',
-                    width: '50%',
-                    borderBottomWidth: showPictures === "grid" ? 2 : 0,
-                    borderBottomColor: 'black',
-                    marginBottom: 10,
-                }}>
-                    <TouchableOpacity onPress={() => setShowPictures("grid")}>
-                        <MaterialIcons name="grid-on" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                    </TouchableOpacity>
-                </View>
-                <View style={{
-                    justifyContent: 'flex-start',
-                    // alignSelf: 'center',
-                    alignItems: 'center',
-                    height: '100%',
-                    width: '50%',
-                    borderBottomWidth: showPictures === "grid" ? 0 : 2,
-                    borderBottomColor: 'black',
-                    marginBottom: 10,
-                }}>
-                    <TouchableOpacity onPress={() => setShowPictures("list")}>
-                        <Foundation name="list" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <GridList showPictures={showPictures} setShowPictures={setShowPictures} />
 
         </>)
     }
 
-    return (<>
+    return (<View style={{ backgroundColor: GlobalStyles[theme].background }} onLayout={onLayoutRootView}>
         {showPictures === "grid" ?
             <FlatList
                 refreshControl={
@@ -345,7 +207,21 @@ console.log(windowWidth)
                         <TouchableOpacity onPress={() => openRecipe(item)}>
                             <View style={{ width: windowWidth, borderWidth: 1, borderColor: 'black' }}>
                                 <Image source={{ uri: item?.recipePicture?.normal[0] }} style={{ width: windowWidth, height: windowWidth * 3 / 4, resizeMode: "cover", }} />
-                                <Text style={{ minHeight: 50, width: windowWidth * 0.9, alignSelf: 'center', paddingVertical: 10, textAlign: 'justify' }}>{item.freeText}</Text>
+                                <Text
+                                    style={{
+                                        minHeight: 50,
+                                        width: windowWidth,
+                                        alignSelf: 'center',
+                                        paddingVertical: 10,
+                                        textAlign: 'justify',
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        fontSize: GlobalFontStyles[fontStyle].fontSize,
+                                        backgroundColor: GlobalStyles[theme].paperColor,
+                                        paddingHorizontal: 10,
+                                        color: GlobalStyles[theme].fontColor
+                                    }}>
+                                    {item.freeText}
+                                </Text>
                             </View>
                         </TouchableOpacity>
                         : null
@@ -357,32 +233,8 @@ console.log(windowWidth)
 
         <PopupModal message={redux?.auth?.message} popupModal={popupModal} />
 
-    </>
+    </View>
     )
 }
 
 const styles = StyleSheet.create({})
-
-// const Main = () => {
-//     const renderItem= (item, index) => {
-//       return (
-//         <Recipe
-//         key={index}
-//         recipe={item}>
-//       )
-//     }
-//     return (
-//       <FlatList
-//         ListHeaderComponent={
-//         <>
-//           <CoverPhoto src={images[0]} />
-//           <Title>Welcome</Title>
-//           <Text>Take a look at the list of recipes below:</Text>
-//         </>}
-//         data={recipes}
-//         renderItem={renderItem}
-//         ListFooterComponent={
-//           <Footer/>
-//         }/>
-//     );
-//   };

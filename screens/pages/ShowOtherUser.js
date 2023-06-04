@@ -36,9 +36,11 @@ import { useIsFocused } from '@react-navigation/native';
 
 
 import { useFonts } from 'expo-font';
-import StylesText from "../../components/StylesText"
+// import StylesText from "../../components/StylesText"
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
 import PopupModal from '../../components/PopupModal';
+import GridList from '../../components/GridList';
+import trans from '../../Language';
 
 const ShowOtherUser = ({ navigation, route }) => {
     var countRecipe = 0
@@ -50,6 +52,7 @@ const ShowOtherUser = ({ navigation, route }) => {
 
     const [userId, setUserId] = useState()
     const [popupModal, setPopupModal] = useState(false)
+    const [language, setLanguage] = useState("en")
     const [theme, setTheme] = useState("stylesLight")
     const [showPictures, setShowPictures] = useState("grid")
     const [moreHeight, setMoreHeight] = useState(true)
@@ -90,7 +93,7 @@ const ShowOtherUser = ({ navigation, route }) => {
 
     const Header = () => {
         return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'flex-start', alignContent: 'center' }}>
+            <SafeAreaView style={{ flex: 1, justifyContent: 'flex-start', alignContent: 'center', backgroundColor: GlobalStyles[theme].background }}>
 
                 {!userContext.following.includes(userInfo._id)
                     ? <TouchableOpacity
@@ -103,19 +106,33 @@ const ShowOtherUser = ({ navigation, route }) => {
                             backgroundColor: GlobalStyles[theme].lightBlue,
                             // marginBottom: 20
                         }}>
-                        <Text style={{ height: '100%', fontSize: 18, fontWeight: '500', textAlign: 'center', textAlignVertical: 'center' }}>Start Following</Text>
+                        <Text style={{ 
+                              height: '100%', 
+                              fontSize: 18, 
+                              textAlign: 'center', 
+                              textAlignVertical: 'center' ,
+                              color: GlobalStyles[theme].fontColor,
+                            }}>
+                                {trans[language].START_FOLLOWING}
+                            </Text>
                     </TouchableOpacity>
                     : <TouchableOpacity
                         onPress={() => stopFollowingFn(userInfo._id)}
                         style={{
-                            height: 30,
-                            borderWidth: 1,
-                            borderColor: 'black',
+                            height: 40,
+                            borderBottomWidth: 0.5,
+                            borderColor: GlobalStyles[theme].borderColor,
                             paddingHorizontal: 7,
                             backgroundColor: GlobalStyles[theme].lightBlue,
                             // marginBottom: 20
                         }}>
-                        <Text style={{ height: '100%', fontSize: 18, fontWeight: '500', textAlign: 'center', textAlignVertical: 'center' }}>Stop Following</Text>
+                        <Text style={{ 
+                            height: '100%', 
+                            fontSize: 18, 
+                            textAlign: 'center', 
+                            textAlignVertical: 'center' ,
+                            color: GlobalStyles[theme].fontColor,
+                            }}>{trans[language].STOP_FOLLOWING}</Text>
                     </TouchableOpacity>
                 }
 
@@ -222,15 +239,19 @@ const ShowOtherUser = ({ navigation, route }) => {
                     </TouchableOpacity>
                 </View> */}
 
-                <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-around', alignSelf: 'center', height: 40, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'black', marginBottom: 15 }}>
+
+                <GridList showPictures={showPictures} setShowPictures={setShowPictures} />
+
+                {/* OLD GridList */}
+                {/* <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-around', alignSelf: 'center', height: 40, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'black', marginBottom: 15 }}>
                     <TouchableOpacity onPress={() => setShowPictures("grid")}>
-                        <MaterialIcons name="grid-on" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                        <MaterialIcons name="grid-on" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setShowPictures("list")}>
-                        <Foundation name="list" size={24} color="black" style={{ width: 40, textAlign: 'center' }} />
+                        <Foundation name="list" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
                     </TouchableOpacity>
 
-                </View>
+                </View> */}
 
             </SafeAreaView>)
     }
@@ -242,6 +263,8 @@ const ShowOtherUser = ({ navigation, route }) => {
                 <FlatList
                     ListHeaderComponent={<Header />}
                     data={userInfo?.recipesId}
+                    contentContainerStyle={{backgroundColor: GlobalStyles[theme].background}}
+                    style={{backgroundColor: GlobalStyles[theme].background}}
                     showsVerticalScrollIndicator={false}
                     numColumns={3}
                     initialNumToRender={9}
@@ -278,7 +301,9 @@ const ShowOtherUser = ({ navigation, route }) => {
                     keyExtractor={item => "#" + item._id}
                 />
             }
+
             <PopupModal message={redux?.auth?.authData?.message} popupModal={popupModal} />
+
         </View>
     )
 }

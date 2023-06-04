@@ -31,7 +31,22 @@ import { delShopList, saveShopList, updateShopList } from '../Redux/actions/shop
 import Banner from './Banner';
 import GlobalStyles from '../GlobalStyles';
 
-
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../GlobalFontStyles';
+import trans from '../Language'
 
 
 const TodoList = ({ navigation, answer, openShopListId, title }) => {
@@ -40,8 +55,22 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
     const [modalVisible, setModalVisible] = useState(false)
     const [userId, setUserId] = useState("")
     const [toDelete, setToDelete] = useState(false)
-    const [theme, setTheme] = useState('stylesLight')
-
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
     const dispatch = useDispatch()
 
     // const isFocused = useIsFocused();
@@ -101,27 +130,105 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
     const Footer = () => {
         return (
             <View style={{
-                flexDirection: "column", height: 150, justifyContent: 'space-around', bottom: 0, position: "relative"
+                width: "100%",flexDirection: "column", height: 150, justifyContent: 'space-around', bottom: 0, position: "relative"
             }}>
                 <View style={{
                     flexDirection: 'row', width: "100%", justifyContent: 'space-around', alignItems: 'center'
                 }}>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: GlobalStyles[theme].yesColor }]}
+                    <TouchableOpacity style={[{
+                        width: 170,
+                        minHeight: 40,
+                        borderRadius: 10,
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                        justifyContent: 'center',
+                        // shadowRadius: 60,
+                        // shadowColor: '#F02A4B',
+                        // shadowOpacity: 0.3,
+                        // shadowOffset: { height: 3, width: 0 },
+                        // elevation: 10,
+                        // zIndex: 10,
+                        // bottom: 50,
+                        paddingHorizontal: 20,
+                        paddingVertical: 10,
+                        borderStyle: 'solid',
+                        borderWidth: 0.5,
+                    }, {
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].yesColor
+                    }]}
                         onPress={saveShop}
                     >
-                        <Text style={{ fontWeight: 'bold', color: "white" }}>Save Shop List!</Text>
+                        <Text style={{
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].SAVE_SHOP_LIST}
+                        </Text>
                     </TouchableOpacity>
                     {answer?.list?.some(item => item.isDone === true || item.isDone === false) &&
-                        <TouchableOpacity style={[styles.button, { backgroundColor: GlobalStyles[theme].noColor }]}
+                        <TouchableOpacity style={[{
+                            Width: 170,
+                            minHeight: 40,
+                            borderRadius: 10,
+                            alignItems: 'center',
+                            alignSelf: 'center',
+                            justifyContent: 'center',
+                            // shadowRadius: 60,
+                            // shadowColor: '#F02A4B',
+                            // shadowOpacity: 0.3,
+                            // shadowOffset: { height: 3, width: 0 },
+                            // elevation: 10,
+                            // zIndex: 10,
+                            // bottom: 50,
+                            paddingHorizontal: 20,
+                            paddingVertical: 10,
+                            borderStyle: 'solid',
+                            borderWidth: 0.5,
+                        }, {
+                            borderColor: GlobalStyles[theme].borderColor,
+                            backgroundColor: GlobalStyles[theme].noColor
+                        }]}
                             onPress={openDeleteModal}>
-                            <Text style={{ fontWeight: 'bold', color: "white" }}>Delete Shop List!</Text>
+                            <Text style={{
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                                {trans[language].DELETE_SHOP_LIST}
+                            </Text>
                         </TouchableOpacity>}
                 </View>
-                <View>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: GlobalStyles[theme].buttonColor }]}
+                <View style={{width: "100%", alignItems: 'center'}}>
+                    <TouchableOpacity style={[{
+                        width: 170,
+                        minHeight: 40,
+                        borderRadius: 10,
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                        justifyContent: 'center',
+                        // shadowRadius: 60,
+                        // shadowColor: '#F02A4B',
+                        // shadowOpacity: 0.3,
+                        // shadowOffset: { height: 3, width: 0 },
+                        // elevation: 10,
+                        // zIndex: 10,
+                        // bottom: 50,
+                        paddingHorizontal: 20,
+                        paddingVertical: 10,
+                        borderStyle: 'solid',
+                        borderWidth: 0.5,
+                    }, {
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].buttonColor
+                    }]}
                         onPress={() => navigation.navigate('MyDrawer', { screen: 'Home' })}
                     >
-                        <Text style={{ fontWeight: 'bold', color: "white" }}>Back Home!</Text>
+                        <Text style={{
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].BACK_HOME}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -144,9 +251,8 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
     // console.log({ answer })
     return (
         <>
-            {/* <Header /> */}
             <Banner title={answer?.list === undefined ? title : answer?.shopListName} />
-            {/* <Banner title={answer?.list === undefined ? title : answer?.shopListName} /> */}
+
             <FlatList
                 data={newList}
                 showsVerticalScrollIndicator={false}
@@ -155,15 +261,41 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                 }}
                 ItemSeparatorComponent={ItemSeparatorView}
                 // ListHeaderComponent={<Header />}
-                renderItem={({ item }) =>
-                    <TouchableOpacity style={{ flexDirection: 'row', height: 35, width: "90%", justifyContent: 'center', alignSelf: 'center', alignItems: 'center', backgroundColor: GlobalStyles[theme].paperColor }}
+                renderItem={({ item, index }) =>
+                    <TouchableOpacity
+                        style={[{
+                            flexDirection: 'row',
+                            height: 40,
+                            width: "100%",
+                            justifyContent: 'center',
+                            alignSelf: 'center',
+                            alignItems: 'center',
+                            backgroundColor: GlobalStyles[theme].paperColor
+                        },
+                        (index === 0) && {
+                            borderTopLeftRadius: 10,
+                            borderTopRightRadius: 10,
+                        },
+                        (index === newList.length - 1) && {
+                            borderBottomLeftRadius: 10,
+                            borderBottomRightRadius: 10,
+                        },
+                        ]}
                         // onPress={() => setChecked(!checked)}>
                         onPress={() => handleCheck(item._id)}>
                         {item.isDone ?
-                            <MaterialIcons name="check-box" size={30} color={GlobalStyles[theme].yesColor} style={{ width: "15%", height: 30, justifyContent: 'center', backgroundColor: GlobalStyles[theme].paperColor }} />
-                            : <MaterialIcons name="check-box-outline-blank" size={30} color={GlobalStyles[theme].noColor} style={{ width: "15%", height: 30, justifyContent: 'center', backgroundColor: GlobalStyles[theme].paperColor }} />}
+                            <MaterialIcons name="check-box" size={30} color={GlobalStyles[theme].yesColor} style={{ justifyContent: 'center', backgroundColor: GlobalStyles[theme].paperColor }} />
+                            : <MaterialIcons name="check-box-outline-blank" size={30} color={GlobalStyles[theme].noColor} style={{ justifyContent: 'center', backgroundColor: GlobalStyles[theme].paperColor }} />}
                         <View style={{ flexDirection: 'row', width: "85%", justifyContent: 'center', }}>
-                            <Text style={{ width: "100%", textAlign: 'left', textAlignVertical: 'center', textDecorationLine: item.isDone ? 'line-through' : 'none' }}>
+                            <Text style={{
+                                width: "100%",
+                                textAlign: 'left',
+                                paddingLeft: 5,
+                                textAlignVertical: 'center',
+                                textDecorationLine: item.isDone ? 'line-through' : 'none',
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            }}>
                                 {/* Qty: {item.quantity} Un: {item.units} Prod: {item.product} */}
                                 {item.quantity} {item.units} of {item.product}
                             </Text>
@@ -181,7 +313,17 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                 visible={modalVisible}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
+                    <View style={{
+                        width: 350,
+                        height: 150,
+                        borderStyle: 'solid',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 0.5,
+                        borderRadius: 10,
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].background,
+                    }}>
 
                         {!toDelete &&
                             <TouchableOpacity style={{
@@ -192,32 +334,46 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                                 // marginBottom: 20
                             }}
                                 onPress={() => setModalVisible(!modalVisible)}>
-                                <EvilIcons name="close-o" size={30} color="black" />
+                                <EvilIcons name="close-o" size={30} color="red" />
                             </TouchableOpacity>
                         }
 
                         {toDelete
                             ? <View style={{
-                                height: "70%", width: "90%", justifyContent: 'space-around', alignItems: 'center',
+                                height: "70%", width: "100%", justifyContent: 'space-around', alignItems: 'center',
                             }}>
-                                <Text>Are you sure do you want to Delete It?</Text>
+                                <Text style={{
+                                    fontSize: 16,
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {trans[language].ARE_YOU_SURE}
+                                </Text>
                                 <View style={{
-                                    flexDirection: 'row', width: "90%", justifyContent: 'space-around', alignItems: 'center',
+                                    flexDirection: 'row',
+                                    width: "100%",
+                                    justifyContent: 'space-around',
+                                    alignItems: 'center',
                                 }}>
                                     <TouchableOpacity style={{
                                         width: "40%",
                                         height: 30,
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        borderColor: GlobalStyles[theme].noColor,
-                                        borderWidth: 1,
+                                        borderWidth: 0.5,
                                         borderRadius: 10,
+                                        borderColor: GlobalStyles[theme].borderColor,
                                         backgroundColor: GlobalStyles[theme].noColor,
 
                                     }}
                                         onPress={() => { setModalVisible(false), setToDelete(false) }
                                         }>
-                                        <Text style={{ fontWeight: 'bold', color: 'white' }}>No</Text>
+                                        <Text style={{
+                                            color: GlobalStyles[theme].fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        }}>
+                                            {trans[language].CANCEL}
+                                        </Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity style={{
@@ -225,14 +381,19 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                                         height: 30,
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        borderColor: GlobalStyles[theme].yesColor,
-                                        borderWidth: 1,
+                                        borderWidth: 0.5,
                                         borderRadius: 10,
+                                        borderColor: GlobalStyles[theme].borderColor,
                                         backgroundColor: GlobalStyles[theme].yesColor,
 
                                     }}
                                         onPress={deleteShop}>
-                                        <Text style={{ fontWeight: 'bold', color: 'white' }}>Yes</Text>
+                                        <Text style={{
+                                            color: GlobalStyles[theme].fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        }}>
+                                            {trans[language].DELETE}
+                                        </Text>
                                     </TouchableOpacity>
 
                                 </View>
@@ -240,14 +401,26 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
 
                             : answer?.list?.some(item => item.isDone === true || item.isDone === false)
                                 ? <>
-                                    <Text style={{ width: "85%" }}>Submit your shop progress?</Text>
+                                    <Text style={{
+                                        width: "85%",
+                                        fontSize: 16,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }}>
+                                        {trans[language].SUBMIT} {trans[language].YOUR_SHOP_PROGRESS}?
+                                    </Text>
                                     <View style={{ height: 50 }} />
                                 </>
                                 : <>
-                                    <Text style={{ width: "85%" }}>Enter Shop List Name:</Text>
+                                    <Text style={{
+                                        width: "85%",
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }}>
+                                        {trans[language].ENTER} {trans[language].SHOP_LIST_NAME}:
+                                    </Text>
                                     <TextInput
                                         style={styles.outPuts}
-                                        placeholder="Shop List Name"
+                                        placeholder={trans[language].SHOP_LIST_NAME}
                                         // value={eventForm.eventName}
                                         onChangeText={text => handleOnChange('shopListName', text)} />
                                 </>
@@ -260,7 +433,13 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                             // marginBottom: 20
                         }}
                             onPress={submitShopList}>
-                            <Text style={{ color: 'blue' }}>Submit</Text>
+                            <Text style={{
+                                fontSize: 15,
+                                color: GlobalStyles[theme].buttonColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                                {trans[language].SUBMIT}
+                            </Text>
                         </TouchableOpacity>}
                     </View>
                 </View>
@@ -302,9 +481,10 @@ const styles = StyleSheet.create({
     },
     button: {
         // position: 'absolute',
-        width: 150,
-        height: 50,
-        borderRadius: 5,
+        // width: 150,
+        // height: 50,
+        minWidth: 150,
+        borderRadius: 10,
         alignItems: 'center',
         alignSelf: 'center',
         justifyContent: 'center',
@@ -315,8 +495,11 @@ const styles = StyleSheet.create({
         // elevation: 10,
         // zIndex: 10,
         // bottom: 50,
-        backgroundColor: 'white',
-        borderColor: 'black', borderStyle: 'solid', borderWidth: 0.2,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderColor: 'black',
+        borderStyle: 'solid',
+        borderWidth: 0.5,
     },
     separator: {
         backgroundColor: 'blue',

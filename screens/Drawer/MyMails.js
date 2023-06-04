@@ -4,10 +4,8 @@ import { useIsFocused } from '@react-navigation/native';
 import {
     View,
     Text,
-    Button,
     StyleSheet,
     TextInput,
-    TouchableWithoutFeedback,
     TouchableOpacity,
     KeyboardAvoidingView,
     Keyboard,
@@ -21,6 +19,7 @@ import {
     StatusBar,
     RefreshControl,
     ImageBackground,
+    FlatList
 } from 'react-native'
 
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons, FontAwesome } from '@expo/vector-icons';
@@ -30,20 +29,34 @@ import uuid from 'react-native-uuid';
 import * as SecureStore from 'expo-secure-store';
 
 import { useDispatch, useSelector } from 'react-redux';
-
-import { getUserInfo } from '../../Redux/actions/auth'
-
+import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
 import { createMyMail, getMyMails, getSendedMails, deleteMyMail, mailView } from '../../Redux/actions/mymails';
 
+import PopupModal from '../../components/PopupModal';
+
+import { getUserInfo } from '../../Redux/actions/auth'
+import Banner from '../../components/Banner';
 import Constants from 'expo-constants';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { SelectList } from 'react-native-dropdown-select-list';
-import PopupModal from '../../components/PopupModal';
 
-import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
-import Banner from '../../components/Banner';
-
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
 import GlobalStyles from '../../GlobalStyles';
+import GlobalFontStyles from '../../GlobalFontStyles';
+import trans from '../../Language'
 
 const initialMailForm = {
     senderId: '',
@@ -56,39 +69,57 @@ const initialMailForm = {
     isOpen: false
 };
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 const otherUsersList = []
 export default function MyMails({ navigation }) {
     const myRefs = React.useRef([]);
-
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
 
     const [popupModal, setPopupModal] = useState(false)
-    const [userInfo, setUserInfo] = useState()
-    const [allSelected, setAllSelected] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
+    const [modalVisible3, setModalVisible3] = useState(false);
+    const [modalAlert, setModalAlert] = useState(false);
+    const [modalAlert1, setModalAlert1] = useState(false);
+    const [searchResult, setSearchResult] = useState([])
     const [mailForm, setMailForm] = useState(initialMailForm);
     const [mailToShow, setMailtoShow] = useState('');
-    const [selected, setSelected] = useState('');
     const [listToDelete, setListToDelete] = useState([])
-    const [checkboxState, setCheckboxState] = useState([])
     const [myMails, setMyMails] = useState([])
     const [refreshing, setRefreshing] = useState(false)
+
+    const [userInfo, setUserInfo] = useState()
+    const [allSelected, setAllSelected] = useState(false);
+
+    const [language, setLanguage] = useState("en")
     const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
-    console.log("MyMails GlobalStyles", GlobalStyles)
-    console.log("MyMails GlobalStyles", GlobalStyles[theme])
-
-    const windowWidth = Dimensions.get('window').width;
-    const windowHeight = Dimensions.get('window').height;
+    const [selected, setSelected] = useState('');
+    const [checkboxState, setCheckboxState] = useState([])
 
     useEffect(() => {
         navigation.addListener('focus', () => setListToDelete([]))
     }, [])
 
     const redux = useSelector(state => state)
-    console.log("redux.auth.authData.result", redux.auth.authData.result.userName, redux.auth.authData.result._id)
+    // console.log("redux.auth.authData.result", redux?.auth?.authData?.result?.userName, redux?.auth?.authData?.result?._id)
     // useEffect(() => {
     //     setMyMails(redux?.myMail?.myMails)
     // }, [redux])
@@ -129,8 +160,8 @@ export default function MyMails({ navigation }) {
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        console.log("MyMails redux.auth.authData.result._id", redux.auth.authData.result._id)
-        dispatch(getMyMails(redux.auth.authData.result._id))
+        console.log("MyMails redux?.auth?.authData?.result?._id", redux?.auth?.authData?.result?._id)
+        dispatch(getMyMails(redux?.auth?.authData?.result?._id))
         wait(3000).then(() => setRefreshing(false))
     }, []);
 
@@ -154,7 +185,7 @@ export default function MyMails({ navigation }) {
     }, [listToDelete])
 
     const deleteMails = () => {
-        dispatch(deleteMyMail(redux.auth.authData.result?._id, listToDelete))
+        dispatch(deleteMyMail(redux?.auth?.authData?.result?._id, listToDelete))
     };
 
     const selectAllMails = (isChecked) => {
@@ -189,6 +220,8 @@ export default function MyMails({ navigation }) {
                 senderName: redux?.auth?.authData?.result?.userName,
             });
         }
+        setModalVisible3(false)
+        setSearchResult([])
     };
 
     const showMail = (mail) => {
@@ -199,10 +232,10 @@ export default function MyMails({ navigation }) {
 
     const sendMailFunc = () => {
         if (mailForm.reciverName === "") {
-            Alert.alert('Please add the recipient!!!')
+            setModalAlert1(true)
         } else {
             dispatch(createMyMail(mailForm))
-            dispatch(getMyMails(redux.auth.authData.result._id))
+            dispatch(getMyMails(redux?.auth?.authData?.result._id))
             setMailForm(initialMailForm)
             setModalVisible(!modalVisible);
             onRefresh()
@@ -212,70 +245,70 @@ export default function MyMails({ navigation }) {
         //     : console.log('null');
     };
 
+    const modalSearch = (text) => {
+        console.log(text)
+        setSearchResult(otherUsersList.filter(item => item.value.toLowerCase().includes(text.toLowerCase())))
+    }
+
     return (
         <KeyboardAvoidingView
-            // style={styles.container}
-            style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}
-
+            style={
+                [{
+                    flex: 1,
+                    padding: 10,
+                }, { backgroundColor: GlobalStyles[theme].background }]}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-            <ScrollView 
-            showsVerticalScrollIndicator={false}
+            <ScrollView
+                showsVerticalScrollIndicator={false}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={() => onRefresh()}
                     />
                 }>
-                <Banner title="My Mails" />
 
-                {/* <View
+                {/* <Banner title={trans[language].MY_MAILS} /> */}
+
+                <TouchableOpacity
+                    onPress={() => setModalVisible(true)}
                     style={{
                         flexDirection: 'row',
-                        width: 330,
                         justifyContent: 'center',
-                        alignSelf: 'center',
                         alignItems: 'center',
-                        marginBottom: 20
-                    }}> */}
-                    <TouchableOpacity
-                        onPress={() => setModalVisible(true)}
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            alignSelf: 'center',
-                            // width: 150,
-                            paddingHorizontal: 20,
-                            paddingVertical: 15,
-                            // height: 50,
-                            borderWidth: 1,
-                            borderStyle: 'solid',
-                            borderColor: 'black',
-                            borderRadius: 10,
-                            backgroundColor: GlobalStyles[theme].buttonColor
-                        }}>
-                        <Feather name="edit-3" size={24} color="black" />
-                        <Text style={{ marginLeft: 15, color: 'white', fontWeight: "500", fontSize: 16 }}>Compose</Text>
-                    </TouchableOpacity>
-
-                    {/* <TouchableOpacity onPress={deleteMails}>
-                    <AntDesign name="delete" size={24} color="black" />
-                </TouchableOpacity> */}
-
-                {/* </View> */}
-
-                <View style={{ 
-                    justifyContent: 'center', 
-                    flexDirection: 'row', 
-                    height: 40, 
-                    width: '100%', 
-                    borderColor: "black", 
-                    borderBottomWidth: 1, 
-                    borderStyle: 'solid', 
-                    alignItems: 'center' ,
-                    marginTop: 10,
+                        alignSelf: 'center',
+                        padding: 20,
+                        borderWidth: 0.5,
+                        borderStyle: 'solid',
+                        borderRadius: 10,
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].buttonColor,
                     }}>
+                    <Feather name="edit-3" size={24} color="black" />
+                    <Text style={{
+                        marginLeft: 15,
+                        fontSize: 16,
+                        color: GlobalStyles[theme].fontColor,
+                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                    }}>
+                        {trans[language].COMPOSE}
+                    </Text>
+                </TouchableOpacity>
+
+                <View style={{
+                    flexDirection: 'row',
+                    height: 40,
+                    width: '100%',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: 10,
+                    borderBottomWidth: 1,
+                    borderStyle: 'solid',
+                    borderTopLeftRadius: 10,
+                    borderTopRightRadius: 10,
+                    borderColor: GlobalStyles[theme].borderColor,
+                    backgroundColor: GlobalStyles[theme].paperColor,
+                }}>
                     {/* <BouncyCheckbox
                     size={25}
                     fillColor="cyan"
@@ -289,259 +322,631 @@ export default function MyMails({ navigation }) {
                     }}
                     style={{ width: '10%', justifyContent: 'center' }}
                 /> */}
-                    <TouchableOpacity onPress={deleteMails} style={{ width: '10%', justifyContent: 'center',alignItems: 'center' }}>
-                        <AntDesign name="delete" size={24} color="black" />
+                    <TouchableOpacity onPress={deleteMails} style={{ width: '10%', justifyContent: 'center', alignItems: 'center' }}>
+                        <AntDesign name="delete" size={24} color={GlobalStyles[theme].fontColor} />
                     </TouchableOpacity>
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', alignSelf: 'center', width: windowWidth * 0.85, height: '100%' }}>
-                        <Text style={{ width: '20%', paddingLeft: 10, fontWeight: '500' }}>From:</Text>
-                        <Text style={{ marginLeft: 10, width: '50%', paddingLeft: 10, fontWeight: '500' }}>Subject:</Text>
-                        <Text style={{  paddingLeft: 10, fontWeight: '500' }}>Date:</Text>
-                        <TouchableOpacity onPress={() => Alert.alert(
-                            `Don't forget to read your e-mails.`,
-                            `E-mails will be automatically deleted\nafter 30 days!`,
-                        )}>
-                            <FontAwesome name="question-circle-o" size={25} color="black" style={{ width: 40, textAlign: 'center' }} />
+                    <View style={{
+                        flexDirection: 'row',
+                        height: '100%',
+                        width: windowWidth * 0.85,
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                    }}>
+                        <Text style={{
+                            width: '20%',
+                            paddingLeft: 10,
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].FROM}:
+                        </Text>
+                        <Text style={{
+                            width: '50%',
+                            paddingLeft: 10,
+                            marginLeft: 10,
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].SUBJECT}
+                        </Text>
+                        <Text style={{
+                            paddingLeft: 10,
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].DATE}:
+                        </Text>
+                        <TouchableOpacity onPress={() => setModalAlert(true)}>
+                            <FontAwesome name="question-circle-o" size={25} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
                         </TouchableOpacity>
                     </View>
                 </View>
 
                 <View style={{ justifyContent: 'center' }}>
                     <ScrollView style={{ flex: 1, borderColor: "black", borderBottomWidth: 0.5, borderStyle: 'solid', }}>
-                        {myMails?.map(mail =>
+                        {myMails?.map((mail, index) =>
                             mail.isDeleted === false && (
-                                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', height: 50, borderStyle: 'solid', borderColor: "black", borderBottomWidth: 0.5, width: '100%' }} key={uuid.v4()}>
-                                    <TouchableOpacity onPress={() => addToDelList(mail._id)} style={{ width: '10%',justifyContent: 'center',alignItems: 'center'}}>
+                                <View style={[{
+                                    flexDirection: 'row',
+                                    height: 50,
+                                    width: '100%',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderStyle: 'solid',
+                                    borderColor: "black",
+                                    borderBottomWidth: 0.5,
+                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                },
+                                (index === myMails?.length - 1) &&
+                                {
+                                    borderBottomLeftRadius: 10,
+                                    borderBottomRightRadius: 10,
+                                    borderBottomWidth: 0,
+                                },
+                                ]} key={uuid.v4()}>
+                                    <TouchableOpacity onPress={() => addToDelList(mail._id)} style={{ width: '10%', justifyContent: 'center', alignItems: 'center' }}>
                                         <View
-                                            style={{ width: 25, height: 25, borderRadius: 20, borderWidth: 2, borderColor: GlobalStyles[theme].buttonColor, alignItems: 'center', justifyContent: 'center'}}>
+                                            style={{ width: 25, height: 25, borderRadius: 20, borderWidth: 2, borderColor: GlobalStyles[theme].buttonColor, alignItems: 'center', justifyContent: 'center' }}>
                                             <Entypo name="check" size={25} ref={el => myRefs.current[mail._id] = el} color="white" style={{ width: 25, height: 25, textAlign: 'center', opacity: 0, borderRadius: 20, borderWidth: 1, borderColor: GlobalStyles[theme].buttonColor }} />
                                         </View>
                                     </TouchableOpacity>
-                                    <Pressable onPress={() => showMail(mail)} style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', alignSelf: 'center', width: windowWidth * 0.85, height: '100%' }}>
-                                        <Text style={[{ marginLeft: 10, width: '20%' }, mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>{mail.senderName}</Text>
-                                        <Text style={[{ marginLeft: 10, width: '50%' }, mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>{mail.subject}</Text>
-                                        <Text style={[mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>{mail.date.split('T')[0]}</Text>
-                                    </Pressable>
+                                    <TouchableOpacity onPress={() => showMail(mail)} style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', alignSelf: 'center', width: windowWidth * 0.85, height: '100%' }}>
+                                        <Text style={[{
+                                            marginLeft: 10,
+                                            width: '20%',
+                                            color: GlobalStyles[theme].fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        },
+                                        mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>
+                                            {mail.senderName}
+                                        </Text>
+                                        <Text style={[{
+                                            marginLeft: 10,
+                                            width: '50%',
+                                            color: GlobalStyles[theme].fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        },
+                                        mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>
+                                            {/* // TODO  check how long can be the subject string , to add hidden + ... or scrollView Horizontal*/}
+                                            {mail.subject}
+                                        </Text>
+                                        <Text style={[{
+                                            color: GlobalStyles[theme].fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        },
+                                        mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>
+                                            {mail.date.split('T')[0]}
+                                        </Text>
+                                    </TouchableOpacity>
                                 </View>
                             )
                         )}
                     </ScrollView>
                 </View >
 
-                <View style={styles.centeredView}>
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={() => {
-                            Alert.alert('Mail sended.');
-                            setModalVisible(!modalVisible);
-                        }}>
-                        <View style={styles.centeredView}>
-                            <View style={styles.modalView}>
-                                <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}
-                                    style={{
-                                        width: "120%",
-                                        alignItems: 'flex-end',
-                                        marginTop: 0,
-                                        marginRight: 0,
-                                        marginBottom: 0,
-                                        // borderColor: 'black',
-                                        // borderWidth: 1
-                                    }}>
-                                    <EvilIcons name="close-o" size={30} color="black" />
-                                </TouchableOpacity>
-                                <SelectList
-                                    onSelect={() => onChange('reciverName', selected)}
-                                    setSelected={setSelected}
-                                    // placeholder="To:"
-                                    placeholder={mailForm.reciverName ? mailForm.reciverName : "To:"}
-
-                                    maxHeight="150"
-                                    data={otherUsersList}
-                                    search={true}
-                                    // fontFamily="lato"
-                                    save="value"
-                                    boxStyles={{
-                                        width: 300,
-                                        borderWidth: 0,
-                                        borderBottomWidth: 2,
-                                        borderStyle: 'solid',
-                                        borderColor: 'black',
-                                    }}
-                                    dropdownItemStyles={{
-                                        width: 250,
-                                        marginBottom: 10,
-                                    }}
-                                    dropdownStyles={{
-                                        width: windowWidth * 0.75,
-                                        alignSelf: 'center',
-                                        backgroundColor: 'white',
-                                        position: 'absolute',
-                                        elevation: 10,
-                                        zIndex: 10,
-                                        top: 40
-                                    }}
-                                    dropdownTextStyles={{
-                                        // backgroundColor: 'red'
-                                    }}
-                                // arrowicon={
-                                //   <FontAwesome name="chevron-down" size={12} color={'black'} />
-                                // }
-                                // searchicon={
-                                //   <FontAwesome name="search" size={12} color={'black'} />
-                                // }
-                                />
-
-                                <TextInput
-                                    placeholder="Subject:"
-                                    style={{
-                                        width: 300,
-                                        borderBottomWidth: 2,
-                                        borderStyle: 'solid',
-                                        borderColor: 'black',
-                                        borderRadius: 10,
-                                        marginBottom: 10,
-                                        // marginTop: 50,
-                                        height: 50,
-                                        paddingLeft: 10,
-                                    }}
-                                    onChangeText={(text) => onChange('subject', text)}
-                                    value={mailForm.subject}
-                                />
-                                <TextInput
-                                    placeholder="Message:"
-                                    style={{
-                                        width: '100%',
-                                        // borderWidth: 1,
-                                        // borderStyle: 'solid',
-                                        // borderColor: 'black',
-                                        borderRadius: 15,
-                                        marginBottom: 10,
-                                        // paddingLeft: 10,
-                                        textAlignVertical: 'top',
-                                        height: 250,
-                                    }}
-                                    onChangeText={(text) => onChange('message', text)}
-                                    value={mailForm.message}
-                                    multiline
-                                    numberOfLines={4}
-                                />
-                                <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-around' }}>
-                                    <Pressable
-                                        style={[styles.button, { backgroundColor: GlobalStyles[theme].noColor }]}
-                                        onPress={() => setMailForm(initialMailForm)}>
-                                        <Text style={styles.textStyle}>Clear Mail</Text>
-                                    </Pressable>
-                                    <Pressable
-                                        style={[styles.button, { backgroundColor: GlobalStyles[theme].yesColor }]}
-                                        onPress={() => sendMailFunc()}>
-                                        <Text style={styles.textStyle}>Send Mail</Text>
-                                    </Pressable>
-                                </View>
-                                {/* <View style={{ flexDirection: 'row' }}>
-
-                                <Pressable
-                                    style={[styles.button, styles.buttonClose]}
-                                    onPress={() => setModalVisible(!modalVisible)}>
-                                    <Text style={styles.textStyle}>Hide Modal</Text>
-                                </Pressable>
-                                <Pressable
-                                    style={[styles.button, styles.buttonClose]}
-                                    onPress={() => console.log(mailForm)}>
-                                    <Text style={styles.textStyle}>Mail Form</Text>
-                                </Pressable>
-                            </View> */}
-
-                            </View>
-                        </View>
-                    </Modal>
-                </View>
-
-                <View style={styles.centeredView}>
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible2}
-                        onRequestClose={() => {
-                            Alert.alert('Mail sended.');
-                            setModalVisible(!modalVisible2);
-                        }}>
-                        <View style={styles.centeredView}>
-                            <View style={[styles.modalView, { alignItems: 'flex-start' }]}>
-                                <Text>From: {mailToShow.userName}</Text>
-                                <Text>Subject: {mailToShow.subject}</Text>
-                                <Text>Message: {mailToShow.message}</Text>
-                            </View>
-                            <Pressable
-                                style={[styles.button,{marginTop: 20 ,backgroundColor: GlobalStyles[theme].buttonColor}]}
-                                onPress={() => {
-                                    setModalVisible2(!modalVisible2)
-                                    dispatch(getMyMails(redux.auth.authData.result._id))
-                                }}>
-                                <Text style={styles.textStyle}>Close Mail</Text>
-                            </Pressable>
-                        </View>
-                    </Modal>
-                </View>
-
                 <PopupModal message={redux?.myMail?.message} popupModal={popupModal} />
 
+                {/* // Read Mail Modal //  */}
+                <Modal
+                    animationType="fade"
+                    transparent={false}
+                    visible={modalVisible2}
+                >
+                    <View style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: GlobalStyles[theme].background,
+                        // marginTop: 22,
+                    }}>
+                        <View style={[{
+                            borderRadius: 10,
+                            padding: 20,
+                            paddingTop: 50,
+                            alignItems: 'center',
+                            // shadowColor: 'white',
+                            // shadowOffset: {
+                            //     width: 0,
+                            //     height: 2,
+                            // },
+                            // shadowOpacity: 0.25,
+                            // shadowRadius: 4,
+                            elevation: 5,
+                            height: 500,
+                            width: 350,
+                            borderWidth: 0.5,
+                            alignItems: 'flex-start',
+                        },
+                        {
+                            backgroundColor: GlobalStyles[theme].background,
+                            borderColor: GlobalStyles[theme].borderColor,
+                        }
+                        ]}>
+                            <TouchableOpacity
+                                style={{
+                                    position: 'absolute',
+                                    width: "100%",
+                                    alignItems: 'flex-end',
+                                    marginTop: 20,
+                                    marginRight: 20,
+                                    top: 0,
+                                    right: 0
+                                }}
+                                onPress={() => {
+                                    setModalVisible2(!modalVisible2)
+                                    dispatch(getMyMails(redux?.auth?.authData?.result?._id))
+                                }}>
+                                <EvilIcons name="close-o" size={30} color="red" />
+                            </TouchableOpacity>
+
+                            <View style={{
+                                flexDirection: 'row',
+                                height: 40,
+                                width: '100%',
+                                borderRadius: 10,
+                                paddingLeft: 10,
+                                marginBottom: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                            }}>
+                                <Text style={{
+                                    fontSize: 16,
+                                    textAlignVertical: 'center',
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {trans[language].FROM}:
+                                </Text>
+                                <Text style={{
+                                    paddingLeft: 40,
+                                    fontSize: 14,
+                                    textAlignVertical: 'center',
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {mailToShow.senderName}
+                                </Text>
+                            </View>
+
+                            <View style={{
+                                flexDirection: 'row',
+                                height: 40,
+                                width: '100%',
+                                borderRadius: 10,
+                                paddingLeft: 10,
+                                marginBottom: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                            }}>
+                                <Text style={{
+                                    fontSize: 16,
+                                    textAlignVertical: 'center',
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {trans[language].SUBJECT}
+                                </Text>
+                                <Text style={{
+                                    paddingLeft: 24,
+                                    fontSize: 14,
+                                    textAlignVertical: 'center',
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {mailToShow.subject}
+                                </Text>
+                            </View>
+
+                            <View style={{
+                                flexDirection: 'row',
+                                height: 40,
+                                width: '100%',
+                                borderRadius: 10,
+                                paddingLeft: 10,
+                                marginBottom: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                            }}>
+                                <Text style={{
+                                    fontSize: 16,
+                                    textAlignVertical: 'center',
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {trans[language].MESSAGE}
+                                </Text>
+                                <Text style={{
+                                    paddingLeft: 15,
+                                    fontSize: 14,
+                                    textAlignVertical: 'center',
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {mailToShow.message}
+                                </Text>
+                            </View>
+                        </View>
+                        {/* TODO add button to answer the mail, will open the compose mail with the sender fix */}
+                        {/* button or icon with arrow */}
+                        {/* <TouchableOpacity
+                            style={[{
+                                borderRadius: 10,
+                                elevation: 2,
+                                paddingHorizontal: 20,
+                                marginTop: 20,
+                                paddingVertical: 10
+                            }, { backgroundColor: GlobalStyles[theme].buttonColor }]}
+                            onPress={() => {
+                                setModalVisible2(!modalVisible2)
+                                dispatch(getMyMails(redux?.auth?.authData?.result?._id))
+                            }}>
+                            <Text style={[{
+                                textAlign: 'center',
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }]}>
+                                {trans[language].CLOSE_MAIL}
+                            </Text>
+                        </TouchableOpacity> */}
+                    </View>
+                </Modal>
+                {/* </View> */}
+
+                {/* // Compose Mail Modal //  */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                // onRequestClose={() => {
+                //     Alert.alert(trans[language].MAIL_SENT);
+                //     setModalVisible(!modalVisible);
+                // }}
+                >
+                    <View style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
+                        <View style={[{
+                            height: 500,
+                            width: 350,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            paddingHorizontal: 35,
+                            paddingBottom: 35,
+                            paddingTop: 10,
+                            borderRadius: 10,
+                            borderWidth: 0.5,
+                            elevation: 5,
+                        }, {
+                            borderColor: GlobalStyles[theme].borderColor,
+                            backgroundColor: GlobalStyles[theme].background
+                        }]}>
+
+                            <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}
+                                style={{
+                                    width: "120%",
+                                    alignItems: 'flex-end',
+                                    marginTop: 10,
+                                    marginRight: 10,
+                                    marginBottom: 0,
+                                    // borderColor: 'black',
+                                    // borderWidth: 1
+                                }}>
+                                <EvilIcons name="close-o" size={30} color="red" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => setModalVisible3(true)}
+                                style={{
+                                    width: '100%',
+                                    height: 40,
+                                    borderRadius: 10,
+                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                <Text style={{
+                                    textAlign: 'left',
+                                    paddingLeft: 15,
+                                    textAlignVertical: 'center',
+                                    height: "100%",
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor,
+                                }}>
+                                    {mailForm.reciverName ? mailForm.reciverName : trans[language].TO + ":"}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TextInput
+                                placeholder={trans[language].SUBJECT}
+                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                style={{
+                                    width: "100%",
+                                    height: 40,
+                                    // borderBottomWidth: 2,
+                                    borderStyle: 'solid',
+                                    // borderColor: 'black',
+                                    borderRadius: 10,
+                                    marginVertical: 10,
+                                    paddingLeft: 15,
+                                    color: GlobalStyles[theme].fontColor,
+                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}
+                                onChangeText={(text) => onChange('subject', text)}
+                                value={mailForm.subject}
+                            />
+
+                            <TextInput
+                                placeholder={trans[language].MESSAGE}
+                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                style={{
+                                    width: "100%",
+                                    height: 250,
+                                    borderRadius: 10,
+                                    marginBottom: 20,
+                                    textAlignVertical: 'top',
+                                    paddingTop: 5,
+                                    paddingLeft: 15,
+                                    color: GlobalStyles[theme].fontColor,
+                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    // borderWidth: 1,
+                                    // borderStyle: 'solid',
+                                    // borderColor: 'black',
+                                    // paddingLeft: 10,
+                                }}
+                                onChangeText={(text) => onChange('message', text)}
+                                value={mailForm.message}
+                                multiline
+                                numberOfLines={4}
+                            />
+
+                            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-around' }}>
+                                <TouchableOpacity
+                                    style={[{
+                                        borderRadius: 20,
+                                        elevation: 2,
+                                        paddingHorizontal: 20,
+                                        paddingVertical: 10
+                                    }, {
+                                        borderWidth: 0.5,
+                                        borderColor: GlobalStyles[theme].borderColor,
+                                        backgroundColor: GlobalStyles[theme].noColor
+                                    }]}
+                                    onPress={() => setMailForm(initialMailForm)}>
+                                    <Text style={[{
+                                        color: 'white',
+                                        fontWeight: '500',
+                                        textAlign: 'center',
+                                    }, {
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }]}>
+                                        {trans[language].CLEAR_MAIL}
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[{
+                                        borderRadius: 20,
+                                        elevation: 2,
+                                        paddingHorizontal: 20,
+                                        paddingVertical: 10
+                                    }, {
+                                        borderWidth: 0.5,
+                                        borderColor: GlobalStyles[theme].borderColor,
+                                        backgroundColor: GlobalStyles[theme].yesColor
+                                    }]}
+                                    onPress={() => sendMailFunc()}>
+                                    <Text style={[{
+                                        textAlign: 'center',
+                                    }, {
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }]}>
+                                        {trans[language].SEND_MAIL}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* // user to mail Modal // */}
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={modalVisible3}>
+
+                    <View style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}>
+                        <View style={[{
+                            borderRadius: 10,
+                            // maxHeight: 400,
+                            padding: 20,
+                            paddingTop: 50,
+                            alignItems: "center",
+                            elevation: 5,
+                            borderWidth: 0.5,
+                            height: 500,
+                            width: 350,
+                        }, {
+                            borderColor: GlobalStyles[theme].borderColor,
+                            backgroundColor: GlobalStyles[theme].background
+                        }]}>
+                            <TouchableOpacity
+                                style={{
+                                    position: 'absolute',
+                                    width: "100%",
+                                    alignItems: 'flex-end',
+                                    marginTop: 20,
+                                    marginRight: 20,
+                                    top: 0,
+                                    right: 0
+                                }}
+                                onPress={() => {
+                                    setModalVisible3(false)
+                                    setSearchResult([])
+                                }}>
+                                <EvilIcons name="close-o" size={30} color="red" />
+                            </TouchableOpacity>
+                            <TextInput
+                                style={{
+                                    width: 300,
+                                    height: 40,
+                                    paddingLeft: 10,
+                                    marginBottom: 5,
+                                    borderRadius: 10,
+                                    borderWidth: 0.5,
+                                    borderColor: GlobalStyles[theme].borderColor,
+                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                }}
+                                placeholder={trans[language].SEARCH}
+                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                onChangeText={(text) => modalSearch(text)}
+                            />
+                            <FlatList
+                                data={searchResult?.length !== 0 ? searchResult : otherUsersList}
+                                showsVerticalScrollIndicator={false}
+                                renderItem={({ item }) => <TouchableOpacity
+                                    style={[{
+                                        width: 300,
+                                        paddingHorizontal: 20,
+                                        paddingVertical: 10,
+                                        marginVertical: 5,
+                                        borderRadius: 10,
+                                        borderWidth: 0.5,
+                                        elevation: 2,
+                                    }, {
+                                        borderColor: GlobalStyles[theme].borderColor,
+                                        backgroundColor: GlobalStyles[theme].buttonColor
+                                    }]}
+                                >
+                                    <Text style={[{
+                                        textAlign: "center"
+                                    }, {
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }]}
+                                        onPress={() => onChange('reciverName', item.value)}
+                                    >
+                                        {item.value}
+                                    </Text>
+                                </TouchableOpacity>
+                                }
+                                keyExtractor={item => item.key + item.value + Math.random()}
+                            />
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* // Modal Alert// */}
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={modalAlert}>
+
+                    <View style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}>
+                        <View style={[{
+                            width: 300,
+                            maxHeight: 400,
+                            alignItems: "flex-start",
+                            padding: 30,
+                            paddingBottom: 45,
+                            borderWidth: 0.5,
+                            borderRadius: 10,
+                            elevation: 5,
+                        }, {
+                            borderColor: GlobalStyles[theme].borderColor,
+                            backgroundColor: GlobalStyles[theme].paperColor
+                        }]}>
+                            <Text style={{
+                                fontSize: 16,
+                                marginBottom: 10,
+                                color: GlobalStyles[theme].fontColor,
+                            }}>
+                                {trans[language].DONT_FORGET}
+                            </Text><Text style={{
+                                fontSize: 16,
+                                color: GlobalStyles[theme].fontColor,
+                            }}>
+                                {trans[language].EMAIL_WILL_DEL}
+                            </Text>
+                            <TouchableOpacity
+                                style={{
+                                    position: 'absolute',
+                                    width: "100%",
+                                    alignItems: 'flex-end',
+                                    marginBottom: 20,
+                                    marginRight: 20,
+                                    bottom: 0,
+                                    right: 0,
+                                }}
+                                onPress={() => { setModalAlert(false) }}>
+                                <Text style={{ color: GlobalStyles[theme].buttonColor, fontSize: 16 }}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* // ADD Recipient Alert// */}
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={modalAlert1}>
+
+                    <View style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}>
+                        <View style={[{
+                            width: 300,
+                            maxHeight: 400,
+                            alignItems: "flex-start",
+                            padding: 30,
+                            paddingBottom: 45,
+                            borderWidth: 0.5,
+                            borderRadius: 10,
+                            elevation: 5,
+                        }, {
+                            borderColor: GlobalStyles[theme].borderColor,
+                            backgroundColor: GlobalStyles[theme].paperColor
+                        }]}>
+                            <Text style={{
+                                fontSize: 16,
+                                marginBottom: 10,
+                                color: GlobalStyles[theme].fontColor,
+                            }}>
+                                {trans[language].PLEASE_ADD_THE_RECIPIENT}
+                            </Text>
+                            <TouchableOpacity
+                                style={{
+                                    position: 'absolute',
+                                    width: "100%",
+                                    alignItems: 'flex-end',
+                                    marginBottom: 20,
+                                    marginRight: 20,
+                                    bottom: 0,
+                                    right: 0,
+                                }}
+                                onPress={() => { setModalAlert1(false) }}>
+                                <Text style={{ color: GlobalStyles[theme].buttonColor, fontSize: 16 }}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
             </ScrollView >
-        </KeyboardAvoidingView>
+        </KeyboardAvoidingView >
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        // backgroundColor: '#ecf0f1',
-        padding: 10,
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 22,
-    },
-    modalView: {
-        margin: 0,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        paddingHorizontal: 35,
-        paddingBottom: 35,
-        paddingTop: 10,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        height: 500,
-        width: 350,
-    },
-    button: {
-        borderRadius: 20,
-        elevation: 2,
-        paddingHorizontal: 20,
-        paddingVertical: 10
-    },
-    textStyle: {
-        color: 'white',
-        fontWeight: '500',
-        textAlign: 'center',
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    input: {
-        // backgroundColor: 'grey',
-        width: '100%',
-        borderBottomWidth: 1,
-        borderStyle: 'solid',
-        borderColor: 'black',
-    },
-});
+const styles = StyleSheet.create({});

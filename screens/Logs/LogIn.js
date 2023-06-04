@@ -26,6 +26,24 @@ import * as SecureStore from 'expo-secure-store';
 
 const initialState = { email: '', password: '', userName: '' };
 
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
+import GlobalStyles from '../../GlobalStyles'
+import trans from '../../Language'
+
 export default function LogIn({ navigation }) {
     const { userContext, setUserContext } = useContext(Context)
     const dispatch = useDispatch();
@@ -35,7 +53,22 @@ export default function LogIn({ navigation }) {
     const [isValid, setIsValid] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [userToken, setUserToken] = useState(null)
-
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
     setUserContext(userInfo?.auth?.authData?.result)
 
     useEffect(() => {
@@ -97,8 +130,7 @@ export default function LogIn({ navigation }) {
             >
 
                 <View style={styles.logoView}>
-                    <Image style={styles.logo} source={require('../../assets/images/favicon.png')} />
-                    {/* TODO add my Logo here */}
+                    <Image style={styles.logo} source={require('../../assets/logo.png')} />
                 </View>
 
                 <View style={styles.inputLogo}>
@@ -198,31 +230,32 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'flex-start',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: 10,
     },
     logoView: {
-        height: 100,
+        height: 210,
         marginTop: 100
     },
     logo: {
-        height: 70,
-        width: 70
+        height: 200,
+        width: 200
     },
     inputLogo: {
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'flex-start',
-        width: "90%",
+        width: "100%",
         backgroundColor: "white",
         height: 45,
         borderRadius: 10,
         marginBottom: 10,
     },
     input: {
-        width: "80%",
+        width: "100%",
     },
     logButton: {
-        width: "90%",
+        width: "100%",
     },
     textLink: {
         marginVertical: 15,

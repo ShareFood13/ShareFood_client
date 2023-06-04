@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View, TextInput, Dimensions, TouchableOpacity, Alert } from 'react-native'
+import { StyleSheet, Text, View, TextInput, Dimensions, TouchableOpacity, Alert, Modal, FlatList } from 'react-native'
 import React, { useState } from 'react'
 
-import { Fontisto, FontAwesome, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
+import { Fontisto, FontAwesome, EvilIcons, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
 import GlobalStyles from '../GlobalStyles';
 import { useDispatch, useSelector } from 'react-redux';
 import { superSearch } from '../Redux/actions/superSearch';
@@ -56,139 +56,448 @@ const logos = [
 ]
 
 const windowWidth = Dimensions.get("window").width
+const windowHeight = Dimensions.get("window").height
+
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from './../GlobalFontStyles';
+import trans from '../Language'
+import GlobalTextStyles from '../GlobalTextStyles';
 
 const SuperSearch = () => {
     const dispatch = useDispatch();
     const [textToSearch, setTextToSearch] = useState("")
+    const [restrictions, setRestrictions] = useState({ sDiet: "", foodCourses: "" })
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalVisible2, setModalVisible2] = useState(false);
+    const [modalVisible3, setModalVisible3] = useState(false)
+    const [text, setText] = useState('normalText')
     const [theme, setTheme] = useState("stylesLight")
-    const [selected, setSelected] = useState('');
-    const [restrictions, setRestrictions] = useState({})
+    const [language, setLanguage] = useState("en")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
+
+    const MODAL_TITLE = trans[language].HOW_TO_SEARCH
+    const MODAL_MSG = trans[language].SEARCH_MSG
 
     const onChangeSearch = (text) => {
         setTextToSearch(text)
     }
 
-    const search = () => {
-        console.log("search", textToSearch, restrictions)
+    const searchFn = () => {
         dispatch(superSearch(textToSearch, restrictions))
     }
 
     const onChange = (type, select) => {
         setRestrictions({ ...restrictions, [type]: select })
+        setModalVisible(false)
+        setModalVisible2(false)
     }
 
-    console.log("SuperSearch restrictions", restrictions)
     return (
-        <View style={{ flex: 1, justifyContent: 'flex-start' }}>
-            <View style={{ width: windowWidth * 0.95, height: 25, marginTop: 10 }}>
-                <TouchableOpacity
-                    style={{  paddingRight: 0, width: 25, alignSelf: 'flex-end', alignItems: 'center' }}
-                    onPress={() => Alert.alert(
-                        'How to search?',
-                        `
-                by_  -> user search,\n
-                tag_  -> tag search,\n
-                recipe_  -> recipe search,\n
-                meal_  -> meal search,\n
-                event_  -> event search`
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: "center", width: windowWidth, padding: 10, }}>
 
-                    )}>
-                    <FontAwesome name="question-circle-o" size={25} color="black"/>
+            <View style={{ width: "100%", height: 25 }}>
+                <TouchableOpacity
+                    style={{ width: 25, alignSelf: 'flex-end', alignItems: 'center' }}
+                    onPress={() => setModalVisible3(true)}>
+                    <FontAwesome name="question-circle-o" size={25} color={GlobalStyles[theme].fontColor} />
                 </TouchableOpacity>
             </View>
-            <View style={[{ backgroundColor: GlobalStyles[theme].paperColor }, styles.searchContainer]}>
+
+            <View style={[{
+                flexDirection: 'row',
+                width: "100%",
+                height: 50,
+                borderBottomWidth: 2,
+                borderRadius: 10,
+                marginTop: 10,
+                backgroundColor: GlobalStyles[theme].paperColor,
+                borderBottomColor: GlobalStyles[theme].borderColor,
+            }, {
+                // width: windowWidth - 20,
+                // alignSelf: 'center',
+                // justifyContent: 'space-between',
+            }]}>
                 <TextInput
                     onChangeText={text => onChangeSearch(text)}
-                    placeholder="Search for..."
+                    placeholder={trans[language].SEARCH_FOR}
+                    placeholderTextColor={GlobalStyles[theme].fontColor}
                     value={textToSearch}
-                    style={styles.search}
-                />
-                <Fontisto name="search" size={24} color="black" onPress={search}
-                    style={{
-                        width: 30,
-                        textAlign: 'center',
+                    style={[{
+                        width: "90%",
                         alignSelf: 'center',
-                        justifyContent: 'center'
-                    }} />
-            </View>
-            <View style={{ width: windowWidth * 0.9, alignItems: 'center' }}>
-                <SelectList
-                    onSelect={() => onChange('foodCourses', selected)}
-                    setSelected={setSelected}
-                    // placeholder="To:"
-                    placeholder="Food Courses"
-
-                    maxHeight="160"
-                    data={foodCourses}
-                    search={true}
-                    // fontFamily="lato"
-                    save="value"
-                    boxStyles={{
-                        width: 300,
-                        borderWidth: 0,
-                        borderBottomWidth: 2,
-                        borderStyle: 'solid',
-                        borderColor: 'black',
-                        backgroundColor: GlobalStyles[theme].paperColor,
-                        marginTop: 10
-                    }}
-                    dropdownItemStyles={{
-                        width: 250,
-                        // marginBottom: 10,
-                    }}
-                    dropdownStyles={{
-                        width: windowWidth * 0.75,
-                        alignSelf: 'center',
-                        backgroundColor: 'white',
-                        position: 'absolute',
-                        elevation: 10,
-                        zIndex: 10,
-                        top: 50
-                    }}
-                    dropdownTextStyles={{
-                        // backgroundColor: 'red'
-                    }}
+                        fontSize: 15,
+                        paddingLeft: 10,
+                        // height: "100%",
+                    }, {
+                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                        color: GlobalStyles[theme].fontColor
+                    }]}
                 />
-
-                <SelectList
-                    onSelect={() => onChange('sDiet', selected)}
-                    setSelected={setSelected}
-                    placeholder="Special Diet"
-
-                    maxHeight="160"
-                    data={logos}
-                    search={true}
-                    // fontFamily="lato"
-                    save="value"
-                    boxStyles={{
-                        width: 300,
-                        borderWidth: 0,
-                        borderBottomWidth: 2,
-                        borderStyle: 'solid',
-                        borderColor: 'black',
-                        backgroundColor: GlobalStyles[theme].paperColor,
-                        marginTop: 10
-                    }}
-                    dropdownItemStyles={{
-                        width: 250,
-                        // marginBottom: 10,
-                    }}
-                    dropdownStyles={{
-                        width: windowWidth * 0.75,
-                        alignSelf: 'center',
-                        backgroundColor: 'white',
-                        position: 'absolute',
-                        elevation: 10,
-                        zIndex: 10,
-                        top: 50
-                    }}
-                    dropdownTextStyles={{
-                        // backgroundColor: 'red'
-                    }}
-                />
+                <TouchableOpacity onPress={searchFn} style={{
+                    width: "10%",
+                    textAlign: 'center',
+                    alignSelf: 'center',
+                    justifyContent: 'center',
+                }}>
+                    <Fontisto name="search" size={24} color={GlobalStyles[theme].fontColor} />
+                </TouchableOpacity>
             </View>
 
+            {/* // Special Diet Area // */}
+            <View style={{
+                width: "100%",
+                height: 50,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginVertical: 10,
+                borderRadius: 10,
+                backgroundColor: GlobalStyles[theme].paperColor,
+            }}>
+                {restrictions.sDiet !== "" ?
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: "100%" }}>
+                        <TouchableOpacity onPress={() => setModalVisible(true)}
+                            style={{
+                                width: '90%',
+                            }}>
+                            <Text style={{
+                                textAlign: 'center',
+                                textAlignVertical: 'center',
+                                fontSize: 16,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {restrictions.sDiet}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{
+                                width: "10%",
+                                alignItems: 'center',
+                                justifyContent: "center",
+                            }}
+                            onPress={() => setRestrictions({ ...restrictions, sDiet: "" })}>
+                            <EvilIcons name="close-o" size={30} color="red" />
+                        </TouchableOpacity>
+                    </View>
+                    :
+                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                        <Text style={{
+                            textAlignVertical: 'center',
+                            textAlign: 'center',
+                            alignContent: 'center',
+                            height: '100%',
+                            width: '100%',
+                            fontSize: 15,
+                            paddingLeft: 10,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: GlobalStyles[theme].fontColor
+                        }}>
+                            {trans[language].SPECIAL_DIET}
+                        </Text>
+                    </TouchableOpacity>
+                }
+
+                {/* <TouchableOpacity
+                    style={[{
+                        width: "10%",
+                        height: 40,
+                        borderRadius: 10,
+                        padding: 10,
+                        elevation: 2,
+                        borderWidth: 0.5,
+                    }, {
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].buttonColor,
+                    }]}
+                    onPress={() => setModalVisible(true)}>
+
+                    <Text style={[{
+                        width: "100%",
+                        textAlign: "center",
+                        alignSelf: 'center'
+                    }, {
+                        fontSize: GlobalTextStyles[text].fontSize,
+                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                        color: GlobalStyles[theme].fontColor
+                    }]}>
+                        {trans[language].SDIET}
+                    </Text>
+                </TouchableOpacity> */}
+
+            </View>
+
+            {/* // Food Courses Area // */}
+            <View style={{
+                width: "100%",
+                height: 50,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 10,
+                backgroundColor: GlobalStyles[theme].paperColor,
+            }}>
+                {restrictions.foodCourses !== "" ?
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: "100%" }}>
+                        <TouchableOpacity onPress={() => setModalVisible2(true)}
+                            style={{
+                                width: '90%',
+                            }}>
+                            <Text style={{
+                                textAlign: 'center',
+                                textAlignVertical: 'center',
+                                fontSize: 16,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {restrictions.foodCourses}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{
+                                width: "10%",
+                                alignItems: 'center',
+                                justifyContent: "center",
+                            }}
+                            onPress={() => setRestrictions({ ...restrictions, foodCourses: "" })}>
+                            <EvilIcons name="close-o" size={30} color="red" />
+                        </TouchableOpacity>
+                    </View>
+                    :
+                    <TouchableOpacity onPress={() => setModalVisible2(true)}>
+                        <Text style={{
+                            textAlignVertical: 'center',
+                            textAlign: 'center',
+                            alignContent: 'center',
+                            height: '100%',
+                            width: '100%',
+                            fontSize: 15,
+                            paddingLeft: 10,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: GlobalStyles[theme].fontColor
+                        }}>
+                            {trans[language].FOOD_COURSE}
+                        </Text>
+                    </TouchableOpacity>
+                }
+            </View>
+
+            {/* // Search ? Info Modal // */}
+            <Modal
+                animationType="none"
+                transparent={true}
+                visible={modalVisible3}
+            >
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={{
+                        flexDirection: 'row',
+                        width: '90%',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        alignContent: 'center',
+                        borderWidth: 0.5,
+                        borderStyle: 'solid',
+                        borderRadius: 20,
+                        padding: 30,
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].paperColor,
+                    }}>
+                        <TouchableOpacity style={{
+                            width: "100%",
+                            alignItems: 'flex-end',
+                            marginTop: 20,
+                            marginRight: 20,
+                            // marginBottom: 20,
+                            position: 'absolute',
+                            top: 0,
+                            right: 0
+                        }}
+                            onPress={() => setModalVisible3(false)}>
+                            <EvilIcons name="close-o" size={30} color="red" />
+                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'column' }}>
+                            <Text style={{
+                                fontSize: 20,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor,
+                                marginBottom: 10,
+                            }}>{MODAL_TITLE}</Text>
+                            <Text style={{
+                                color: GlobalStyles[theme].fontColor,
+                                fontSize: GlobalFontStyles[fontStyle].fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                paddingLeft: 20
+                            }}>{MODAL_MSG}</Text>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* // Special Diet Modal // */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}>
+
+                <View style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <View style={[{
+                        borderRadius: 10,
+                        maxHeight: 400,
+                        padding: 35,
+                        paddingTop: 45,
+                        alignItems: "center",
+                        elevation: 5,
+                        borderWidth: 0.5,
+                    }, {
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].paperColor
+                    }]}>
+                        <TouchableOpacity
+                            style={{
+                                position: 'absolute',
+                                width: "100%",
+                                alignItems: 'flex-end',
+                                marginTop: 20,
+                                marginRight: 20,
+                                top: 0,
+                                right: 0
+                            }}
+                            onPress={() => setModalVisible(false)}>
+                            <EvilIcons name="close-o" size={30} color="red" />
+                        </TouchableOpacity>
+                        <FlatList
+                            data={logos}
+                            showsVerticalScrollIndicator={false}
+                            renderItem={({ item }) => <TouchableOpacity
+                                style={[{
+                                    borderRadius: 10,
+                                    paddingHorizontal: 20,
+                                    paddingVertical: 10,
+                                    minWidth: 150,
+                                    borderWidth: 0.5,
+                                    marginVertical: 5,
+                                    elevation: 2,
+                                }, {
+                                    borderColor: GlobalStyles[theme].borderColor,
+                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                }]}
+                            >
+                                <Text style={[{
+                                    textAlign: "center"
+                                }, {
+                                    fontSize: GlobalTextStyles[text].fontSize,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor
+                                }]}
+                                    onPress={() => onChange('sDiet', item.value)}
+                                >
+                                    {item.value}</Text>
+                            </TouchableOpacity>
+                            }
+                            keyExtractor={item => item.key}
+                        />
+                    </View>
+                </View>
+            </Modal>
+
+            {/* // Food Courses Modal // */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible2}>
+
+                <View style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <View style={[{
+                        borderRadius: 10,
+                        maxHeight: 400,
+                        padding: 35,
+                        paddingTop: 45,
+                        alignItems: "center",
+                        elevation: 5,
+                        borderWidth: 0.5,
+                    }, {
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].paperColor
+                    }]}>
+                        <TouchableOpacity
+                            style={{
+                                position: 'absolute',
+                                width: "100%",
+                                alignItems: 'flex-end',
+                                marginTop: 20,
+                                marginRight: 20,
+                                top: 0,
+                                right: 0
+                            }}
+                            onPress={() => setModalVisible2(false)}>
+                            <EvilIcons name="close-o" size={30} color="red" />
+                        </TouchableOpacity>
+                        <FlatList
+                            data={foodCourses}
+                            showsVerticalScrollIndicator={false}
+                            renderItem={({ item }) => <TouchableOpacity
+                                style={[{
+                                    borderRadius: 10,
+                                    paddingHorizontal: 20,
+                                    paddingVertical: 10,
+                                    minWidth: 150,
+                                    borderWidth: 0.5,
+                                    marginVertical: 5,
+                                    elevation: 2,
+                                }, {
+                                    borderColor: GlobalStyles[theme].borderColor,
+                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                }]}
+                            >
+                                <Text style={[{
+                                    textAlign: "center"
+                                }, {
+                                    fontSize: GlobalTextStyles[text].fontSize,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor
+                                }]}
+                                    onPress={() => onChange('foodCourses', item.value)}>
+                                    {item.value}</Text>
+                            </TouchableOpacity>
+                            }
+                            keyExtractor={item => item.key}
+                        />
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
 }
@@ -196,24 +505,5 @@ const SuperSearch = () => {
 export default SuperSearch
 
 const styles = StyleSheet.create({
-    searchContainer: {
-        flexDirection: 'row',
-        width: windowWidth * 0.95,
-        height: 40,
-        borderBottomWidth: 2,
-        borderBottomColor: 'black',
-        borderRadius: 10,
-        marginTop: 10,
-    },
-    search: {
-        width: "90%",
-        height: "100%",
-        paddingLeft: 15,
-        // borderBottomWidth: 2,
-        // borderBottomColor: 'black',
-        // borderRadius: 5,
-        alignSelf: 'center',
-        fontWeight: 'bold',
-        fontSize: 15
-    },
+
 })

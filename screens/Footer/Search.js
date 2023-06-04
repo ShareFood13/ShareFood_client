@@ -1,24 +1,26 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { View, Text, Button, StyleSheet, FlatList, TouchableOpacity, Image, Dimensions, KeyboardAvoidingView, Platform } from 'react-native'
 import { Context } from "../../context/UserContext";
 import SuperSearch from '../../components/SuperSearch';
 import { useDispatch, useSelector } from 'react-redux';
+import GlobalStyles from '../../GlobalStyles';
 const windowWidth = Dimensions.get('window').width
 
 
 export default function Search({ navigation }) {
     const { userContext } = useContext(Context)
     const redux = useSelector((state) => state)
-    console.log("Search redux", redux?.recipe?.recipes)
+    const [theme, setTheme] = useState("stylesLight")
+
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
             <FlatList
                 ListHeaderComponent={<SuperSearch />}
-                ListHeaderComponentStyle={{ marginBottom: 10, alignItems: 'center' , zIndex: 200}}
+                ListHeaderComponentStyle={{ alignItems: 'center', zIndex: 200 }}
                 data={redux?.recipe?.recipes}
                 showsVerticalScrollIndicator={false}
                 numColumns={3}

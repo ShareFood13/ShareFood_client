@@ -3,11 +3,9 @@ import React, { useEffect, useState, useCallback, useContext } from 'react'
 import {
     View,
     Text,
-    Button,
     StyleSheet,
     RefreshControl,
     TextInput,
-    TouchableWithoutFeedback,
     TouchableOpacity,
     KeyboardAvoidingView,
     Keyboard,
@@ -53,11 +51,42 @@ const logos = [
 ]
 import { useDispatch, useSelector } from 'react-redux';
 import { getRecipe } from '../Redux/actions/recipes';
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../GlobalFontStyles';
 import GlobalStyles from '../GlobalStyles';
+import trans from '../Language'
 
 export default function RecipeCard({ recipe, navigation }) {
     const dispatch = useDispatch()
-    const [theme,setTheme] = useState('stylesLight')
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        // Oswald_400Regular,
+        // SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
     const openRecipe = (recipe) => {
         // navigation.push('RecipeDetail', { recipeData: recipe })
@@ -70,12 +99,12 @@ export default function RecipeCard({ recipe, navigation }) {
     }
     // console.log(recipe?.recipePicture?.small)
     return (
-        <View style={styles.container}>
-            <View style={[styles.recipeCard, {backgroundColor: GlobalStyles[theme].paperColor}]}>
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
+            <View style={[styles.recipeCard, { backgroundColor: GlobalStyles[theme].paperColor, borderColor: GlobalStyles[theme].borderColor }]}>
                 <View style={styles.subCard}>
 
-                    <Pressable style={styles.left} onPress={() => openRecipe(recipe)}>
-                        <Text style={{ width: "100%", textAlign: 'center', fontWeight: 'bold' }}>{recipe?.recipeName}</Text>
+                    <TouchableOpacity style={styles.left} onPress={() => openRecipe(recipe)}>
+                        <Text style={{ width: "100%", textAlign: 'center', fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }}>{recipe?.recipeName}</Text>
 
                         <View style={{
                             flexDirection: 'row',
@@ -83,7 +112,6 @@ export default function RecipeCard({ recipe, navigation }) {
                             paddingLeft: 0,
                             overflow: 'hidden',
                         }}>
-                            {/* <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}> */}
                             <View style={{ height: 45 }} >
                                 <FlatList
                                     data={recipe?.specialDiet}
@@ -103,16 +131,24 @@ export default function RecipeCard({ recipe, navigation }) {
                                     keyExtractor={item => item}
                                 />
                             </View>
-                            {/* </ScrollView> */}
                         </View>
 
                         <View style={{ flexDirection: 'row', width: 170, justifyContent: 'space-between', alignSelf: 'center' }}>
-                            <Text><AntDesign name="like2" size={24} color="black" /> {recipe?.likes?.length}</Text>
-                            <Text><AntDesign name="hearto" size={24} color="black" /> {recipe?.downloads?.length} </Text>
-                            <Text><Entypo name="stopwatch" size={24} color="black" /> {Number(recipe?.cookTime) + Number(recipe?.prepTime)} </Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>
+                                <AntDesign name="like2" size={24} color={GlobalStyles[theme].fontColor} />
+                                {recipe?.likes?.length}
+                            </Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>
+                                <AntDesign name="hearto" size={24} color={GlobalStyles[theme].fontColor} />
+                                {recipe?.downloads?.length}
+                            </Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>
+                                <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                                {Number(recipe?.cookTime) + Number(recipe?.prepTime)}
+                            </Text>
                         </View>
 
-                    </Pressable>
+                    </TouchableOpacity>
 
                     <View style={styles.image}>
                         {recipe?.recipePicture?.small?.length > 0 && <ScrollView
@@ -121,7 +157,6 @@ export default function RecipeCard({ recipe, navigation }) {
                             style={{ width: 140, height: 70 }}>
                             {recipe?.recipePicture?.small?.map((image, index) =>
                                 <View key={index} style={{ position: 'relative' }}>
-                                    {/* <Image source={{ uri: image.base64 }} style={{ width: 140, height: 90, resizeMode: "cover", borderRadius: 10 }} /> */}
                                     <Image source={{ uri: image }} style={{ width: 140, height: "100%", resizeMode: "cover", borderRadius: 10 }} />
                                 </View>)}
                         </ScrollView>}
@@ -141,7 +176,7 @@ const styles = StyleSheet.create({
     },
     image: {
         borderRadius: 10,
-        borderWidth: 0.1,
+        borderWidth: 0.5,
         borderStyle: 'solid',
         height: "100%",
         // width: "40%"
@@ -161,13 +196,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'center',
         marginTop: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
+        // shadowColor: "#000",
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 2
+        // },
+        // shadowOpacity: 0.25,
+        // shadowRadius: 4,
     },
     subCard: {
         flexDirection: "row",

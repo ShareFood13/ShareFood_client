@@ -26,6 +26,22 @@ import uuid from 'react-native-uuid';
 
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons, FontAwesome } from '@expo/vector-icons';
 
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../GlobalFontStyles';
+import trans from '../Language'
 
 
 const logos = [
@@ -56,7 +72,22 @@ const logos = [
 ]
 
 const ShowMealDetail = ({ meal, recipes, sDietMeal, closeModal }) => {
-
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
     return (
         <View style={styles.centeredView}>
@@ -104,28 +135,28 @@ const ShowMealDetail = ({ meal, recipes, sDietMeal, closeModal }) => {
                                 marginBottom: 0,
                                 position: 'absolute'
                             }}>
-                            <EvilIcons name="close-o" size={30} color="black" />
+                            <EvilIcons name="close-o" size={30} color="red" />
                         </TouchableOpacity>
 
                         {[...Array(20)].map((_, index) => (
                             <View key={index} style={styles.line} >
-                                {index === 1 && <Text style={{ fontSize: 20, marginBottom: 18, position: 'absolute', paddingLeft: 20 }}>{meal?.mealName}</Text>}
+                                {index === 1 && <Text style={{ fontSize: 20, marginBottom: 18, position: 'absolute', paddingLeft: 20, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{meal?.mealName}</Text>}
                             </View>
                         ))}
 
                         <View style={{
                             height: 350,
-                            width: '90%',
+                            width: '100%',
                             justifyContent: 'flex-start',
                             alignItems: 'center',
                             position: 'absolute',
-                            top: "16.5%"
+                            top: "16.5%",
                         }}>
                             {meal?.recipesId.map(recipeId =>
                                 // userContext?.result?.recipesId.map
                                 recipes.map((item, index) => {
                                     if (item._id === recipeId && item.isDeleted === false) {
-                                        return <Text key={uuid.v4()} style={{ fontSize: 16, top: 30 * index }}>{item.recipeName}</Text>
+                                        return <Text key={uuid.v4()} style={{ fontSize: 16, top: 30 * index, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{item.recipeName}</Text>
                                     }
                                 })
                             )}
@@ -193,26 +224,13 @@ const styles = StyleSheet.create({
         marginLeft: 50,
         paddingHorizontal: 10,
     },
-    outputTags: {
-        width: "90%",
-        backgroundColor: '#e6e6e6',
-        height: 40,
-        borderRadius: 10,
-        fontSize: 14,
-        padding: 10,
-        borderRadius: 15,
-        marginVertical: 7,
-        paddingLeft: 10,
-        overflow: 'hidden',
-    },
-
     container: {
         // height: '70%',
         // backgroundColor: 'cyan',
         // top: '20%',
         // justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: '#000',
         position: 'relative'
     },
     notebook: {

@@ -20,8 +20,37 @@ import {
 } from 'react-native'
 
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
+import GlobalFontStyles from '../GlobalFontStyles';
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
 
 const SwitchButton = ({ text01, text02, setShow, show }) => {
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
     return (
         <View style={styles.switch}>
@@ -39,7 +68,7 @@ const SwitchButton = ({ text01, text02, setShow, show }) => {
                 left: 0,
             }}
                 onPress={() => setShow(text01)}>
-                <Text>{text01}</Text>
+                <Text style={{fontFamily: GlobalFontStyles[fontStyle].fontStyle}}>{text01}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{
                 flexDirection: 'row',
@@ -55,7 +84,7 @@ const SwitchButton = ({ text01, text02, setShow, show }) => {
                 right: 0
             }}
                 onPress={() => setShow(text02)}>
-                <Text>{text02}</Text>
+                <Text style={{fontFamily: GlobalFontStyles[fontStyle].fontStyle}}>{text02}</Text>
             </TouchableOpacity>
         </View>
     )

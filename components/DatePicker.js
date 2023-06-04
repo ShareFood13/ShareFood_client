@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import {
     View,
-    Button,
     Text,
     StyleSheet,
     Platform,
@@ -11,8 +10,25 @@ import {
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../GlobalFontStyles';
+import GlobalStyles from '../GlobalStyles';
+import trans from '../Language';
 
 export default function DatePicker({
     pickerType,
@@ -22,14 +38,26 @@ export default function DatePicker({
 }) {
 
     const todayDate = new Date();
-
     const [date, setDate] = useState(todayDate);
-
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
     var currentDate = '';
-
-
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
     const onChange = (event, selectedDate) => {
         currentDate = selectedDate;
@@ -63,31 +91,69 @@ export default function DatePicker({
             {pickerType === 'date' && (
                 (birthDay)
                     ?
-                    <View style={{ flexDirection: 'row', height: 35, width: '90%', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }}>
-                        <Text style={{ width: '30%' }}>BirthDate:</Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: 'white', borderRadius: 10, marginHorizontal: 5 }}>
-                            <Text>{date.toISOString().split('T')[0]}</Text>
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            height: 35,
+                            width: '100%',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginVertical: 10,
+                        }}>
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].BIRTHDATE}:
+                        </Text>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                borderRadius: 10,
+                            }}>
+                            <Text style={{
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            }}>
+                                {date.toISOString().split('T')[0]}
+                            </Text>
                             <TouchableOpacity style={{ width: "20%", alignItems: 'center', justifyContent: 'center' }} onPress={showDatepicker}>
-                                <Ionicons name="calendar-outline" size={30} color="black" />
+                                <Ionicons name="calendar-outline" size={30} color={GlobalStyles[theme].fontColor} />
                             </TouchableOpacity>
                         </View>
                     </View>
                     :
                     <View
-                        style={styles.outPuts}
+                        style={[styles.outPuts, {backgroundColor: GlobalStyles[theme].paperColor,}]}
                     >
-                        <Text style={{ width: "80%" }}>Date Picked: {date.toISOString().split('T')[0]}</Text>
+                        <Text style={{
+                            width: "80%",
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                        }}>
+                            {trans[language].DATE_PICKED}: {date.toISOString().split('T')[0]}
+                        </Text>
                         <TouchableOpacity style={{ width: "20%", alignItems: 'center', justifyContent: 'center' }} onPress={showDatepicker}>
-                            <Ionicons name="calendar-outline" size={30} color="black" />
+                            <Ionicons name="calendar-outline" size={30} color={GlobalStyles[theme].fontColor} />
                         </TouchableOpacity>
                     </View>
             )}
             {pickerType === 'time' && (
                 <View
-                    style={styles.outPuts}
+                    style={[styles.outPuts, {backgroundColor: GlobalStyles[theme].paperColor,}]}
                 >
-                    <Text style={{ width: "80%" }}>
-                        Time Picked: {date.toLocaleTimeString('he-IL')}
+                    <Text style={{ 
+                        width: "80%", 
+                        color: GlobalStyles[theme].fontColor,
+                        fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>
+                        {trans[language].TIME_PICKED}: {date.toLocaleTimeString('he-IL')}
                     </Text>
                     <TouchableOpacity
                         style={{
@@ -96,7 +162,7 @@ export default function DatePicker({
                             justifyContent: 'center'
                         }}
                         onPress={showTimepicker}>
-                        <MaterialCommunityIcons name="clock-time-three-outline" size={30} color="black" />
+                        <MaterialCommunityIcons name="clock-time-three-outline" size={30} color={GlobalStyles[theme].fontColor} />
                     </TouchableOpacity>
                 </View>
             )}
@@ -108,6 +174,7 @@ export default function DatePicker({
                     mode={mode}
                     is24Hour={true}
                     onChange={onChange}
+
                 />
             )}
         </View>
@@ -116,14 +183,13 @@ export default function DatePicker({
 
 const styles = StyleSheet.create({
     outPuts: {
-        width: "90%",
+        width: "100%",
         height: 40,
-        marginVertical: 10,
+        marginVertical: 5,
         flexDirection: 'row',
-        backgroundColor: '#e6e6e6',
         paddingLeft: 15,
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderRadius: 20
+        borderRadius: 10
     },
 });

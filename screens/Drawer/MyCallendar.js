@@ -48,6 +48,21 @@ import { useIsFocused } from '@react-navigation/native';
 import { getMyRecipes } from '../../Redux/actions/recipes';
 import Banner from '../../components/Banner';
 import GlobalStyles from '../../GlobalStyles';
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
 
 const windowWidth = Dimensions.get('window').width
 
@@ -72,6 +87,8 @@ const initialValue = {
     creatorId: "",
 }
 
+import trans from "../../Language"
+
 const Mycallendar = ({ navigation }) => {
     const todayDate = new Date()
 
@@ -79,7 +96,9 @@ const Mycallendar = ({ navigation }) => {
     const [eventForm, setEventForm] = useState(initialValue)
     const [items, setItems] = useState({});
     const [modalVisible, setModalVisible] = useState(false)
+    const [modalAlert, setModalAlert] = useState(false)
     const [modalFromEdit, setModalFromEdit] = useState(false)
+    const [itemDelete, setItemDelete] = useState({})
     const [refreshing, setRefreshing] = useState(false);
     const [show, setShow] = useState("Public")
     const [alarmDate, setAlarmDate] = useState(todayDate)
@@ -96,7 +115,22 @@ const Mycallendar = ({ navigation }) => {
     const [popupModal, setPopupModal] = useState(false)
     const [fromDate, setFromDate] = useState()
     const [toDate, setToDate] = useState()
+    const [language, setLanguage] = useState("en")
     const [theme, setTheme] = useState('stylesLight')
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
@@ -263,33 +297,65 @@ const Mycallendar = ({ navigation }) => {
 
     const renderItem = (item) => {
         return (
-            <TouchableOpacity style={styles.item} onPress={() => openShowEventDetail(item)}>
+            <View style={{
+                flex: 1,
+                borderRadius: 10,
+                padding: 3,
+                marginRight: 10,
+                marginTop: 10,
+                borderWidth: 0.5,
+                backgroundColor: GlobalStyles[theme].paperColor,
+                borderColor: GlobalStyles[theme].borderColor,
+                // backgroundColor: "white",
+                // borderColor: "black",
+            }} >
                 <Card>
-                    <Card.Content>
+                    <Card.Content
+                        style={{ backgroundColor: GlobalStyles[theme].paperColor }}
+                    >
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <View>
-                                <Text>{item.eventName}</Text>
-                                <Text>{item.occasion}</Text>
-                                <Text>{item.eventTime}</Text>
-                            </View>
+                            <TouchableOpacity style={{ width: "90%" }} onPress={() => openShowEventDetail(item)}>
+                                <Text style={{
+                                    color: GlobalStyles[theme].fontColor,
+                                    // color: "black",
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {item.eventName}
+                                </Text>
+                                <Text style={{
+                                    color: GlobalStyles[theme].fontColor,
+                                    // color: "black",
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {item.occasion}
+                                </Text>
+                                <Text style={{
+                                    color: GlobalStyles[theme].fontColor,
+                                    // color: "black",
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {item.eventTime.slice(0, 5)}
+                                </Text>
+                            </TouchableOpacity>
+
                             <View style={{ height: 55, alignContent: 'center', justifyContent: 'space-between' }}>
                                 <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => editEvent(item)}>
-                                    <Feather name="edit-3" size={24} color="black" />
+                                    <Feather name="edit-3" size={24}
+                                        // color="black"
+                                        color={GlobalStyles[theme].fontColor}
+                                    />
                                 </TouchableOpacity>
-                                <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => Alert.alert(
-                                    'Are you sure???',
-                                    'You are permantly deleting this meal from your calendar!!!',
-                                    [
-                                        { text: "Cancel", },
-                                        { text: "Delete", onPress: () => delEvent(item) }
-                                    ])}>
-                                    <AntDesign name="delete" size={24} color="black" />
+                                <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => { setModalAlert(true); setItemDelete(item) }}>
+                                    <AntDesign name="delete" size={24}
+                                        // color="black"
+                                        color={GlobalStyles[theme].fontColor}
+                                    />
                                 </TouchableOpacity>
                             </View>
                         </View>
                     </Card.Content>
                 </Card>
-            </TouchableOpacity>
+            </View >
         );
     }
 
@@ -346,7 +412,7 @@ const Mycallendar = ({ navigation }) => {
 
         }}>
             <TouchableOpacity
-                    onPress={() => setModalVisible(true)}> 
+                onPress={() => setModalVisible(true)}>
                 <View
                     // value={mealForm.mealName}
                     style={{
@@ -359,7 +425,7 @@ const Mycallendar = ({ navigation }) => {
                         borderStyle: 'solid',
                         backgroundColor: GlobalStyles[theme].buttonColor
                     }}>
-                    <Text style={{ color: 'white', fontWeight: '700', fontSize: 20, }}>Add new Event</Text>
+                    <Text style={{ color: 'white', fontSize: 20, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].ADD_NEW_EVENT}</Text>
 
                 </View>
             </TouchableOpacity>
@@ -367,26 +433,39 @@ const Mycallendar = ({ navigation }) => {
     }
     return (
 
-        < View style={styles.container} >
+        < View style={[styles.container,
+        { backgroundColor: GlobalStyles[theme].background }
+        ]} >
 
             < View style={{ alignItems: 'center', padding: 10 }} >
 
-                <Banner title="My Calendar" />
+                {/* <Banner title={trans[language].MY_CALENDAR} /> */}
 
                 <SpSheet
-                    text={"Create Shop List"}
+                    text={trans[language].CREATE_SHOP_LIST}
                     heightValue={370}
                     style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: '100%' }}
                 >
-                    <View style={{ alignItems: 'center' }}>
-                        <Text>From Date:</Text>
+                    <View style={{ alignItems: 'center', padding: 10, backgroundColor: GlobalStyles[theme].background }}>
+                        <Text style={{
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].FROM_DATE}:
+                        </Text>
                         <DatePicker2
                             pickerType="date"
                             // setInfoPicked={setInfoPicked}
                             infoPickerFunction={infoPickerFunction}
                             formTypeInput="fromDate"
+
                         />
-                        <Text>To Date:</Text>
+                        <Text style={{
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].TO_DATE}:
+                        </Text>
                         <DatePicker2
                             pickerType="date"
                             // setInfoPicked={setInfoPicked}
@@ -395,22 +474,28 @@ const Mycallendar = ({ navigation }) => {
                         />
                         <TouchableOpacity
                             style={[{
-                                marginTop: 15,
-                                marginBottom: 30,
                                 // width: 100,
                                 // height: 40,
+                                paddingHorizontal: 20,
+                                paddingVertical: 10,
+                                marginTop: 10,
+                                marginBottom: 20,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                borderRadius: 30,
+                                borderRadius: 10,
                                 borderStyle: 'solid',
-                                borderColor: 'black',
                                 borderWidth: 0.5,
+                                borderColor: GlobalStyles[theme].borderColor,
                                 backgroundColor: GlobalStyles[theme].buttonColor,
-                                paddingHorizontal: 20,
-                                paddingVertical: 10
                             }]}
                             onPress={() => createShopList()}>
-                            <Text style={{ fontSize: 16, fontWeight: '500', color: 'white' }}>Create Shop List</Text>
+                            <Text style={{
+                                fontSize: 16,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                                {trans[language].CREATE_SHOP_LIST}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </SpSheet>
@@ -421,51 +506,90 @@ const Mycallendar = ({ navigation }) => {
                 loadItemsForMonth={loadItems}
                 // selected={todayDate.getFullYear() + "-" + (todayDate.getMonth() + 1) + "-" + todayDate.getDate()}
                 // selected={date}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={() => onRefresh()}
-                    />}
+                // refreshControl={
+                //     <RefreshControl
+                //         refreshing={refreshing}
+                //         onRefresh={() => onRefresh()}
+                //     />}
+                // refreshing={true}
                 showClosingKnob={true}
-                refreshing={true}
                 renderItem={renderItem}
                 renderKnob={() => {
-                    return <View style={{ borderColor: "red", borderStyle: 'solid', borderWidth: 2, width: 50, marginTop: 8, height: 10, backgroundColor: 'red', borderRadius: 10 }} />;
+                    return <View style={{
+                        width: 50,
+                        height: 10,
+                        borderStyle: 'solid',
+                        borderWidth: 2,
+                        marginTop: 8,
+                        borderRadius: 10,
+                        borderColor: GlobalStyles[theme].buttonColor,
+                        backgroundColor: GlobalStyles[theme].buttonColor,
+                    }} />;
                 }}
-                calendarStyle={{ maxHeight: 650, }}
+                rende
+                calendarStyle={{ maxHeight: 600, borderColor: GlobalStyles[theme].fontColor, borderWidth: 1, }}
+                theme={{
+                    backgroundColor: GlobalStyles[theme].background,
+                    agendaDayNumColor: GlobalStyles[theme].fontColor,
+                    agendaDayTextColor: GlobalStyles[theme].fontColor,
+                    agendaTodayColor: GlobalStyles[theme].buttonColor,
+                    calendarBackground: GlobalStyles[theme].paperColor,
+                    dotColor: GlobalStyles[theme].buttonColor,
+                    textColor: GlobalStyles[theme].fontColor,
+                    monthTextColor: GlobalStyles[theme].fontColor,
+                    dayTextColor: GlobalStyles[theme].fontColor,
+                    todayDotColor: GlobalStyles[theme].buttonColor,
+                    selectedDayTextColor: GlobalStyles[theme].fontColor,
+                    selectedDayBackgroundColor: GlobalStyles[theme].buttonColor,
+                    textDayFontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                    textMonthFontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                    todayButtonFontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                    textDisabledColor: "#cccccc",
+                    // todayBackgroundColor: 'red',
+                    // todayTextColor: 'blue',
+                    // separatorColor: "purple",
+                    // weekVerticalMargin: 2,
+                    // arrowColor: "white",
+                    // arrowWidth: 3,
+                    // contentStyle: {borderColor: "red", borderWidth: 1},
+                    // container: {borderColor: "blue", borderWidth: 1},
+                   
+                }}
             // Agenda theme
             // theme={{
-            //     agendaDayTextColor: 'yellow',
-            //     agendaDayNumColor: 'green',
-            //     agendaTodayColor: 'red',
-            //     agendaKnobColor: 'blue'
+            //     calendarBackground: 'red',
+            // agendaDayTextColor: 'yellow',
+            // agendaDayNumColor: 'green',
+            // agendaTodayColor: 'red',
+            // agendaKnobColor: 'blue'
             // }}
             // Agenda container style
             // style={{}}
             />
 
+            {/* Add New Event Modal */}
             <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
+                    <View style={[styles.modalView, { backgroundColor: GlobalStyles[theme].paperColor }]}>
 
                         <TouchableOpacity style={{
                             width: "100%",
                             alignItems: 'flex-end',
-                            marginTop: 20,
-                            marginRight: 40,
-                            marginBottom: 20
+                            marginTop: 10,
+                            marginRight: 20,
                         }}
                             onPress={() => closeModal()}>
-                            <EvilIcons name="close-o" size={30} color="black" />
+                            <EvilIcons name="close-o" size={30} color="red" />
                         </TouchableOpacity>
 
                         <TextInput
-                            style={styles.outPuts}
-                            placeholder="Event Name"
+                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle].fontStyle }]}
+                            placeholderTextColor="black"
+                            placeholder={trans[language].EVENT_NAME}
                             value={eventForm.eventName}
                             onChangeText={text => handleOnChange('eventName', text)} />
 
@@ -483,31 +607,34 @@ const Mycallendar = ({ navigation }) => {
                         />
 
                         <TextInput
-                            style={styles.outPuts}
-                            placeholder="Occasion"
+                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle].fontStyle }]}
+                            placeholderTextColor="black"
+                            placeholder={trans[language].OCCASION}
                             value={eventForm.occasion}
                             onChangeText={text => handleOnChange('occasion', text)} />
 
                         <TextInput
-                            style={styles.outPuts}
-                            placeholder="How many guests?"
+                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle].fontStyle }]}
+                            placeholderTextColor="black"
+                            placeholder={trans[language].HOW_MANY_GUESTS}
                             keyboardType='numeric'
                             value={eventForm.howManyGuests}
                             onChangeText={text => handleOnChange('howManyGuests', text)} />
 
                         <TextInput
-                            style={styles.outPuts}
-                            placeholder="Free Text"
+                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle].fontStyle }]}
+                            placeholderTextColor="black"
+                            placeholder={trans[language].FREE_TEXT}
                             value={eventForm.freeText}
                             onChangeText={text => handleOnChange('freeText', text)} />
 
-                        <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
+                        <SwitchButton text01={trans[language].PUBLIC} text02={trans[language].PRIVATE} show={show} setShow={setShow} />
 
-                        <Pressable onPress={() => setAlarm2(!alarm2)} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Pressable onPress={() => setAlarm2(!alarm2)} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                             <View style={{ width: 52, height: 27, borderRadius: 25, borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid', justifyContent: 'center', marginRight: 10 }}>
                                 <View style={{ width: 25, height: 25, borderRadius: 25, backgroundColor: alarm2 ? "green" : 'red', alignSelf: alarm2 ? 'flex-end' : 'flex-start', borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid', marginHorizontal: 1 }} />
                             </View>
-                            <Text>Set Alarm</Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].SET_ALARM}</Text>
                         </Pressable>
 
                         {alarm2 && <View style={{ width: "100%", alignItems: 'center' }}>
@@ -530,12 +657,12 @@ const Mycallendar = ({ navigation }) => {
                             <TouchableOpacity
                                 style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                                 onPress={() => addNewEvent()}>
-                                <Text style={{ color: 'white', fontWeight: '700' }}>Save</Text>
+                                <Text style={{ color: 'white', fontSize: 16, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].SAVE}</Text>
                             </TouchableOpacity>
                             : <TouchableOpacity
                                 style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
                                 onPress={() => updatEvent()}>
-                                <Text style={{ color: 'white', fontWeight: '700' }}>Update</Text>
+                                <Text style={{ color: 'white', fontSize: 16, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].UPDATE}</Text>
                             </TouchableOpacity>
                         }
 
@@ -544,6 +671,73 @@ const Mycallendar = ({ navigation }) => {
             </Modal>
 
             <PopupModal message={redux?.event.message} popupModal={popupModal} />
+
+            {/* // Modal Alert// */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalAlert}>
+
+                <View style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <View style={[{
+                        width: 350,
+                        maxHeight: 400,
+                        alignItems: "flex-start",
+                        padding: 30,
+                        borderWidth: 0.5,
+                        borderRadius: 10,
+                        elevation: 5,
+                    }, {
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].paperColor
+                    }]}>
+                        <View>
+                            <Text style={{
+                                fontSize: 16,
+                                marginBottom: 10,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor,
+                            }}>
+                                {trans[language].ARE_YOU_SURE}
+                            </Text>
+                            <Text style={{
+                                fontSize: 16,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor,
+                            }}>
+                                {trans[language].EVENT_PERMANET_DELETE}
+                            </Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', width: "100%", justifyContent: "space-around", marginTop: 20 }}>
+                            <TouchableOpacity
+                                onPress={() => delEvent(itemDelete)}>
+                                <Text style={{
+                                    color: GlobalStyles[theme].buttonColor,
+                                    fontSize: 16,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {trans[language].DELETE}
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => { setModalAlert(false); setItemDelete({}) }}>
+                                <Text style={{
+                                    color: GlobalStyles[theme].buttonColor,
+                                    fontSize: 16,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {trans[language].CANCEL}
+                                </Text>
+                            </TouchableOpacity>
+
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             {/* <View style={{ width: '100%', backgroundColor: GlobalStyles[theme].buttonColor }}>
                 <Button title='Add new Event' onPress={() => setModalVisible(true)} />
@@ -567,8 +761,7 @@ const styles = StyleSheet.create({
     genericButton: {
         marginTop: 15,
         marginBottom: 30,
-        width: 100,
-        height: 40,
+        // width: 100,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 30,
@@ -581,7 +774,7 @@ const styles = StyleSheet.create({
     },
     item: {
         flex: 1,
-        borderRadius: 5,
+        borderRadius: 10,
         padding: 10,
         marginRight: 10,
         marginTop: 10
@@ -592,13 +785,13 @@ const styles = StyleSheet.create({
         borderStyle: 'solid',
         borderWidth: 1,
         borderColor: 'black',
-        borderRadius: 40,
+        borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'white'
+        padding: 10
     },
     outPuts: {
-        width: "90%",
+        width: "100%",
         height: 40,
         marginVertical: 10,
         flexDirection: 'row',
@@ -606,7 +799,7 @@ const styles = StyleSheet.create({
         paddingLeft: 15,
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderRadius: 20
+        borderRadius: 10,
     },
 });
 

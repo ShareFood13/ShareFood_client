@@ -24,13 +24,30 @@ import RecipeCard from '../../components/RecipeCard';
 import PopupModal from '../../components/PopupModal';
 
 import * as SecureStore from 'expo-secure-store';
-import GlobalStyles from '../../GlobalStyles';
 
 // import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
 
 var courses = ['All'];
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
+import trans from '../../Language'
+import GlobalStyles from '../../GlobalStyles';
 
 export default function MyBook({ route, navigation }) {
     const { userContext, setUserContext } = useContext(Context)
@@ -44,6 +61,21 @@ export default function MyBook({ route, navigation }) {
     const [filter, setFilter] = useState('All');
     const [theme, setTheme] = useState('stylesLight')
     const [newList, setNewList] = useState([]);
+    const [language, setLanguage] = useState("en");
+    const [fontStyle, setFontStyle] = useState("Montserrat");
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
 
     const redux = useSelector((state) => state)
@@ -134,12 +166,28 @@ export default function MyBook({ route, navigation }) {
     }
 
     return (
-        <View style={[styles.container, {backgroundColor: GlobalStyles[theme].background}]}>
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
 
             <TextInput
                 onChangeText={text => onChangeSearch(text)}
-                placeholder="Search for a recipe..."
-                style={[styles.search, {backgroundColor: GlobalStyles[theme].paperColor}]}
+                placeholder={trans[language].SEARCH}
+                placeholderTextColor={GlobalStyles[theme].fontColor}
+                style={[{
+                    width: "100%",
+                    height: 40,
+                    paddingLeft: 15,
+                    marginBottom: 10,
+                    alignSelf: 'center',
+                    fontSize: 15,
+                    borderBottomWidth: 2,
+                    borderRadius: 10,
+                    borderWidth: 0.5,
+                }, {
+                    color: GlobalStyles[theme].fontColor,
+                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                    borderColor: GlobalStyles[theme].fontColor,
+                    backgroundColor: GlobalStyles[theme].paperColor,
+                }]}
             />
 
             <ScrollView
@@ -150,13 +198,26 @@ export default function MyBook({ route, navigation }) {
                     <TouchableOpacity
                         key={item}
                         style={[
-                            styles.page,
+                            {
+                                width: 130,
+                                height: 50,
+                                marginBottom: 3,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderWidth: 0.5,
+                                borderTopLeftRadius: 20,
+                                borderTopRightRadius: 20,
+                            },
                             { backgroundColor: filter === item ? GlobalStyles[theme].buttonColor : GlobalStyles[theme].lightBlue },
                             { borderBottomColor: filter === item ? GlobalStyles[theme].buttonColor : GlobalStyles[theme].fontColor },
                         ]}
-                        // onPress={() => setFilter(item)}>
                         onPress={() => pageFilter(item)}>
-                        <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: filter === item ? GlobalStyles[theme].fontColor : GlobalStyles[theme].fontColor }}>
+                        <Text style={{
+                            textAlign: 'center',
+                            fontSize: 16,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: filter === item ? GlobalStyles[theme].fontColor : GlobalStyles[theme].fontColor
+                        }}>
                             {item}
                         </Text>
                     </TouchableOpacity>
@@ -166,8 +227,10 @@ export default function MyBook({ route, navigation }) {
             {<FlatList
                 data={myRecipes}
                 showsVerticalScrollIndicator={false}
-                style={styles.recipes}
-                renderItem={({ item }) => !item?.isDeleted && <RecipeCard recipe={item} key={item._id} navigation={navigation} />}
+                contentContainerStyle={{ backgroundColor: GlobalStyles[theme].background }}
+                style={[{ backgroundColor: GlobalStyles[theme].background }]}
+                renderItem={({ item }) => !item?.isDeleted &&
+                    <RecipeCard recipe={item} key={item._id} navigation={navigation} />}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -181,7 +244,9 @@ export default function MyBook({ route, navigation }) {
                 {myRecipes.map((item) => !item?.isDeleted && <RecipeCard recipe={item} key={item._id} navigation={navigation} />
                 )}
             </ScrollView> */}
+
             <PopupModal message={redux?.recipe.message} popupModal={popupModal} />
+
         </View>
     )
 }
@@ -189,59 +254,55 @@ export default function MyBook({ route, navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
         alignContent: 'flex-start',
-        // paddingTop: Constants.statusBarHeight,
-        backgroundColor: 'white',
         padding: 10
     },
-    search: {
-        backgroundColor: 'white',
-        width: "100%",
-        height: 40,
-        paddingLeft: 15,
-        borderBottomWidth: 2,
-        borderBottomColor: 'black',
-        borderRadius: 10,
-        marginBottom: 10,
-        alignSelf: 'center',
-        backgroundColor: '#eee',
-        fontWeight: 'bold',
-        fontSize: 15
-    },
+    // search: {
+    //     width: "100%",
+    //     height: 40,
+    //     paddingLeft: 15,
+    //     borderBottomWidth: 2,
+    //     borderBottomColor: 'black',
+    //     borderRadius: 10,
+    //     marginBottom: 10,
+    //     alignSelf: 'center',
+    //     backgroundColor: '#eee',
+    //     fontWeight: 'bold',
+    //     fontSize: 15
+    // },
     pagination: {
         height: 0,
         width: windowWidth
     },
-    page: {
-        width: 130,
-        height: 50,
-        // backgroundColor: 'cyan',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderColor: 'black',
-        borderWidth: 0.5,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        marginBottom: 3
-    },
-    card: {
-        height: 70,
-        width: windowWidth * 0.95,
-        borderColor: 'black',
-        borderWidth: 0.5,
-        borderRadius: 12,
-        backgroundColor: 'white',
-        marginVertical: 6,
-        paddingLeft: 10,
-        justifyContent: 'center',
-    },
-    recipes: {
-        height: 500,
-        windowWidth,
-        backgroundColor: '#ecf0f1',
-        // alignItems: 'center',
-    },
+    // page: {
+    //     width: 130,
+    //     height: 50,
+    //     // backgroundColor: 'cyan',
+    //     justifyContent: 'center',
+    //     alignItems: 'center',
+    //     borderColor: 'black',
+    //     borderWidth: 0.5,
+    //     borderTopLeftRadius: 20,
+    //     borderTopRightRadius: 20,
+    //     marginBottom: 3
+    // },
+    // card: {
+    //     height: 70,
+    //     width: windowWidth * 0.95,
+    //     borderColor: 'black',
+    //     borderWidth: 0.5,
+    //     borderRadius: 12,
+    //     backgroundColor: 'white',
+    //     marginVertical: 6,
+    //     paddingLeft: 10,
+    //     justifyContent: 'center',
+    // },
+    // recipes: {
+    //     height: 500,
+    //     windowWidth,
+    //     backgroundColor: '#ecf0f1',
+    //     // alignItems: 'center',
+    // },
     //     container: {
     //         flex: 1,
     //         justifyContent: 'center',

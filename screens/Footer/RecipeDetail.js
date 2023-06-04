@@ -44,7 +44,24 @@ import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
 import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 import ImagesSwipe from '../../components/ImagesSwipe';
 import Banner from '../../components/Banner';
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
 import GlobalStyles from '../../GlobalStyles';
+import trans from '../../Language'
+import GlobalTextStyles from '../../GlobalTextStyles';
 
 const logos = [
     { name: "Vegan", image: require('../../assets/images/logo/vegan.png') },
@@ -82,8 +99,23 @@ export default function RecipeDetail({ navigation, route }) {
     const [popupModal, setPopupModal] = useState(false)
     const [userId, setUserId] = useState()
     const [showImage, setShowImage] = useState(false)
-    const [theme, setTheme] = useState('stylesLight')
-
+    const [language, setLanguage] = useState("en")
+    const [text, setText] = useState('normalText')
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        // Oswald_400Regular,
+        // SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
     var difficultyColor = ""
 
     const dispatch = useDispatch();
@@ -187,10 +219,10 @@ export default function RecipeDetail({ navigation, route }) {
 
     switch (recipeData?.difficulty) {
         case "Super Easy":
-            difficultyColor = "lime"
+            difficultyColor = GlobalStyles[theme].green
             break
         case "Easy":
-            difficultyColor = "greenyellow"
+            difficultyColor = GlobalStyles[theme].yesColor
             break
         case "Medium":
             difficultyColor = "orange"
@@ -199,7 +231,7 @@ export default function RecipeDetail({ navigation, route }) {
             difficultyColor = "salmon"
             break
         case "Super Hard":
-            difficultyColor = "red"
+            difficultyColor = GlobalStyles[theme].noColor
             break
     }
 
@@ -210,12 +242,21 @@ export default function RecipeDetail({ navigation, route }) {
         >
             <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
 
-                <View style={{ height: 45, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 30 }}>{recipeData?.recipeName}</Text>
+                <View style={{
+                    height: 45,
+                    width: '100%',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderBottomWidth: 1,
+                    borderRadius: 10,
+                    borderColor: GlobalStyles[theme].fontColor,
+                    backgroundColor: GlobalStyles[theme].paperColor
+                }}>
+                    <Text style={{ fontSize: 30, color: GlobalStyles[theme].fontColor }}>{recipeData?.recipeName}</Text>
                 </View>
 
-                <View style={{ height: 30, width: "100%", alignItems: "flex-end" }}>
-                    <Text>by_{recipeData?.creator}</Text>
+                <View style={{ height: 30, width: "100%", alignItems: "flex-end", marginTop: 5 }}>
+                    <Text style={{ color: GlobalStyles[theme].fontColor }}>by_{recipeData?.creator}</Text>
                 </View>
 
                 <ImagesSwipe recipeFormRecipePicture={recipeData.recipePicture.normal} setShowImage={setShowImage} showImage={showImage} />
@@ -235,73 +276,194 @@ export default function RecipeDetail({ navigation, route }) {
                     alignSelf: 'center',
                     marginBottom: 10
                 }}>
-                    <Text><AntDesign name="like2" size={24} color="black" /> {recipeData?.likes?.length}</Text>
-                    <Text><AntDesign name="hearto" size={24} color="black" /> {recipeData?.downloads?.length} </Text>
+                    <Text style={{ color: GlobalStyles[theme].fontColor }}><AntDesign name="like2" size={24} color={GlobalStyles[theme].fontColor} /> {recipeData?.likes?.length}</Text>
+                    <Text style={{ color: GlobalStyles[theme].fontColor }}><AntDesign name="hearto" size={24} color={GlobalStyles[theme].fontColor} /> {recipeData?.downloads?.length} </Text>
                 </View>
 
-                <View style={[styles.cookInfo, { backgroundColor: GlobalStyles[theme].paperColor }]}>
-                    <View style={styles.cookItem}>
-                        <Text style={{ marginBottom: 10 }}>Prep.Time</Text>
-                        <View style={styles.logoInput}>
-                            <Entypo name="stopwatch" size={24} color="black" />
-                            <Text style={{
+                <View style={[{
+                    width: "100%",
+                    height: 90,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderRadius: 10,
+                    padding: 10,
+                    marginBottom: 10,
+                }, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                    <View style={{
+                        width: (windowWidth - 40) / 4,
+                        height: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                    }}>
+                        <Text style={{
+                            marginBottom: 10,
+                            fontSize: GlobalTextStyles[text].fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: GlobalStyles[theme].fontColor
+                        }}>
+                            {trans[language].PREP_TIME}
+                        </Text>
+                        <View style={{
+                            width: "90%",
+                            height: 40,
+                            flexDirection: "row",
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}>
+                            <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                            <Text style={[{
                                 width: 30,
-                                // height: 20,
-                                borderStyle: 'solid',
-                                borderBottomWidth: 1,
-                                borderBottomColor: 'black',
                                 textAlign: "center",
-                            }}>{recipeData?.prepTime}</Text>
-                            <Text>min</Text>
-                        </View>
-                    </View>
-                    <View style={styles.cookItem}>
-                        <Text style={{ marginBottom: 10 }}>Cook Time</Text>
-                        <View style={styles.logoInput}>
-                            <Entypo name="stopwatch" size={24} color="black" />
+                                borderStyle: 'solid',
+                                borderBottomWidth: 0.5,
+                            }, {
+                                borderBottomColor: GlobalStyles[theme].borderColor,
+                                fontSize: GlobalTextStyles[text].fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }]}>{recipeData?.prepTime}</Text>
                             <Text style={{
-                                width: 30,
-                                // height: 30,
-                                borderStyle: 'solid',
-                                borderBottomWidth: 1,
-                                borderBottomColor: 'black',
-                                textAlign: "center",
-                            }}>{recipeData?.cookTime}</Text>
-                            <Text>min</Text>
+                                fontSize: GlobalTextStyles[text].fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {trans[language].MIN}
+                            </Text>
                         </View>
                     </View>
 
-                    <View style={styles.cookItem}>
-                        <Text style={{ marginBottom: 10 }}>Difficulty</Text>
-                        <View style={styles.logoInput}>
-                            <MaterialCommunityIcons name="chef-hat" size={24} color="black" />
+                    <View style={{
+                        width: (windowWidth - 40) / 4,
+                        height: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                    }}>
+                        <Text style={{
+                            marginBottom: 10,
+                            fontSize: GlobalTextStyles[text].fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: GlobalStyles[theme].fontColor
+                        }}>
+                            {trans[language].COOK_TIME}
+                        </Text>
+                        <View style={{
+                            width: "90%",
+                            height: 40,
+                            flexDirection: "row",
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}>
+                            <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                            <Text style={[{
+                                width: 30,
+                                textAlign: "center",
+                                borderStyle: 'solid',
+                                borderBottomWidth: 0.5,
+                            }, {
+                                borderBottomColor: GlobalStyles[theme].borderColor,
+                                fontSize: GlobalTextStyles[text].fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }]}>{recipeData?.cookTime}</Text>
+                            <Text style={{
+                                fontSize: GlobalTextStyles[text].fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {trans[language].MIN}
+                            </Text>
+                        </View>
+                    </View>
 
-                            <View style={{
-                                backgroundColor: difficultyColor,
+                    <View style={{
+                        width: (windowWidth - 40) / 4,
+                        height: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                    }}>
+                        <Text style={{
+                            marginBottom: 5,
+                            fontSize: GlobalTextStyles[text].fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: GlobalStyles[theme].fontColor
+                        }}>
+                            {trans[language].DIFFICULTY}
+                        </Text>
+                        <View style={{
+                            width: "90%",
+                            height: 40,
+                            flexDirection: "row",
+                            alignItems: 'center',
+                            justifyContent: 'space-around',
+                        }}>
+                            <MaterialCommunityIcons name="chef-hat" size={24} color={GlobalStyles[theme].fontColor} />
+
+                            <View style={[{
                                 width: 40,
                                 height: 40,
                                 borderRadius: 20,
-                                alignContent: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <Text style={{ textAlign: 'center', fontWeight: '500', fontSize: 18 }}>{recipeData?.difficulty?.split(" ")[0].slice(0, 1)}{recipeData?.difficulty?.split(" ")[1]?.slice(0, 1)}</Text>
+                                // padding: 10,
+                                elevation: 2,
+                                borderWidth: 0.5,
+                                fontSize: 18,
+                                backgroundColor: difficultyColor,
+                                borderColor: GlobalStyles[theme].borderColor,
+                            }]}>
+                                <Text style={{
+                                    width: 40,
+                                    height: 40,
+                                    textAlign: 'center',
+                                    textAlignVertical: "center",
+                                    fontSize: 18,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                }}>
+                                    {recipeData?.difficulty?.split(" ")[0].slice(0, 1)}{recipeData?.difficulty?.split(" ")[1]?.slice(0, 1)}
+                                </Text>
                             </View>
                         </View>
                     </View>
 
-                    <View style={styles.cookItem}>
-                        <Text style={{ marginBottom: 10 }}>Serves</Text>
-                        <View style={styles.logoInput}>
-                            <Ionicons name="ios-people-circle-outline" size={24} color="black" />
-                            <Text style={{
+                    <View style={{
+                        width: (windowWidth - 40) / 4,
+                        height: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                    }}>
+                        <Text style={{
+                            marginBottom: 10,
+                            fontSize: GlobalTextStyles[text].fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: GlobalStyles[theme].fontColor
+                        }}>
+                            {trans[language].SERVES}
+                        </Text>
+                        <View style={{
+                            width: "90%",
+                            height: 40,
+                            flexDirection: "row",
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}>
+                            <Ionicons name="ios-people-circle-outline" size={24} color={GlobalStyles[theme].fontColor} />
+                            <Text style={[{
                                 width: 30,
-                                // height: 30,
-                                borderStyle: 'solid',
-                                borderBottomWidth: 1,
-                                borderBottomColor: 'black',
                                 textAlign: "center",
-                            }}>{recipeData?.prepTime}</Text>
-                            <Text>ppl.</Text>
+                                borderStyle: 'solid',
+                                borderBottomWidth: 0.5,
+                            }, {
+                                borderBottomColor: GlobalStyles[theme].borderColor,
+                                fontSize: GlobalTextStyles[text].fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }]}>{recipeData?.prepTime}</Text>
+                            <Text style={{
+                                fontSize: GlobalTextStyles[text].fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {trans[language].PPL}
+                            </Text>
                         </View>
                     </View>
                 </View>
@@ -324,15 +486,25 @@ export default function RecipeDetail({ navigation, route }) {
                 </View>
 
                 <Text style={[styles.outputTags, { backgroundColor: GlobalStyles[theme].paperColor }]} >
-                    <Text >{recipeData?.foodCourse}</Text>
+                    <Text style={{
+                        fontSize: GlobalTextStyles[text].fontSize,
+                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                        color: GlobalStyles[theme].fontColor
+                    }}>{recipeData?.foodCourse}</Text>
                 </Text>
 
-                <Text style={[styles.outputTags, { backgroundColor: GlobalStyles[theme].paperColor }]} >
-                    <FontAwesome5 name="hashtag" size={24} color="black" />
+                <View style={[styles.outputTags, { flexDirection: 'row', backgroundColor: GlobalStyles[theme].paperColor }]} >
+                    <FontAwesome5 name="hashtag" size={24} color={GlobalStyles[theme].fontColor} />
                     {recipeData?.tags?.map(item => <Text key={uuid.v4()}
+                        style={{
+                            textAlignVertical: 'center',
+                            fontSize: GlobalTextStyles[text].fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: GlobalStyles[theme].fontColor
+                        }}
                     // onPress={(text) => remove(text, "tags")}
                     >{item}, </Text>)}
-                </Text>
+                </View>
 
                 <View style={{
                     flexDirection: 'row',
@@ -385,19 +557,37 @@ export default function RecipeDetail({ navigation, route }) {
                 {show === "ingredients"
                     ? <View style={{ width: "100%", alignItems: 'center', minHeight: 200 }}>
                         {recipeData?.ingredients?.map(item =>
-                            <View style={styles.outputIngredients} key={uuid.v4()}>
-                                <Text style={styles.quantity}>{item.quantity}</Text>
-                                <Text style={styles.units}>{item.units}</Text>
-                                <Text style={styles.product}>{item.product}</Text>
-                                <Text style={styles.remarks}>{item.remarks}</Text>
+                            <View style={[styles.outputIngredients, {backgroundColor: GlobalStyles[theme].paperColor}]} key={uuid.v4()}>
+                                <Text style={[styles.quantity, {
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor
+                                }]}>{item.quantity}</Text>
+                                <Text style={[styles.units, {
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor
+                                }]}>{item.units}</Text>
+                                <Text style={[styles.product, {
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor
+                                }]}>{item.product}</Text>
+                                <Text style={[styles.remarks, {
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor
+                                }]}>{item.remarks}</Text>
                             </View>
                         )}
                     </View>
                     : <View style={{ width: "100%", alignItems: 'center', minHeight: 200 }}>
                         {recipeData?.preparation.map(item =>
-                            <View style={styles.outputPreparation} key={uuid.v4()}>
-                                <Text style={styles.step} key={uuid.v4()}>Step {item.step}</Text>
-                                <Text style={styles.prep} key={uuid.v4()}>{item.preparation}</Text>
+                            <View style={[styles.outputPreparation, {backgroundColor: GlobalStyles[theme].paperColor}]} key={uuid.v4()}>
+                                <Text style={[styles.step, {
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor
+                                }]} key={uuid.v4()}>Step {item.step}</Text>
+                                <Text style={[styles.prep, {
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor
+                                }]} key={uuid.v4()}>{item.preparation}</Text>
                             </View>
                         )}
                     </View>
@@ -516,7 +706,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: "90%", 
+        width: "90%",
         height: 40,
         // backgroundColor: 'red',
 
@@ -567,7 +757,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'center'
     },
     units: {
-        width: 50,
+        width: 70,
         textAlignVertical: 'center',
         textAlign: 'center'
 
@@ -593,13 +783,13 @@ const styles = StyleSheet.create({
         borderRadius: 5
     },
     step: {
-        width: 60,
+        width: "20%",
         paddingLeft: 10,
         textAlignVertical: 'center',
 
     },
     prep: {
-        width: 240,
+        width: "80%",
         textAlignVertical: 'center',
         justifyContent: 'flex-start',
     },

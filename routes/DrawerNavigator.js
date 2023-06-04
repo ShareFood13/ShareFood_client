@@ -51,6 +51,26 @@ import { getUserInfo } from '../Redux/actions/auth';
 import { useIsFocused } from '@react-navigation/native';
 import MyShopLists from '../screens/Drawer/MyShopLists';
 
+const windowWidth = Dimensions.get('window').width;
+
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../GlobalFontStyles';
+import trans from '../Language'
+import GlobalStyles from '../GlobalStyles';
+
 export default function MyDrawer({ navigation }) {
     const { userContext, setUserContext } = useContext(Context)
     const [userData, setUserData] = useState()
@@ -62,7 +82,22 @@ export default function MyDrawer({ navigation }) {
     // console.log(redux?.auth?.authData?.result?.profile?.profilePicture.base64)
     // console.log(redux?.auth?.authData?.result?.profile?.backgroundPicture.base64)
 
-    const window = Dimensions.get('window');
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
     useEffect(() => {
         var mailsQty = 0
@@ -87,7 +122,11 @@ export default function MyDrawer({ navigation }) {
         return (
             <DrawerContentScrollView
                 {...props}
-                contentContainerStyle={{ backgroundColor: 'white' }}>
+                contentContainerStyle={{
+                    backgroundColor: GlobalStyles[theme].paperColor,
+                    borderRightColor: GlobalStyles[theme].borderColor,
+                    borderRightWidth: 2
+                }}>
                 <ImageBackground
                     // source={require('../assets/images/menu-bg.jpeg')}
                     source={{ uri: redux?.auth?.authData?.result?.profile?.backgroundPicture.base64 }}
@@ -103,12 +142,11 @@ export default function MyDrawer({ navigation }) {
                 </ImageBackground>
                 <Text
                     style={{
-                        color: 'black',
                         fontSize: 18,
-                        // fontFamily: 'Roboto-Medium',
-                        // marginTop: 5,
                         marginBottom: 10,
                         marginLeft: 15,
+                        color: GlobalStyles[theme].fontColor,
+                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                     }}>
                     {/* {userData?.userName}, ({userData?.userUserName}) */}
                     {userContext?.name}, ({userContext?.userName})
@@ -124,8 +162,9 @@ export default function MyDrawer({ navigation }) {
             screenOptions={{
                 drawerLabelStyle: { display: 'none' },
                 headerTitle: 'Share Food',
-                headerLeftContainerStyle: { paddingLeft: 10 },
-                headerTitleStyle: { paddingLeft: 65 },
+                // headerLeftContainerStyle: { paddingLeft: 10 },
+                headerTitleStyle: {fontSize: 25 },
+                headerTitleAlign: 'center'
 
                 // headerStatusBarHeight: 100,
                 // headerShown: false,
@@ -154,15 +193,16 @@ export default function MyDrawer({ navigation }) {
                             <AntDesign
                                 name="home"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                Home
+                                {trans[language].HOME}
                             </Text>
                         </View>
                     ),
@@ -172,6 +212,7 @@ export default function MyDrawer({ navigation }) {
                 name="My Profile"
                 component={MyProfile}
                 options={{
+                    headerTitle: trans[language].MY_PROFILE,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -182,15 +223,16 @@ export default function MyDrawer({ navigation }) {
                             <AntDesign
                                 name="profile"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                My Profile
+                                {trans[language].MY_PROFILE}
                             </Text>
                         </View>
                     ),
@@ -200,6 +242,7 @@ export default function MyDrawer({ navigation }) {
                 name="My Mails"
                 component={MyMails}
                 options={{
+                    headerTitle: trans[language].MY_MAILS,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -210,15 +253,16 @@ export default function MyDrawer({ navigation }) {
                             <Fontisto
                                 name="email"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                My Mails
+                                {trans[language].MY_MAILS}
                             </Text>
                             <Text style={{
                                 borderColor: 'red',
@@ -234,6 +278,7 @@ export default function MyDrawer({ navigation }) {
                                 textAlignVertical: 'center',
                                 marginLeft: 5,
                                 marginBottom: 10,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                             }}>
                                 {mailsQuantity}
                             </Text>
@@ -245,6 +290,7 @@ export default function MyDrawer({ navigation }) {
                 name="My Settings"
                 component={MySettings}
                 options={{
+                    headerTitle: trans[language].MY_SETTINGS,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -255,15 +301,16 @@ export default function MyDrawer({ navigation }) {
                             <Feather
                                 name="settings"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                My Settings
+                                {trans[language].MY_SETTINGS}
                             </Text>
                         </View>
                     ),
@@ -273,6 +320,7 @@ export default function MyDrawer({ navigation }) {
                 name="Units Converter"
                 component={Conversions}
                 options={{
+                    headerTitle: trans[language].UNITS_CONVERTOR,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -283,15 +331,16 @@ export default function MyDrawer({ navigation }) {
                             <MaterialCommunityIcons
                                 name="scale-balance"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                Units Converter
+                                {trans[language].UNITS_CONVERTOR}
                             </Text>
                         </View>
                     ),
@@ -301,6 +350,7 @@ export default function MyDrawer({ navigation }) {
                 name="My Callendar"
                 component={MyCallendarStackScreen}
                 options={{
+                    headerTitle: trans[language].MY_CALENDAR,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -311,15 +361,16 @@ export default function MyDrawer({ navigation }) {
                             <AntDesign
                                 name="calendar"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                My Calendar
+                                {trans[language].MY_CALENDAR}
                             </Text>
                         </View>
                     ),
@@ -329,6 +380,7 @@ export default function MyDrawer({ navigation }) {
                 name="My Meals"
                 component={MyMealsStackScreen}
                 options={{
+                    headerTitle: trans[language].MY_MEALS,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -339,15 +391,16 @@ export default function MyDrawer({ navigation }) {
                             <MaterialIcons
                                 name="dinner-dining"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                My Meals
+                                {trans[language].MY_MEALS}
                             </Text>
                         </View>
                     ),
@@ -357,6 +410,7 @@ export default function MyDrawer({ navigation }) {
                 name="My Shop Lists"
                 component={MyShopLists}
                 options={{
+                    headerTitle: trans[language].MY_SHOP_LIST,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -367,15 +421,16 @@ export default function MyDrawer({ navigation }) {
                             <FontAwesome
                                 name="list"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                My Shop Lists
+                                {trans[language].MY_SHOP_LIST}
                             </Text>
                         </View>
                     ),
@@ -385,6 +440,7 @@ export default function MyDrawer({ navigation }) {
                 name="My Friends"
                 component={MyFriends}
                 options={{
+                    headerTitle: trans[language].MY_FRIENDS,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -395,15 +451,16 @@ export default function MyDrawer({ navigation }) {
                             <FontAwesome5
                                 name="user-friends"
                                 size={16}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                My Friends
+                                {trans[language].MY_FRIENDS}
                             </Text>
                         </View>
                     ),
@@ -413,6 +470,7 @@ export default function MyDrawer({ navigation }) {
                 name="Contact Us"
                 component={ContactUs}
                 options={{
+                    headerTitle: trans[language].CONTACT_US,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -423,15 +481,16 @@ export default function MyDrawer({ navigation }) {
                             <MaterialIcons
                                 name="connect-without-contact"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                Contact Us
+                                {trans[language].CONTACT_US}
                             </Text>
                         </View>
                     ),
@@ -441,6 +500,7 @@ export default function MyDrawer({ navigation }) {
                 name="Donate a Meal"
                 component={Donations}
                 options={{
+                    headerTitle: trans[language].DONATE_A_MEAL,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -451,15 +511,16 @@ export default function MyDrawer({ navigation }) {
                             <FontAwesome5
                                 name="donate"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                Donate a Meal
+                                {trans[language].DONATE_A_MEAL}
                             </Text>
                         </View>
                     ),
@@ -486,6 +547,7 @@ export default function MyDrawer({ navigation }) {
                 //     }
                 // }}
                 options={{
+                    headerTitle: trans[language].TELL_YOUR_FRIENS,
                     drawerIcon: ({ focused }) => (
                         <View>
                             <View
@@ -507,15 +569,16 @@ export default function MyDrawer({ navigation }) {
                                 <AntDesign
                                     name="sharealt"
                                     size={20}
-                                    style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                    style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                                 />
                                 <Text
                                     style={{
-                                        color: focused ? '#e32f45' : '#748c94',
+                                        color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                         fontSize: 12,
                                         marginLeft: 20,
                                     }}>
-                                    Tell Your Friends
+                                    {trans[language].TELL_YOUR_FRIENS}
                                 </Text>
                             </View>
                         </View>
@@ -542,6 +605,7 @@ export default function MyDrawer({ navigation }) {
                     navigation.navigate('Auth', { screen: 'LogIn' })
                 }}
                 options={{
+                    headerTitle: trans[language].LOG_OUT,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -552,15 +616,16 @@ export default function MyDrawer({ navigation }) {
                             <AntDesign
                                 name="logout"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                Log Out
+                                {trans[language].LOG_OUT}
                             </Text>
                         </View>
                     ),
@@ -570,6 +635,7 @@ export default function MyDrawer({ navigation }) {
                 name="Help"
                 component={Help}
                 options={{
+                    headerTitle: trans[language].HELP,
                     drawerIcon: ({ focused }) => (
                         <View
                             style={{
@@ -580,15 +646,16 @@ export default function MyDrawer({ navigation }) {
                             <Entypo
                                 name="help"
                                 size={20}
-                                style={{ color: focused ? '#e32f45' : '#748c94' }}
+                                style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                             />
                             <Text
                                 style={{
-                                    color: focused ? '#e32f45' : '#748c94',
+                                    color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                     fontSize: 12,
                                     marginLeft: 20,
                                 }}>
-                                Help
+                                {trans[language].HELP}
                             </Text>
                         </View>
                     ),
@@ -618,15 +685,16 @@ const MyMealsStackScreen = () => (
                         <MaterialIcons
                             name="dinner-dining"
                             size={20}
-                            style={{ color: focused ? '#e32f45' : '#748c94' }}
+                            style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                         />
                         <Text
                             style={{
-                                color: focused ? '#e32f45' : '#748c94',
+                                color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                 fontSize: 12,
                                 marginLeft: 20,
                             }}>
-                            My Meals
+                            {trans[language].MY_MEALS}My Meals
                         </Text>
                     </View>
                 ),
@@ -660,15 +728,16 @@ const MyCallendarStackScreen = () => (
                         <AntDesign
                             name="calendar"
                             size={20}
-                            style={{ color: focused ? '#e32f45' : '#748c94' }}
+                            style={{ color: focused ? '#e32f45' : GlobalStyles[theme].fontColor }}
                         />
                         <Text
                             style={{
-                                color: focused ? '#e32f45' : '#748c94',
+                                color: focused ? '#e32f45' : GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
                                 fontSize: 12,
                                 marginLeft: 20,
                             }}>
-                            My Calendar
+                            {trans[language].MY_CALENDAR}My Calendar
                         </Text>
                     </View>
                 ),

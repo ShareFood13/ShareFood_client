@@ -196,6 +196,10 @@ const MyBookStackScreen = () => (
             component={MyBook}
             initialParams={{ fromNewRecipe: false }}
             options={{
+                // headerTitleAlign: "center",
+                // headerTitle: 'test',
+                // headerShown: true,
+                // title: 'My Book',
                 tabBarIcon: ({ focused }) => (
                     <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                         <MaterialIcons
@@ -209,7 +213,6 @@ const MyBookStackScreen = () => (
                         </Text>
                     </View>
                 ),
-                title: 'My Book',
             }}
         />
         <MyBookStack.Screen

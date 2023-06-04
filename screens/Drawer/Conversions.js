@@ -8,6 +8,7 @@ import {
     TextInput,
     Alert,
     TouchableOpacity,
+    Dimensions
 } from 'react-native';
 
 import { SimpleLineIcons } from '@expo/vector-icons'
@@ -22,7 +23,9 @@ import uuid from 'react-native-uuid';
 import { ScrollView } from 'react-native-gesture-handler';
 import Banner from '../../components/Banner';
 import GlobalStyles from '../../GlobalStyles';
+import { SelectList } from 'react-native-dropdown-select-list';
 
+const windowWidth = Dimensions.get('window').width
 const mainColor = '#052F5F'
 
 const mass = [
@@ -190,29 +193,97 @@ const temperature = [
     },
 ];
 
+const massUnit = [
+    { key: '1', value: "Grams" },
+    { key: '2', value: "KiloGrams" },
+    { key: '3', value: "Onces" },
+    { key: '4', value: "Pounds" },
+]
+
+const volumeUnit = [
+    { key: '1', value: "MilliLiter" },
+    { key: '2', value: "Liter" },
+    { key: '3', value: "TeaSpoon" },
+    { key: '4', value: "TableSpoon" },
+    { key: '5', value: "Cup" },
+    { key: '6', value: "Onces" },
+    { key: '7', value: "Pint" },
+    { key: '8', value: "Gallon" },
+]
+
+const temperatureUnit = [
+    { key: '1', value: "Fahrenheit" },
+    { key: '2', value: "Celsius" },
+
+]
 const convert = ["C", "O", "N", "V", "E", "R", "T",]
 
-const ovenLevels = [
-    { level: 'Cool oven', imperial: '200 °F', metric: '90 °C' },
-    { level: 'Very slow oven', imperial: '250 °F', metric: '120 °C' },
-    { level: 'Slow oven', imperial: '300-325 °F', metric: '150-160 °C' },
-    { level: 'Moderately slow', imperial: '325-350 °F', metric: '160-180 °C' },
-    { level: 'Moderate oven', imperial: '350-375 °F', metric: '180-190 °C' },
-    { level: 'Moderately hot', imperial: '375-400 °F', metric: '190-200 °C' },
-    { level: 'Hot oven', imperial: '400-450 °F', metric: '200-230 °C' },
-    { level: 'Very hot oven', imperial: '450-500 °F', metric: '230-260 °C' },
-    { level: 'Fast oven', imperial: '450-500 °F', metric: '230-260 °C' },
-];
+const ovenLevels = {
+    en: [
+        { level: 'Cool oven', imperial: '200 °F', metric: '90 °C' },
+        { level: 'Very slow oven', imperial: '250 °F', metric: '120 °C' },
+        { level: 'Slow oven', imperial: '300-325 °F', metric: '150-160 °C' },
+        { level: 'Mod. slow', imperial: '325-350 °F', metric: '160-180 °C' },
+        { level: 'Moderate oven', imperial: '350-375 °F', metric: '180-190 °C' },
+        { level: 'Mod. hot', imperial: '375-400 °F', metric: '190-200 °C' },
+        { level: 'Hot oven', imperial: '400-450 °F', metric: '200-230 °C' },
+        { level: 'Very hot oven', imperial: '450-500 °F', metric: '230-260 °C' },
+        { level: 'Fast oven', imperial: '450-500 °F', metric: '230-260 °C' },
+    ],
+    he: [
+        { level: 'Cool oven', imperial: '200 °F', metric: '90 °C' },
+        { level: 'Very slow oven', imperial: '250 °F', metric: '120 °C' },
+        { level: 'Slow oven', imperial: '300-325 °F', metric: '150-160 °C' },
+        { level: 'Mod. slow', imperial: '325-350 °F', metric: '160-180 °C' },
+        { level: 'Moderate oven', imperial: '350-375 °F', metric: '180-190 °C' },
+        { level: 'Mod. hot', imperial: '375-400 °F', metric: '190-200 °C' },
+        { level: 'Hot oven', imperial: '400-450 °F', metric: '200-230 °C' },
+        { level: 'Very hot oven', imperial: '450-500 °F', metric: '230-260 °C' },
+        { level: 'Fast oven', imperial: '450-500 °F', metric: '230-260 °C' },
+    ]
+}
+
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
+import trans from '../../Language'
 
 export default function Conversions() {
     const [show, setShow] = useState('mass');
+    const [convertResult, setConvertResult] = useState()
     const [fromUnit, setFromUnit] = useState('');
     const [toUnit, setToUnit] = useState('');
     const [toUnitShow, setToUnitShow] = useState('');
     const [value, setValue] = useState(0);
     const [multi, setMulti] = useState(1);
-    const [theme,setTheme] = useState('stylesLight')
-
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
     const [test, setTest] = useState(1);
     var array = [];
     const handleChange = (text) => {
@@ -220,28 +291,11 @@ export default function Conversions() {
     };
 
     const handleButtonPress = (text) => {
-        if (text === 'mass') {
-            setShow('mass');
-            // setValue(0)
-            setMulti(1);
-            setFromUnit('');
-            setToUnitShow('');
-            setToUnit('');
-        } else if (text === 'volume') {
-            setShow('volume');
-            // setValue(0)
-            setMulti(1);
-            setFromUnit('');
-            setToUnitShow('');
-            setToUnit('');
-        } else {
-            setShow('temperature');
-            setMulti(1);
-            // setValue(0)
-            setFromUnit('');
-            setToUnitShow('');
-            setToUnit('');
-        }
+        setShow(text);
+        setMulti(1);
+        setFromUnit('');
+        setToUnitShow('');
+        setToUnit('');
     };
 
     const setFromUnitHandler = (text) => {
@@ -257,7 +311,6 @@ export default function Conversions() {
         }
         setFromUnit(text)
     }
-
     const setTo = (text) => {
         // if (show === "temperature") {
         //     if (text === 'Celsius') {
@@ -272,8 +325,8 @@ export default function Conversions() {
         setToUnit(`to${text}`);
     };
 
-
     const result = () => {
+        fromUnit
         const result =
             show === 'mass'
                 ? mass.filter((elem) => elem.unit === fromUnit)
@@ -283,20 +336,37 @@ export default function Conversions() {
         for (const [key, value] of Object.entries(result[0])) {
             array.push(key === toUnit && `${value}`);
         }
-        setMulti(array.filter((elem) => elem !== false));
+        // setMulti(array.filter((elem) => elem !== false));
         //Object.entries(obj)
-        setTest(array.filter((elem) => elem !== false));
+        // setTest(array.filter((elem) => elem !== false));
+        var multi2 = array.filter((elem) => elem !== false)
+
+        Number(multi2[0]) !== 1 &&
+            (show !== 'temperature'
+                ? setConvertResult((value * +multi2[0]).toFixed(3))
+                : toUnit === 'toCelsius'
+                    ? setConvertResult(((value - 32) * +multi2[0]).toFixed(3))
+                    : setConvertResult((value * +multi2[0] + 32).toFixed(3)))
     };
 
-
-
     return (
-        <View style={[styles.container, {backgroundColor: GlobalStyles[theme].background,}]}>
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background, }]}>
 
-            <Banner title="Units Convertor" />
+            {/* <Banner title={trans[language].UNITS_CONVERTOR} /> */}
 
             <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.switch}>
+                <View style={{
+                    flexDirection: 'row',
+                    width: '100%',
+                    height: 30,
+                    marginVertical: 15,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    alignSelf: 'center',
+                    borderRadius: 10,
+                    borderColor: 'orange',
+                    backgroundColor: '#ffcc80',
+                }}>
                     <View
                         style={{
                             flexDirection: 'row',
@@ -308,7 +378,7 @@ export default function Conversions() {
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                width: '33%',
+                                width: '33.33333%',
                                 height: 30,
                                 borderRadius: 10,
                                 borderColor: show === 'mass' ? 'orange' : '#ffcc80',
@@ -318,14 +388,14 @@ export default function Conversions() {
                                 // left: 0,
                             }}
                             onPress={() => handleButtonPress('mass')}>
-                            <Text>Mass</Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].MASS}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={{
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                width: '33%',
+                                width: '33.33333%',
                                 height: 30,
                                 borderRadius: 10,
                                 borderColor: show === 'volume' ? 'orange' : '#ffcc80',
@@ -335,14 +405,14 @@ export default function Conversions() {
                                 // right: '33%'
                             }}
                             onPress={() => handleButtonPress('volume')}>
-                            <Text>Volume</Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].VOLUME}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={{
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                width: '33%',
+                                width: '33.33333%',
                                 height: 30,
                                 borderRadius: 10,
                                 borderColor: show === 'temperature' ? 'orange' : '#ffcc80',
@@ -352,36 +422,97 @@ export default function Conversions() {
                                 // right: 0
                             }}
                             onPress={() => handleButtonPress('temperature')}>
-                            <Text>Temperature</Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].TEMPERATURE}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-                
+
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                     <View>
                         <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
                             <TextInput
+                                placeholder='0.000'
+                                placeholderTextColor={GlobalStyles[theme].fontColor}
                                 value={value}
                                 keyboardType={'numeric'}
                                 onChangeText={(text) => setValue(text)}
-                                style={{ backgroundColor: GlobalStyles[theme].paperColor, width: 80, height: 55, textAlign: 'center', fontSize: 18, marginRight: 20, borderRadius: 15, borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid' }}
+                                style={{
+                                    width: 100,
+                                    // height: 55, 
+                                    textAlign: 'center',
+                                    marginRight: 10,
+                                    // borderRadius: 10,
+                                    borderTopLeftRadius: 10,
+                                    borderWidth: 0.5,
+                                    borderStyle: 'solid',
+                                    fontSize: 18,
+                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                    borderColor: GlobalStyles[theme].borderColor,
+                                    color: GlobalStyles[theme].fontColor,
+                                }}
                             />
-                            <View style={{ borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid' }}>
+                            <View style={{
+                                borderColor: GlobalStyles[theme].borderColor,
+                                borderWidth: 0.5
+                            }}>
                                 <Picker
-                                    style={{ width: 150, height: 55, alignSelf: 'center', paddingLeft: 10, backgroundColor: GlobalStyles[theme].paperColor }}
+                                    style={{
+                                        width: 150,
+                                        height: 55,
+                                        alignSelf: 'center',
+                                        paddingLeft: 10,
+                                        color: GlobalStyles[theme].fontColor,
+                                        backgroundColor: GlobalStyles[theme].paperColor,
+                                    }}
                                     selectedValue={fromUnit}
                                     onValueChange={(text) => setFromUnitHandler(text)}>
-                                    <Picker.Item label="From..." value="From..." />
+                                    <Picker.Item label={trans[language].FROM + "..."}
+                                        value="From..."
+                                        color={GlobalStyles[theme].fontColor}
+                                        fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                        style={{
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            backgroundColor: GlobalStyles[theme].paperColor,
+                                            width: 150,
+                                        }}
+                                    />
                                     {show === 'mass'
                                         ? mass.map((elem) => (
-                                            <Picker.Item label={elem.unit} value={elem.unit} key={uuid.v4()} />
+                                            <Picker.Item
+                                                label={elem.unit}
+                                                value={elem.unit}
+                                                key={uuid.v4()}
+                                                color={GlobalStyles[theme].fontColor}
+                                                fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                style={{
+                                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                                }} />
                                         ))
                                         : show === 'volume'
                                             ? volume.map((elem) => (
-                                                <Picker.Item label={elem.unit} value={elem.unit} key={uuid.v4()} />
+                                                <Picker.Item
+                                                    label={elem.unit}
+                                                    value={elem.unit}
+                                                    key={uuid.v4()}
+                                                    color={GlobalStyles[theme].fontColor}
+                                                    fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                    style={{
+                                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                        backgroundColor: GlobalStyles[theme].paperColor
+                                                    }} />
                                             ))
                                             : temperature.map((elem) => (
-                                                <Picker.Item label={elem.unit} value={elem.unit} key={uuid.v4()} />
+                                                <Picker.Item
+                                                    label={elem.unit}
+                                                    value={elem.unit}
+                                                    key={uuid.v4()}
+                                                    color={GlobalStyles[theme].fontColor}
+                                                    fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                    style={{
+                                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                        backgroundColor: GlobalStyles[theme].paperColor
+                                                    }} />
                                             ))}
                                 </Picker>
                             </View>
@@ -390,92 +521,302 @@ export default function Conversions() {
                         <SimpleLineIcons
                             name="arrow-down-circle"
                             size={40}
-                            color={mainColor}
+                            color={GlobalStyles[theme].buttonColor}
                             style={{ alignSelf: 'center' }}
                         />
 
                         <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
                             <Text
-                                style={{ backgroundColor: GlobalStyles[theme].paperColor, width: 80, height: 55, textAlign: 'center', fontSize: 18, marginRight: 20, textAlignVertical: 'center', borderRadius: 15, borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid' }}>
-                                {show !== 'temperature'
+                                style={{
+                                    width: 100,
+                                    // height: 55, 
+                                    textAlign: 'center',
+                                    marginRight: 10,
+                                    textAlignVertical: 'center',
+                                    // borderRadius: 10,
+                                    borderBottomLeftRadius: 10,
+                                    borderWidth: 0.5,
+                                    borderStyle: 'solid',
+                                    fontSize: 18,
+                                    color: GlobalStyles[theme].fontColor,
+                                    borderColor: GlobalStyles[theme].borderColor,
+                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                {/* {multi !== 1 && (show !== 'temperature'
                                     ? (value * multi).toFixed(3)
                                     : toUnit === 'toCelsius'
                                         ? ((value - 32) * multi).toFixed(3)
-                                        : (value * multi + 32).toFixed(3)}
+                                        : (value * multi + 32).toFixed(3))} */}
+                                {convertResult}
                             </Text>
 
-                            <View style={{ borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid' }}>
+                            <View style={{ borderColor: GlobalStyles[theme].borderColor, borderWidth: 0.5 }}>
                                 <Picker
-                                    style={{ width: 150, height: 55, alignSelf: 'center', paddingLeft: 10, backgroundColor: GlobalStyles[theme].paperColor}}  selectedValue={toUnitShow}
+                                    style={{
+                                        width: 150,
+                                        height: 55,
+                                        alignSelf: 'center',
+                                        paddingLeft: 10,
+                                        color: GlobalStyles[theme].fontColor,
+                                        backgroundColor: GlobalStyles[theme].paperColor,
+                                    }}
+                                    selectedValue={toUnitShow}
                                     onValueChange={(text) => setTo(text)}>
-                                    <Picker.Item label="To..." value="To..." />
+                                    <Picker.Item
+                                        label={trans[language].TO + "..."}
+                                        value="To..."
+                                        color={GlobalStyles[theme].fontColor}
+                                        fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                        style={{
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            backgroundColor: GlobalStyles[theme].paperColor,
+                                            width: 150,
+                                        }} />
                                     {show === 'mass'
                                         ? mass.map((elem) => (
-                                            <Picker.Item label={elem.unit} value={elem.unit} key={uuid.v4()} />
+                                            <Picker.Item
+                                                value={elem.unit}
+                                                key={uuid.v4()}
+                                                color={GlobalStyles[theme].fontColor}
+                                                fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                style={{
+                                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                                }}
+                                            />
                                         ))
                                         : show === 'volume'
                                             ? volume.map((elem) => (
-                                                <Picker.Item label={elem.unit} value={elem.unit} key={uuid.v4()} />
+                                                <Picker.Item
+                                                    label={elem.unit}
+                                                    value={elem.unit}
+                                                    key={uuid.v4()}
+                                                    color={GlobalStyles[theme].fontColor}
+                                                    fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                    style={{
+                                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                        backgroundColor: GlobalStyles[theme].paperColor
+                                                    }}
+                                                />
                                             ))
                                             : temperature.map((elem) => (
-                                                <Picker.Item label={elem.unit} value={elem.unit} key={uuid.v4()} />
+                                                <Picker.Item label={elem.unit}
+                                                    value={elem.unit}
+                                                    key={uuid.v4()}
+                                                    color={GlobalStyles[theme].fontColor}
+                                                    fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                    style={{
+                                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                        backgroundColor: GlobalStyles[theme].paperColor
+                                                    }}
+                                                />
                                             ))}
                                 </Picker>
+                                {/* {show === 'mass'
+                                    ? <SelectList
+                                        setSelected={(text) => setTo(text)}
+                                        data={massUnit}
+                                        // placeholder={toUnitShow === "" ? "To..." : toUnitShow}
+                                        placeholder="To..."
+                                        save="value"
+                                        inputStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
+                                        dropdownTextStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
+                                        boxStyles={{
+                                            width: 150,
+                                            // height: 55,
+                                            borderWidth: 0.5,
+                                            borderStyle: 'solid',
+                                            borderColor: 'black',
+                                            // marginRight: 20,
+                                            backgroundColor: GlobalStyles[theme].paperColor,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+
+                                        }}
+                                        dropdownItemStyles={{
+                                            width: 150,
+                                            // marginBottom: 10,
+                                        }}
+                                        dropdownStyles={{
+                                            width: 150,
+                                            alignSelf: 'center',
+                                            backgroundColor: 'white',
+                                            position: 'absolute',
+                                            elevation: 10,
+                                            zIndex: 10,
+                                            top: 40,
+                                        }}
+                                    />
+                                    : show === 'volume'
+                                        ? <SelectList
+                                            setSelected={(text) => setTo(text)}
+                                            data={volumeUnit}
+                                            placeholder="To..."
+                                            save="value"
+                                            inputStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
+                                            dropdownTextStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
+                                            boxStyles={{
+                                                width: 150,
+                                                borderWidth: 0.5,
+                                                borderStyle: 'solid',
+                                                borderColor: 'black',
+                                                backgroundColor: GlobalStyles[theme].paperColor,
+                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+
+                                            }}
+                                            dropdownItemStyles={{
+                                                width: 150,
+                                                // marginBottom: 10,
+                                            }}
+                                            dropdownStyles={{
+                                                width: 150,
+                                                alignSelf: 'center',
+                                                backgroundColor: 'white',
+                                                position: 'absolute',
+                                                elevation: 10,
+                                                zIndex: 10,
+                                                top: 40,
+                                            }}
+                                        />
+                                        : <SelectList
+                                            setSelected={(text) => setTo(text)}
+                                            data={temperatureUnit}
+                                            placeholder="To..."
+                                            save="value"
+                                            inputStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
+                                            dropdownTextStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
+                                            boxStyles={{
+                                                width: 150,
+                                                borderWidth: 0.5,
+                                                borderStyle: 'solid',
+                                                borderColor: 'black',
+                                                backgroundColor: GlobalStyles[theme].paperColor,
+                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+
+                                            }}
+                                            dropdownItemStyles={{
+                                                width: 150,
+                                                // marginBottom: 10,
+                                            }}
+                                            dropdownStyles={{
+                                                width: 150,
+                                                alignSelf: 'center',
+                                                backgroundColor: 'white',
+                                                position: 'absolute',
+                                                elevation: 10,
+                                                zIndex: 10,
+                                                top: 40,
+                                            }}
+                                        />} */}
                             </View>
                         </View>
                     </View>
                     <TouchableOpacity onPress={() => result()} style={{
-                        width: 40, height: 160, backgroundColor: GlobalStyles[theme].buttonColor, marginLeft: 30, justifyContent: 'center', borderRadius: 15,
-                        borderColor: 'black', borderWidth: 1, borderStyle: 'solid'
-                    }}>
-                        {convert.map(elem => <Text key={uuid.v4()} style={{ fontSize: 14, fontWeight: 'bold', color: 'white', width: '100%', textAlign: 'center' }}>{elem}</Text>)}
+                        // width: 40, 
+                        // height: 160, 
+                        marginLeft: 10,
+                        padding: 20,
+                        justifyContent: 'center',
+                        borderBottomRightRadius:10,
+                        borderTopRightRadius: 10,
+                        borderWidth: 0.5,
+                        borderStyle: 'solid',
+                        backgroundColor: (fromUnit !== "" && toUnit !== "") ? GlobalStyles[theme].buttonColor : '#ddd',
+                        borderColor: GlobalStyles[theme].borderColor,
+                    }}
+                        disabled={(fromUnit !== "" && toUnit !== "") ? false : true}>
+                        {convert.map(elem =>
+                            <Text key={uuid.v4()}
+                                style={{
+                                    // fontWeight: 'bold',
+                                    width: '100%',
+                                    textAlign: 'center',
+                                    fontSize: 14.2,
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                {elem}
+                            </Text>)}
                     </TouchableOpacity>
                 </View>
 
                 <View style={{
-                    alignSelf: 'center',
-                    borderStyle: 'solid',
-                    borderColor: 'black',
-                    borderWidth: 0.5,
                     width: '100%',
                     marginTop: 15,
-                    backgroundColor: GlobalStyles[theme].paperColor
+                    alignSelf: 'center',
+                    borderStyle: 'solid',
+                    borderWidth: 0.5,
+                    borderColor: GlobalStyles[theme].borderColor,
+                    backgroundColor: GlobalStyles[theme].paperColor,
                 }}>
                     <DataTable style={{ width: '100%' }}>
-                        <DataTable.Header style={{ width: '100%' }}>
-                            <DataTable.Title textStyle={{ fontSize: 15, fontWeight: 'bold' }}>
-                                Oven Level
+                        <DataTable.Header style={{
+                            width: '100%',
+                            borderBottomColor: GlobalStyles[theme].borderColor,
+                            borderBottomWidth: 0.5,
+                        }}>
+                            <DataTable.Title textStyle={{
+                                fontSize: 15,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                                {trans[language].OVEN_LEVEL}
                             </DataTable.Title>
                             <DataTable.Title
                                 style={{ flexDirection: 'row', justifyContent: 'center' }}
-                                textStyle={{ fontSize: 15, fontWeight: 'bold' }}>
-                                Fahrenheit
+                                textStyle={{
+                                    fontSize: 15,
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                {trans[language].FAHRENHEIT}
                             </DataTable.Title>
                             <DataTable.Title
                                 style={{ flexDirection: 'row', justifyContent: 'center' }}
-                                textStyle={{ fontSize: 15, fontWeight: 'bold' }}>
-                                Celsius
+                                textStyle={{
+                                    fontSize: 15,
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                {trans[language].CELSIUS}
                             </DataTable.Title>
                         </DataTable.Header>
 
-                        <View style={{ width: '100%' }}>
-                            {ovenLevels.map((level) => (
-                                <DataTable.Row key={uuid.v4()} >
-                                    <DataTable.Cell >{level.level}</DataTable.Cell>
-                                    <DataTable.Cell
-                                        style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                                        {level.imperial}
-                                    </DataTable.Cell>
-                                    <DataTable.Cell
-                                        style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                                        {level.metric}
-                                    </DataTable.Cell>
-                                </DataTable.Row>
-                            ))}
-                        </View>
+                        {ovenLevels[language].map((level) => (
+                            <DataTable.Row key={uuid.v4()}
+                                style={{
+                                    borderBottomColor: GlobalStyles[theme].borderColor,
+                                    borderBottomWidth: 0.5,
+                                }}>
+                                <DataTable.Cell
+                                    textStyle={{
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }}
+                                    style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
+                                    {level.level}
+                                </DataTable.Cell>
+                                <DataTable.Cell
+                                    textStyle={{
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }}
+                                    style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                                    {level.imperial}
+                                </DataTable.Cell>
+                                <DataTable.Cell
+                                    textStyle={{
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }}
+                                    style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                                    {level.metric}
+                                </DataTable.Cell>
+                            </DataTable.Row>
+                        ))}
                     </DataTable>
                 </View>
-            </ScrollView>
+            </ScrollView >
         </View >
     );
 }
@@ -486,26 +827,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignContent: 'center',
         padding: 10,
-    },
-    paragraph: {
-        margin: 24,
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    switch: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        alignSelf: 'center',
-        width: '100%',
-        height: 30,
-        marginVertical: 15,
-        borderRadius: 10,
-        borderColor: 'orange',
-        // borderWidth: 0.5,
-        backgroundColor: '#ffcc80',
-        // opacity: 0.2,
-        // position: 'relative'
-    },
+    }
 });

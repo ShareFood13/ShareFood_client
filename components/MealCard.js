@@ -58,25 +58,59 @@ const logos = [
     // { name: "Wheat Free2", image: require('../assets/images/logo/wheatFree2.png') },
 ]
 
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../GlobalFontStyles';
+import trans from '../Language'
+
 export default function MealCard({ meal, navigation, openMeal, remove, editMeal, delMeal }) {
-const [theme, setTheme] = useState('stylesLight')
+    const [modalAlert, setModalAlert] = useState(false)
+    const [mealDelete, setMealDelete] = useState({})
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
     return (
         <View
             style={{
                 flexDirection: 'row',
+                width: '100%',
+                height: 90,
                 justifyContent: 'space-between',
                 alignSelf: 'center',
                 alignItems: 'center',
-                width: windowWidth - 20,
+                paddingHorizontal: 10,
                 marginBottom: 10,
-                height: 90,
                 borderWidth: 0.5,
                 borderStyle: 'solid',
-                borderColor: 'black',
-                backgroundColor: GlobalStyles[theme].paperColor,
                 borderRadius: 10,
-                paddingHorizontal: 10
+                borderColor: GlobalStyles[theme].borderColor,
+                backgroundColor: GlobalStyles[theme].paperColor,
             }}>
 
             <TouchableOpacity
@@ -84,39 +118,97 @@ const [theme, setTheme] = useState('stylesLight')
                 style={{ width: '90%', height: '75%', }}
             >
                 <View>
-                    <Text style={{ fontSize: 16, fontWeight: '700' }}>{meal?.mealName} </Text>
-                    <Text style={[styles.outputTags, { width: '100%' }]} >
-                        {/* <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}> */}
-                        {meal?.tags?.map(item => <Text key={uuid.v4()}>{item}, </Text>)}
-                        {/* </ScrollView> */}
-                        {/* <FlatList
-                                data={meal?.tags}
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                renderItem={({ item }) => {
-                                    return <Text>{item}, </Text>
-                                }}
-                                keyExtractor={item => item + uuid.v4()}
-                            // extraData={selectedId}
-                            /> */}
+                    <Text style={{
+                        fontSize: 16,
+                        color: GlobalStyles[theme].fontColor,
+                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                    }}>
+                        {meal?.mealName}
                     </Text>
+                    <View style={[{ width: '100%', flexDirection: 'row', fontFamily: GlobalFontStyles[fontStyle].fontStyle }]} >
+                        {meal?.tags?.map(item => <Text key={uuid.v4()} style={{
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>{item}, </Text>)}
+                    </View>
                 </View>
             </TouchableOpacity>
 
             <View style={{ height: 60, justifyContent: 'space-between', }}>
                 <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => editMeal(meal)}>
-                    <Feather name="edit-3" size={24} color="black" />
+                    <Feather name="edit-3" size={24} color={GlobalStyles[theme].fontColor} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => Alert.alert(
-                    'Are you sure???',
-                    'You are permantly deleting this meal from your meals!!!',
-                    [
-                        { text: "Cancel", },
-                        { text: "Delete", onPress: () => delMeal(meal) }
-                    ])}>
-                    <AntDesign name="delete" size={24} color="black" />
+                <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => { setModalAlert(true); setMealDelete(meal) }}>
+                    <AntDesign name="delete" size={24} color={GlobalStyles[theme].fontColor} />
                 </TouchableOpacity>
             </View>
+
+            {/* // Modal Alert// */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalAlert}>
+
+                <View style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <View style={[{
+                        width: 350,
+                        maxHeight: 400,
+                        alignItems: "flex-start",
+                        padding: 30,
+                        borderWidth: 0.5,
+                        borderRadius: 10,
+                        elevation: 5,
+                    }, {
+                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: GlobalStyles[theme].paperColor
+                    }]}>
+                        <View>
+                            <Text style={{
+                                fontSize: 16,
+                                marginBottom: 10,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor,
+                            }}>
+                                {trans[language].ARE_YOU_SURE}
+                            </Text>
+                            <Text style={{
+                                fontSize: 16,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor,
+                            }}>
+                                {trans[language].PERMANTLY_DELETING}
+                            </Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', width: "100%", justifyContent: "space-around", marginTop: 20 }}>
+                            <TouchableOpacity
+                                onPress={() => delMeal(meal)}>
+                                <Text style={{
+                                    color: GlobalStyles[theme].buttonColor,
+                                    fontSize: 16,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {trans[language].DELETE}
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => { setModalAlert(false); setMealDelete({}) }}>
+                                <Text style={{
+                                    color: GlobalStyles[theme].buttonColor,
+                                    fontSize: 16,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {trans[language].CANCEL}
+                                </Text>
+                            </TouchableOpacity>
+
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
         </View>
     )
@@ -127,17 +219,12 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        width: "100%"
+        width: "100%",
     },
     image: {
         borderRadius: 10,
         borderWidth: 1,
         borderStyle: 'solid',
-    },
-    left: {
-        justifyContent: 'space-around',
-        width: "60%",
-        height: "100%"
     },
     recipeCard: {
         width: "90%",
@@ -157,10 +244,5 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.25,
         shadowRadius: 4,
-    },
-    subCard: {
-        flexDirection: "row",
-        width: "98%",
-        justifyContent: 'space-between'
     },
 })

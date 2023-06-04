@@ -26,7 +26,22 @@ import Banner from '../../components/Banner';
 import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
 import GlobalStyles from '../../GlobalStyles';
-
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
+import trans from '../../Language'
 
 export default function MyShopLists({ navigation }) {
     const dispatch = useDispatch()
@@ -35,8 +50,22 @@ export default function MyShopLists({ navigation }) {
 
     const [userId, setUserId] = useState("")
     const [popupModal, setPopupModal] = useState(false)
-    const [theme, setTheme] = useState('stylesLight')
-
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
     useEffect(() => {
         if (redux?.shopList.message !== "") {
@@ -60,8 +89,6 @@ export default function MyShopLists({ navigation }) {
     const openShopList = (list) => {
         navigation.push('ShowShopList', { openShopList: list })
         // navigation.navigate('Main', { screen: 'ShowShopList', params: { openShopList: list } })
-        // navigation.navigate('Main', { screen: 'ShowShopList', params: { openShopList: list } })
-
     }
 
     const ItemSeparatorView = () => {
@@ -69,34 +96,37 @@ export default function MyShopLists({ navigation }) {
             // Flat List Item Separator
             <View
                 style={{
-                    height: 1,
-                    width: '90%',
-                    backgroundColor: '#C8C8C8',
+                    height: 2,
+                    width: '100%',
+                    backgroundColor: GlobalStyles[theme].fontColor,
                     alignSelf: 'center'
                 }}
             />
         );
     };
-    console.log("redux.shopList.shopLists", redux.shopList.shopLists)
+
     return (
         <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
-            {/* <Header /> */}
-            <Banner title="My Shop Lists" />
+
+            {/* <Banner title={trans[language].MY_SHOP_LIST} /> */}
+
             <FlatList
                 data={redux.shopList.shopLists}
                 showsVerticalScrollIndicator={false}
-                style={{ width: '100%', marginBottom: 120 }}
+                style={{ width: '100%', height: "100%"}}
                 // ListHeaderComponent={<Header />}
                 ItemSeparatorComponent={ItemSeparatorView}
-
+                contentContainerStyle={{ flex: 1, justifyContent: 'center', alignContent: 'center' }}
                 renderItem={({ item, index }) =>
                     <TouchableOpacity style={[{
                         flexDirection: 'row',
-                        height: 35,
+                        height: 40,
                         width: "100%",
                         justifyContent: 'center',
                         alignSelf: 'center',
                         alignItems: 'center',
+                        borderWidth: 0.5,
+                        borderColor: GlobalStyles[theme].borderColor,
                         backgroundColor: GlobalStyles[theme].paperColor,
                         // {index} === 0)&& borderTopLeftRadius:  10,
                         // borderTopRightRadius: ({index} === 0) && 10,
@@ -115,7 +145,12 @@ export default function MyShopLists({ navigation }) {
                     ]}
                         // onPress={() => setChecked(!checked)}>
                         onPress={() => openShopList(item)}>
-                        <Text>{item.shopListName} - {index}</Text>
+                        <Text style={{
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {item.shopListName}
+                        </Text>
                     </TouchableOpacity>}
                 keyExtractor={item => item._id}
             // extraData={selectedId}

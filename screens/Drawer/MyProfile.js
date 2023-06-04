@@ -6,10 +6,8 @@ import { Context } from "../../context/UserContext";
 import {
     View,
     Text,
-    Button,
     StyleSheet,
     TextInput,
-    TouchableWithoutFeedback,
     TouchableOpacity,
     KeyboardAvoidingView,
     Keyboard,
@@ -25,7 +23,7 @@ import {
     ImageBackground
 } from 'react-native'
 
-import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, FontAwesome } from '@expo/vector-icons';
+import { Entypo, EvilIcons, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 
 import * as ImagePicker from 'expo-image-picker';
 
@@ -145,6 +143,24 @@ const initialState = {
     },
 };
 
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
+import trans from '../../Language'
+import GlobalTextStyles from '../../GlobalTextStyles';
+
 export default MyProfile = ({ navigation }) => {
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
@@ -156,8 +172,30 @@ export default MyProfile = ({ navigation }) => {
     const [show, setShow] = useState("Public")
     const [refreshing, setRefreshing] = useState(false)
     const [popupModal, setPopupModal] = useState(false)
+    const [modalVisible, setModalVisible] = useState(false)
+    const [modalVisible2, setModalVisible2] = useState(false)
+    const [modalVisible3, setModalVisible3] = useState(false)
+    const [modalVisible4, setModalVisible4] = useState(false)
+    const [modalVisible5, setModalVisible5] = useState(false)
     const [theme, setTheme] = useState('stylesLight')
+    const [searchResult, setSearchResult] = useState([])
 
+    const [language, setLanguage] = useState("en")
+    const [text, setText] = useState("en")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
 
     const isFocused = useIsFocused()
     const dispatch = useDispatch()
@@ -208,7 +246,7 @@ export default MyProfile = ({ navigation }) => {
         })
 
         sortList.map((item, i) => {
-            if (item.idd.suffixes !== undefined) {
+            if (item.idd.suffixes !== undefined && i < 250) {
                 countries.push({
                     key: i,
                     value: item.name.common,
@@ -216,8 +254,9 @@ export default MyProfile = ({ navigation }) => {
                 })
             }
         })
+
         sortList.forEach((item, i) => {
-            if (item.idd.suffixes !== undefined) {
+            if (item.idd.suffixes !== undefined && i < 250) {
                 countryCodes.push({
                     key: i,
                     value: item.altSpellings[0] + " " + item.idd.root + item.idd.suffixes[0]
@@ -274,6 +313,7 @@ export default MyProfile = ({ navigation }) => {
     };
 
     const handleChange = (inputName, text) => {
+        console.log(inputName, text)
         if (inputName === "countryCode" || inputName === "phoneNumber") {
             setProfileForm({ ...profileForm, phone: { ...profileForm?.phone, [inputName]: text } });
         } else if (inputName === "address" || inputName === "addNumber" || inputName === "country" || inputName === "zipCode") {
@@ -285,6 +325,12 @@ export default MyProfile = ({ navigation }) => {
         } else {
             setProfileForm({ ...profileForm, [inputName]: text });
         }
+        setModalVisible(false)
+        setModalVisible2(false)
+        setModalVisible3(false)
+        setModalVisible4(false)
+        setModalVisible5(false)
+        setSearchResult([])
 
     };
 
@@ -329,6 +375,26 @@ export default MyProfile = ({ navigation }) => {
         setProfileForm({ ...profileForm, [formTypeInput]: info });
     };
 
+    const modalSearch = (name, text) => {
+        console.log(name, text)
+        switch (name) {
+            case "gender":
+                setSearchResult(gender.filter(item => item.label.toLowerCase().includes(text.toLowerCase())))
+                return
+            case "country":
+                setSearchResult(countries.filter(item => item.value.toLowerCase().includes(text.toLowerCase())))
+                return
+            case "countryCode":
+                setSearchResult(countryCodes.filter(item => item.value.toLowerCase().includes(text.toLowerCase())))
+                return
+            case "dietaryRestrictions":
+                setSearchResult(dietaryRestrictions.filter(item => item.value.toLowerCase().includes(text.toLowerCase())))
+                return
+            default:
+                return state;
+        }
+    }
+    // console.log(searchResult)
     return (
         <KeyboardAvoidingView
             // style={styles.container}
@@ -353,20 +419,37 @@ export default MyProfile = ({ navigation }) => {
                     />}>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
 
-                    <Banner title="My Profile" />
+                    {/* <Banner title={trans[language].MY_PROFILE} /> */}
 
                     <ImageBackground
                         // source={require('../../assets/images/menu-bg.jpeg')}
                         // source={{ uri: redux?.auth?.authData?.result?.profile?.backgroundPicture }}
                         // source={userContext?.backgroundPicture ? { uri: userContext?.backgroundPicture } : require('../../assets/images/menu-bg.jpeg')}
                         source={{ uri: profileForm?.backgroundPicture?.base64 }}
-                        style={{ marginBottom: 0, width: '100%', height: 150, alignSelf: 'center', justifyContent: 'center', borderColor: 'black', borderWidth: 0.5 }}>
+                        style={{
+                            marginBottom: 0,
+                            width: '100%',
+                            height: 150,
+                            alignSelf: 'center',
+                            justifyContent: 'center',
+                            borderColor: GlobalStyles[theme].borderColor,
+                            backgroundColor: GlobalStyles[theme].paperColor,
+                            borderWidth: 0.5
+                        }}>
                         <Image
                             // source={require("../../assets/images/user-profile.jpeg")}
                             // source={{ uri: redux?.auth?.authData?.result?.profile?.profilePicture }}
                             // source={userContext?.profilePicture ? { uri: userContext?.profilePicture } : require("../../assets/images/user-profile.jpeg")}
                             source={{ uri: profileForm?.profilePicture?.base64 }}
-                            style={{ height: 90, width: 90, borderRadius: 45, marginLeft: 30, borderColor: 'black', borderWidth: 0.5 }}
+                            style={{
+                                height: 90,
+                                width: 90,
+                                borderRadius: 45,
+                                marginLeft: 30,
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                borderWidth: 0.5,
+                            }}
                         />
                         <TouchableOpacity onPress={() => pickImageAsync('profilePicture')} style={{ flexDirection: 'row', position: 'absolute', zIndex: 5, elevation: 5, left: 90, top: 90 }}>
                             <FontAwesome name="camera-retro" size={30} color="black" style={{ width: 32, height: 30, textAlign: 'center', backgroundColor: 'white' }} />
@@ -376,29 +459,50 @@ export default MyProfile = ({ navigation }) => {
                         </TouchableOpacity>
                     </ImageBackground>
 
-                    <View style={{ flexDirection: 'row', height: 35, width: '100%', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-                        <Text>Name:</Text>
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
                         <Text style={{
-                            width: '34%',
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: GlobalStyles[theme].fontColor
+                        }}>
+                            {trans[language].NAME}:
+                        </Text>
+                        <Text style={{
+                            width: '33%',
                             height: '100%',
                             textAlignVertical: 'center',
                             paddingLeft: 10,
-                            backgroundColor: GlobalStyles[theme].paperColor,
                             borderRadius: 10,
-
+                            marginLeft: 5,
+                            backgroundColor: GlobalStyles[theme].paperColor,
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
                         }}>
                             {profileForm?.name?.split(" ")[0]}
                         </Text>
 
-                        <Text>Surname:</Text>
                         <Text style={{
-                            width: '34%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].SURNAME}:
+                        </Text>
+                        <Text style={{
+                            width: '33%',
                             height: '100%',
                             textAlignVertical: 'center',
                             paddingLeft: 10,
-                            backgroundColor: GlobalStyles[theme].paperColor,
                             borderRadius: 10,
-                            marginLeft: 5
+                            marginLeft: 5,
+                            backgroundColor: GlobalStyles[theme].paperColor,
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
                         }}>
                             {profileForm?.name?.split(" ")[1]}
                         </Text>
@@ -420,15 +524,22 @@ export default MyProfile = ({ navigation }) => {
                             justifyContent: 'space-between',
                             marginTop: 10
                         }}>
-                            <Text style={{ width: '30%' }}>BirthDate:</Text>
+                            <Text style={{
+                                width: '30%',
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                                {trans[language].BIRTHDATE}:
+                            </Text>
                             <Text style={{
                                 width: '70%',
                                 height: '100%',
                                 textAlignVertical: 'center',
                                 paddingLeft: 10,
-                                backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
-                                // 
+                                color: GlobalStyles[theme].fontColor,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}>
                                 {profileForm?.birthDate}</Text>
                         </View>
@@ -442,15 +553,22 @@ export default MyProfile = ({ navigation }) => {
                         justifyContent: 'space-between',
                         marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>UserName:</Text>
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].USER_NAME}:
+                        </Text>
                         <Text style={{
                             width: '70%',
                             height: '100%',
                             textAlignVertical: 'center',
                             paddingLeft: 10,
-                            backgroundColor: GlobalStyles[theme].paperColor,
                             borderRadius: 10,
-                            // 
+                            color: GlobalStyles[theme].fontColor,
+                            backgroundColor: GlobalStyles[theme].paperColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
                         }}>
                             {userData?.userUserName}</Text>
                         {/* {userContext?.userName}</Text> */}
@@ -462,37 +580,34 @@ export default MyProfile = ({ navigation }) => {
                         width: '100%',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginTop: 15
+                        marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>Gender: </Text>
-                        <SelectList
-                            setSelected={(val) => handleChange('gender', val)}
-                            data={gender}
-                            placeholder={profileForm?.gender}
-                            save="value"
-                            boxStyles={{
-                                width: windowWidth * 0.66,
-                                borderWidth: 0,
-                                borderBottomWidth: 2,
-                                borderStyle: 'solid',
-                                borderColor: 'black',
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].GENDER}:
+                        </Text>
+                        <TouchableOpacity onPress={() => setModalVisible(true)}
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                borderRadius: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
-
-                            }}
-                            dropdownItemStyles={{
-                                width: windowWidth * 0.66,
-                                // marginBottom: 10,
-                            }}
-                            dropdownStyles={{
-                                width: windowWidth * 0.66,
-                                alignSelf: 'center',
-                                backgroundColor: 'white',
-                                position: 'absolute',
-                                elevation: 10,
-                                zIndex: 10,
-                                top: 40
-                            }}
-                        />
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                            <Text style={{
+                                textAlign: 'left',
+                                paddingLeft: 10,
+                                textAlignVertical: 'center',
+                                height: "100%",
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {profileForm?.gender ? profileForm?.gender : trans[language].GENDER}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
 
                     <View style={{
@@ -501,9 +616,15 @@ export default MyProfile = ({ navigation }) => {
                         width: '100%',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginTop: 15
+                        marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>E-mail:</Text>
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].EMAIL}:
+                        </Text>
                         <TextInput
                             style={{
                                 width: '70%',
@@ -512,6 +633,8 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             // value={profileForm?.email}
                             // defaultValue={userData?.userEmail}
@@ -527,8 +650,16 @@ export default MyProfile = ({ navigation }) => {
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         marginTop: 10,
+                        color: GlobalStyles[theme].fontColor,
+                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
                     }}>
-                        <Text style={{ width: '17%' }}>Address:</Text>
+                        <Text style={{
+                            width: '17%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].ADDRESS}:
+                        </Text>
                         <TextInput
                             keyboardType='ascii-capable'
                             style={{
@@ -538,12 +669,15 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.fullAddress?.address}
                             onChangeText={(text) => handleChange('address', text)}
                         />
                         <TextInput
-                            placeholder='num'
+                            placeholder={trans[language].NUM}
+                            placeholderTextColor={GlobalStyles[theme].fontColor}
                             keyboardType='numeric'
                             style={{
                                 width: '12%',
@@ -552,7 +686,9 @@ export default MyProfile = ({ navigation }) => {
                                 paddingHorizontal: 5,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
-                                textAlign: 'center'
+                                textAlign: 'center',
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.fullAddress?.addNumber}
                             onChangeText={(text) => handleChange('addNumber', text)}
@@ -561,43 +697,47 @@ export default MyProfile = ({ navigation }) => {
 
                     <View style={{
                         flexDirection: 'row',
-                        height: 35,
+                        minHeight: 35,
                         width: '100%',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginTop: 15
+                        marginTop: 10
                     }}>
-                        <Text style={{ width: '17%' }}>Country:</Text>
-                        <SelectList
-                            setSelected={(val) => handleChange('country', val)}
-                            data={countries}
-                            placeholder={profileForm?.fullAddress?.country ? profileForm?.fullAddress?.country : "Country"}
-                            save="value"
-                            inputStyles={{ height: 20 }}
-                            boxStyles={{
-                                width: 180,
-                                borderWidth: 0,
-                                borderBottomWidth: 2,
-                                borderStyle: 'solid',
-                                borderColor: 'black',
+                        <Text style={{
+                            width: '17%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].COUNTRY}:
+                        </Text>
+                        <TouchableOpacity onPress={() => setModalVisible2(true)}
+                            style={{
+                                width: '50%',
+                                minHeight: 35,
+                                borderRadius: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
-                                // height: 40,
-                            }}
-                            dropdownItemStyles={{
-                                width: 300,
-                                marginBottom: 10,
-                            }}
-                            dropdownStyles={{
-                                width: windowWidth * 0.80,
-                                backgroundColor: 'white',
-                                position: 'absolute',
-                                elevation: 10,
-                                zIndex: 10,
-                                top: 40,
-                                left: -25
-                            }}
-                        />
-                        <Text style={{ width: '10%' }}>ZIP:</Text>
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                            <Text style={{
+                                textAlign: 'left',
+                                minHeight: 35,
+                                paddingLeft: 10,
+                                paddingVertical: 5,
+                                textAlignVertical: 'center',
+                                // height: "100%",
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {profileForm?.fullAddress?.country ? profileForm?.fullAddress?.country : trans[language].COUNTRY}
+                            </Text>
+                        </TouchableOpacity>
+                        <Text style={{
+                            width: '10%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].ZIP}:
+                        </Text>
                         <TextInput
                             keyboardType='numeric'
                             style={{
@@ -608,6 +748,8 @@ export default MyProfile = ({ navigation }) => {
                                 // paddingLeft: 10, 
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.fullAddress?.zipCode}
                             onChangeText={(text) => handleChange('zipCode', text)}
@@ -620,14 +762,47 @@ export default MyProfile = ({ navigation }) => {
                         width: '100%',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginTop: 20
+                        marginTop: 10,
                     }}>
-                        <Text style={{ width: '28%' }}>Phone Number:</Text>
-                        <SelectList
+                        <Text style={{
+                            width: '28%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].PHONE_NUMBER}:
+                        </Text>
+                        <TouchableOpacity onPress={() => setModalVisible3(true)}
+                            style={{
+                                width: '40%',
+                                height: '100%',
+                                borderRadius: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                            <Text style={{
+                                textAlign: 'left',
+                                paddingLeft: 10,
+                                textAlignVertical: 'center',
+                                height: "100%",
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {profileForm?.phone?.countryCode ? profileForm?.phone?.countryCode : trans[language].COUNTRY_CODE}
+                            </Text>
+                        </TouchableOpacity>
+                        {/* <SelectList
                             setSelected={(val) => handleChange('countryCode', val)}
                             data={countryCodes}
-                            placeholder={profileForm?.phone?.countryCode ? profileForm?.phone?.countryCode : "Country Code"}
+                            placeholder={profileForm?.phone?.countryCode ? profileForm?.phone?.countryCode : trans[language].COUNTRY_CODE}
                             save="value"
+                            inputStyles={{
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor,
+                            }}
+                            dropdownTextStyles={{
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor,
+                            }}
                             boxStyles={{
                                 width: 150,
                                 borderWidth: 0,
@@ -635,10 +810,12 @@ export default MyProfile = ({ navigation }) => {
                                 borderStyle: 'solid',
                                 borderColor: 'black',
                                 backgroundColor: GlobalStyles[theme].paperColor,
+                                color: GlobalStyles[theme].fontColor,
                                 // height: 35
                             }}
                             dropdownItemStyles={{
                                 width: 150,
+                                color: GlobalStyles[theme].fontColor,
                                 // marginBottom: 10,
                             }}
                             dropdownStyles={{
@@ -650,7 +827,7 @@ export default MyProfile = ({ navigation }) => {
                                 top: 40,
                                 // left: -25
                             }}
-                        />
+                        />*/}
                         <TextInput
                             keyboardType='numeric'
                             style={{
@@ -661,6 +838,8 @@ export default MyProfile = ({ navigation }) => {
                                 // paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.phone?.phoneNumber}
                             onChangeText={(text) => handleChange('phoneNumber', text)}
@@ -673,9 +852,15 @@ export default MyProfile = ({ navigation }) => {
                         width: '100%',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginTop: 15
+                        marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>Profession:</Text>
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].PROFESSION}:
+                        </Text>
                         <TextInput
                             style={{
                                 width: '70%',
@@ -684,6 +869,8 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.profession}
                             onChangeText={(text) => handleChange('profession', text)}
@@ -696,26 +883,59 @@ export default MyProfile = ({ navigation }) => {
                         width: '100%',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginTop: 15
+                        marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>Skills: </Text>
-                        <SelectList
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].SKILLS}:
+                        </Text>
+                        <TouchableOpacity onPress={() => setModalVisible4(true)}
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                borderRadius: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                            <Text style={{
+                                textAlign: 'left',
+                                paddingLeft: 10,
+                                textAlignVertical: 'center',
+                                height: "100%",
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {profileForm?.cookingSkills ? profileForm?.cookingSkills : trans[language].COOKING_SKILLS}                            </Text>
+                        </TouchableOpacity>
+                        {/* <SelectList
                             setSelected={(val) => handleChange('cookingSkills', val)}
                             data={cookingSkills}
-                            placeholder={profileForm?.cookingSkills ? profileForm?.cookingSkills : "Cooking Skills"}
+                            placeholder={profileForm?.cookingSkills ? profileForm?.cookingSkills : trans[language].COOKING_SKILLS}
                             save="value"
+                            inputStyles={{
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor,
+                            }}
+                            dropdownTextStyles={{
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor,
+                            }}
                             boxStyles={{
                                 width: windowWidth * 0.66,
                                 borderWidth: 0,
                                 borderBottomWidth: 2,
                                 borderStyle: 'solid',
-                                borderColor: 'black',
+                                borderColor: GlobalStyles[theme].borderColor,
                                 backgroundColor: GlobalStyles[theme].paperColor,
-
+                                color: GlobalStyles[theme].fontColor,
                             }}
                             dropdownItemStyles={{
                                 width: windowWidth * 0.66,
                                 marginBottom: 10,
+                                color: GlobalStyles[theme].fontColor,
                             }}
                             dropdownStyles={{
                                 width: windowWidth * 0.66,
@@ -726,7 +946,7 @@ export default MyProfile = ({ navigation }) => {
                                 zIndex: 10,
                                 top: 40
                             }}
-                        />
+                        /> */}
                     </View>
 
                     <View style={{
@@ -735,25 +955,59 @@ export default MyProfile = ({ navigation }) => {
                         width: '100%',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginTop: 20
+                        marginTop: 10,
                     }}>
-                        <Text style={{ width: '30%' }}>Diet: </Text>
-                        <SelectList
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].DIET}:
+                        </Text>
+                        <TouchableOpacity onPress={() => setModalVisible5(true)}
+                            style={{
+                                width: '70%',
+                                height: '100%',
+                                borderRadius: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}>
+                            <Text style={{
+                                textAlign: 'left',
+                                paddingLeft: 10,
+                                textAlignVertical: 'center',
+                                height: "100%",
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme].fontColor
+                            }}>
+                                {trans[language].DIETARY_RESTRICTIONS}
+                            </Text>
+                        </TouchableOpacity>
+                        {/* <SelectList
                             setSelected={(val) => handleChange('dietaryRestrictions', val)}
                             data={dietaryRestrictions}
-                            placeholder="Dietary Restrictions"
+                            placeholder={trans[language].DIETARY_RESTRICTIONS}
                             save="value"
+                            inputStyles={{
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}
+                            dropdownTextStyles={{
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            }}
                             boxStyles={{
                                 width: windowWidth * 0.66,
                                 borderWidth: 0,
                                 borderBottomWidth: 2,
                                 borderStyle: 'solid',
-                                borderColor: 'black',
+                                borderColor: GlobalStyles[theme].borderColor,
                                 backgroundColor: GlobalStyles[theme].paperColor,
-
+                                color: GlobalStyles[theme].fontColor,
                             }}
                             dropdownItemStyles={{
                                 width: windowWidth * 0.66,
+                                color: GlobalStyles[theme].fontColor,
                                 // marginBottom: 10,
                             }}
                             dropdownStyles={{
@@ -765,19 +1019,32 @@ export default MyProfile = ({ navigation }) => {
                                 zIndex: 10,
                                 top: 40
                             }}
-                        />
+                        /> */}
                     </View>
 
                     <View style={{
                         flexDirection: 'row',
-                        height: 35,
-                        width: '100%',
+                        minHeight: 35,
+                        // minWidth: "100%",
+                        maxWidth: windowWidth - 20,
                         alignContent: 'center',
-                        marginTop: 15,
+                        marginTop: 10,
                         backgroundColor: GlobalStyles[theme].paperColor,
-                        borderRadius: 10
+                        borderRadius: 10,
+                        paddingHorizontal: 10
                     }}>
-                        {profileForm?.dietaryRestrictions?.map(item => <Text key={uuid.v4()} style={{ paddingLeft: 5, textAlignVertical: 'center' }} onPress={(text) => remove(text, "dietaryRestrictions")}>{item},</Text>)}
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            {profileForm?.dietaryRestrictions?.map(item =>
+                                <Text key={uuid.v4()}
+                                    style={{
+                                        paddingLeft: 5,
+                                        textAlignVertical: 'center',
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }} onPress={(text) => remove(text, "dietaryRestrictions")}>
+                                    {item},
+                                </Text>)}
+                        </ScrollView>
                     </View>
 
                     <View style={{
@@ -788,7 +1055,13 @@ export default MyProfile = ({ navigation }) => {
                         justifyContent: 'space-between',
                         marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>Favorite Food:</Text>
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].FAVORITE_FOOD}:
+                        </Text>
                         <TextInput
                             style={{
                                 width: '70%',
@@ -797,6 +1070,8 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.favoriteFood}
                             onChangeText={(text) => handleChange('favoriteFood', text)}
@@ -811,7 +1086,13 @@ export default MyProfile = ({ navigation }) => {
                         justifyContent: 'space-between',
                         marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>Favorite Restaurants:</Text>
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].FAVORITE_RESTAURANTS}:
+                        </Text>
                         <TextInput
                             style={{
                                 width: '70%',
@@ -820,6 +1101,8 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.favoriteRestaurants}
                             onChangeText={(text) => handleChange('favoriteRestaurants', text)}
@@ -834,7 +1117,13 @@ export default MyProfile = ({ navigation }) => {
                         justifyContent: 'space-between',
                         marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>Meal Preferences:</Text>
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].MEAL_PREFERENCES}:
+                        </Text>
                         <TextInput
                             style={{
                                 width: '70%',
@@ -843,6 +1132,8 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.mealPreferences}
                             onChangeText={(text) => handleChange('mealPreferences', text)}
@@ -857,7 +1148,13 @@ export default MyProfile = ({ navigation }) => {
                         justifyContent: 'space-between',
                         marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>Food Interests:</Text>
+                        <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].FOOD_INTERESTS}:
+                        </Text>
                         <TextInput
                             style={{
                                 width: '70%',
@@ -866,6 +1163,8 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.foodInterests}
                             onChangeText={(text) => handleChange('foodInterests', text)}
@@ -881,25 +1180,43 @@ export default MyProfile = ({ navigation }) => {
                         justifyContent: 'space-between',
                         marginTop: 10
                     }}>
-                        <Text style={{ width: '30%', height: '100%' }}>About me:</Text>
+                        <Text style={{
+                            width: '30%',
+                            height: '100%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].ABOUT_ME}:
+                        </Text>
                         <TextInput
                             style={{
                                 width: '70%',
                                 height: '100%',
                                 textAlignVertical: 'top',
-                                paddingLeft: 10,
-                                backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
-                                paddingBottom: 20
+                                padding: 10,
+                                // paddingBottom: 20,
+                                color: GlobalStyles[theme].fontColor,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
-                            placeholder='Free Text max 256 char.'
+                            placeholder={trans[language].FREE_TEXT_MAX}
+                            placeholderTextColor={GlobalStyles[theme].fontColor}
                             value={profileForm?.personalDescription}
                             onChangeText={text => handleChange('personalDescription', text)}
                             keyboardType="default"
                             maxLength={256}
                             multiline={true}
                         />
-                        <Text style={{ position: "absolute", bottom: 5, right: 10 }}>{profileForm?.personalDescription?.length}/256</Text>
+                        <Text style={{
+                            position: "absolute",
+                            bottom: 5,
+                            right: 10,
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {profileForm?.personalDescription?.length}/256
+                        </Text>
                     </View>
 
                     <View style={{
@@ -910,7 +1227,16 @@ export default MyProfile = ({ navigation }) => {
                         justifyContent: 'space-between',
                         marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>Instagram:</Text>
+                        {/* <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].INSTAGRAM}:
+                        </Text> */}
+                        <View style={{ width: "30%", alignItems: "center" }}>
+                            <Entypo name="instagram" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                        </View>
                         <TextInput
                             style={{
                                 width: '70%',
@@ -919,6 +1245,8 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.socialMediaHandles?.instagram}
                             onChangeText={(text) => handleSocialMediaChange('instagram', text)}
@@ -933,7 +1261,16 @@ export default MyProfile = ({ navigation }) => {
                         justifyContent: 'space-between',
                         marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>TikTok:</Text>
+                        {/* <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].TIKTOK}:
+                        </Text> */}
+                        <View style={{ width: "30%", alignItems: "center" }}>
+                            <FontAwesome5 name="tiktok" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                        </View>
                         <TextInput
                             style={{
                                 width: '70%',
@@ -942,6 +1279,8 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.socialMediaHandles?.tiktok}
                             onChangeText={(text) => handleSocialMediaChange('tiktok', text)}
@@ -956,7 +1295,16 @@ export default MyProfile = ({ navigation }) => {
                         justifyContent: 'space-between',
                         marginTop: 10
                     }}>
-                        <Text style={{ width: '30%' }}>FaceBook:</Text>
+                        {/* <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].FACEBOOK}:
+                        </Text> */}
+                        <View style={{ width: "30%", alignItems: "center" }}>
+                            <Entypo name="facebook" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                        </View>
                         <TextInput
                             style={{
                                 width: '70%',
@@ -965,31 +1313,76 @@ export default MyProfile = ({ navigation }) => {
                                 paddingLeft: 10,
                                 backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
-
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.socialMediaHandles?.facebook}
                             onChangeText={(text) => handleSocialMediaChange('facebook', text)}
                         />
                     </View>
 
-                    <View style={{ flexDirection: 'row', height: 35, width: '100%', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-                        <Text style={{ width: '30%' }}>Pinterest:</Text>
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        {/* <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].PINTEREST}:
+                        </Text> */}
+                        <View style={{ width: "30%", alignItems: "center" }}>
+                            <Entypo name="pinterest" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                        </View>
                         <TextInput
                             style={{
-                                width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: GlobalStyles[theme].paperColor,
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.socialMediaHandles?.pinterest}
                             onChangeText={(text) => handleSocialMediaChange('pinterest', text)}
                         />
                     </View>
 
-                    <View style={{ flexDirection: 'row', height: 35, width: '100%', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-                        <Text style={{ width: '30%' }}>Blog:</Text>
+                    <View style={{
+                        flexDirection: 'row',
+                        height: 35,
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 10
+                    }}>
+                        {/* <Text style={{
+                            width: '30%',
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].BLOG}:
+                        </Text> */}
+                        <View style={{ width: "30%", alignItems: "center" }}>
+                            <FontAwesome5 name="blogger" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                        </View>
                         <TextInput
                             style={{
-                                width: '70%', height: '100%', textAlignVertical: 'center', paddingLeft: 10, backgroundColor: GlobalStyles[theme].paperColor,
+                                width: '70%',
+                                height: '100%',
+                                textAlignVertical: 'center',
+                                paddingLeft: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
                                 borderRadius: 10,
+                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
                             }}
                             value={profileForm?.socialMediaHandles?.blog}
                             onChangeText={(text) => handleSocialMediaChange('blog', text)}
@@ -997,28 +1390,38 @@ export default MyProfile = ({ navigation }) => {
                     </View>
 
                     <View style={{ height: 35, width: '100%', alignItems: 'center', justifyContent: 'flex-start', marginTop: 10, marginBottom: 50 }}>
-                        <Text> Global Status:</Text>
-                        <SwitchButton text01="Public" text02="Private" show={show} setShow={setShow} />
+                        <Text style={{
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        }}>
+                            {trans[language].GLOBAL_STATUS}:
+                        </Text>
+                        <SwitchButton text01={trans[language].PUBLIC} text02={trans[language].PRIVATE} show={show} setShow={setShow} />
                     </View>
 
                     <TouchableOpacity
                         onPress={() => saveProfileSubmit()}
                         style={{
-                            // width: 100, 
-                            height: 40,
-                            borderColor: 'black',
-                            borderWidth: 1,
+                            borderWidth: 0.5,
                             borderRadius: 10,
-                            // marginBottom: 20,
+                            marginBottom: 10,
+                            borderColor: GlobalStyles[theme].borderColor,
                             backgroundColor: GlobalStyles[theme].yesColor,
-                            paddingHorizontal: 20
+                            // width: 100, 
+                            // height: 40,
+                            // paddingHorizontal: 20
                         }}>
-                        <Text style={{ 
-                            textAlignVertical: 'center', 
-                            height: '100%', 
-                            width: '100%', 
-                            textAlign: 'center', 
-                            fontWeight: '500' }}>Save profile</Text>
+                        <Text style={{
+                            textAlign: 'center',
+                            textAlignVertical: 'center',
+                            paddingHorizontal: 20,
+                            paddingVertical: 10,
+                            color: GlobalStyles[theme].fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            // height: '100%',
+                            // width: '100%',
+                            // fontWeight: '500',
+                        }}>{trans[language].SAVE_PROFILE}</Text>
                     </TouchableOpacity>
 
                     {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 20 }}>
@@ -1029,9 +1432,444 @@ export default MyProfile = ({ navigation }) => {
 
                     <PopupModal message={redux?.auth?.message} popupModal={popupModal} />
 
+                    {/* // Gender Modal // */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible}>
+
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            <View style={[{
+                                borderRadius: 10,
+                                maxHeight: 400,
+                                padding: 35,
+                                paddingTop: 45,
+                                alignItems: "center",
+                                elevation: 5,
+                                borderWidth: 0.5,
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TouchableOpacity
+                                    style={{
+                                        position: 'absolute',
+                                        width: "100%",
+                                        alignItems: 'flex-end',
+                                        marginTop: 20,
+                                        marginRight: 20,
+                                        top: 0,
+                                        right: 0
+                                    }}
+                                    onPress={() => {
+                                        setModalVisible(false)
+                                        setSearchResult([])
+                                    }}>
+                                    <EvilIcons name="close-o" size={30} color="red" />
+                                </TouchableOpacity>
+                                <TextInput
+                                    style={{
+                                        width: 150,
+                                        height: 40,
+                                        backgroundColor: "white",
+                                        borderRadius: 10,
+                                        paddingLeft: 10,
+                                        borderColor: 'black',
+                                        borderWidth: 0.5,
+                                    }}
+                                    placeholder={trans[language].SEARCH}
+                                    onChangeText={(text) => modalSearch("gender", text)}
+                                />
+                                <FlatList
+                                    data={searchResult?.length !== 0 ? searchResult : gender}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => <TouchableOpacity
+                                        style={[{
+                                            borderRadius: 10,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 10,
+                                            minWidth: 150,
+                                            borderWidth: 0.5,
+                                            marginVertical: 5,
+                                            elevation: 2,
+                                        }, {
+                                            borderColor: GlobalStyles[theme].borderColor,
+                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                        }]}
+                                    >
+                                        <Text style={[{
+                                            textAlign: "center"
+                                        }, {
+                                            // fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }]}
+                                            onPress={() => handleChange('gender', item.label)}
+                                        >
+                                            {item.label}</Text>
+                                    </TouchableOpacity>
+                                    }
+                                    keyExtractor={item => item.key}
+                                />
+                            </View>
+                        </View>
+                    </Modal>
+
+                    {/* // Countries Modal // */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible2}>
+
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            <View style={[{
+                                borderRadius: 10,
+                                maxHeight: 400,
+                                padding: 35,
+                                paddingTop: 45,
+                                alignItems: "center",
+                                elevation: 5,
+                                borderWidth: 0.5,
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TouchableOpacity
+                                    style={{
+                                        position: 'absolute',
+                                        width: "100%",
+                                        alignItems: 'flex-end',
+                                        marginTop: 20,
+                                        marginRight: 20,
+                                        top: 0,
+                                        right: 0
+                                    }}
+                                    onPress={() => {
+                                        setModalVisible2(false)
+                                        setSearchResult([])
+                                    }}>
+                                    <EvilIcons name="close-o" size={30} color="red" />
+                                </TouchableOpacity>
+                                <TextInput
+                                    style={{
+                                        width: 250,
+                                        height: 40,
+                                        backgroundColor: "white",
+                                        borderRadius: 10,
+                                        paddingLeft: 10,
+                                        borderColor: 'black',
+                                        borderWidth: 0.5,
+                                    }}
+                                    placeholder={trans[language].SEARCH}
+                                    onChangeText={(text) => modalSearch("country", text)}
+                                />
+                                <FlatList
+                                    data={searchResult?.length !== 0 ? searchResult : countries}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => <TouchableOpacity
+                                        style={[{
+                                            borderRadius: 10,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 10,
+                                            width: 250,
+                                            borderWidth: 0.5,
+                                            marginVertical: 5,
+                                            elevation: 2,
+                                        }, {
+                                            borderColor: GlobalStyles[theme].borderColor,
+                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                        }]}
+                                    >
+                                        <Text style={[{
+                                            textAlign: "center"
+                                        }, {
+                                            // fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }]}
+                                            onPress={() => handleChange('country', item.value)}
+                                        >
+                                            {item.value}</Text>
+                                    </TouchableOpacity>
+                                    }
+                                    keyExtractor={item => item.key + item.value + Math.random()}
+                                />
+                            </View>
+                        </View>
+                    </Modal>
+
+                    {/* // CountryCode Modal // */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible3}>
+
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            <View style={[{
+                                borderRadius: 10,
+                                maxHeight: 400,
+                                padding: 35,
+                                paddingTop: 45,
+                                alignItems: "center",
+                                elevation: 5,
+                                borderWidth: 0.5,
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TouchableOpacity
+                                    style={{
+                                        position: 'absolute',
+                                        width: "100%",
+                                        alignItems: 'flex-end',
+                                        marginTop: 20,
+                                        marginRight: 20,
+                                        top: 0,
+                                        right: 0
+                                    }}
+                                    onPress={() => {
+                                        setModalVisible3(false)
+                                        setSearchResult([])
+                                    }}>
+                                    <EvilIcons name="close-o" size={30} color="red" />
+                                </TouchableOpacity>
+                                <TextInput
+                                    style={{
+                                        width: 250,
+                                        height: 40,
+                                        backgroundColor: "white",
+                                        borderRadius: 10,
+                                        paddingLeft: 10,
+                                        borderColor: 'black',
+                                        borderWidth: 0.5,
+                                    }}
+                                    placeholder={trans[language].SEARCH}
+                                    onChangeText={(text) => modalSearch("countryCode", text)}
+                                />
+                                <FlatList
+                                    data={searchResult?.length !== 0 ? searchResult : countryCodes}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => <TouchableOpacity
+                                        style={[{
+                                            borderRadius: 10,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 10,
+                                            width: 250,
+                                            borderWidth: 0.5,
+                                            marginVertical: 5,
+                                            elevation: 2,
+                                        }, {
+                                            borderColor: GlobalStyles[theme].borderColor,
+                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                        }]}
+                                    >
+                                        <Text style={[{
+                                            textAlign: "center"
+                                        }, {
+                                            // fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }]}
+                                            onPress={() => handleChange('countryCode', item.value)}
+                                        >
+                                            {item.value}</Text>
+                                    </TouchableOpacity>
+                                    }
+                                    keyExtractor={item => item.key + item.value + Math.random()}
+                                />
+                            </View>
+                        </View>
+                    </Modal>
+
+                    {/* // Cooking Skills Modal // */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible4}>
+
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            <View style={[{
+                                borderRadius: 10,
+                                maxHeight: 400,
+                                padding: 35,
+                                paddingTop: 45,
+                                alignItems: "center",
+                                elevation: 5,
+                                borderWidth: 0.5,
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TouchableOpacity
+                                    style={{
+                                        position: 'absolute',
+                                        width: "100%",
+                                        alignItems: 'flex-end',
+                                        marginTop: 20,
+                                        marginRight: 20,
+                                        top: 0,
+                                        right: 0
+                                    }}
+                                    onPress={() => {
+                                        setModalVisible4(false)
+                                        setSearchResult([])
+                                    }}>
+                                    <EvilIcons name="close-o" size={30} color="red" />
+                                </TouchableOpacity>
+                                {/* <TextInput
+                                    style={{
+                                        width: 250,
+                                        height: 40,
+                                        backgroundColor: "white",
+                                        borderRadius: 10,
+                                        paddingLeft: 10,
+                                        borderColor: 'black',
+                                        borderWidth: 0.5,
+                                    }}
+                                    placeholder={trans[language].SEARCH}
+                                    onChangeText={(text) => modalSearch("countryCode", text)}
+                                /> */}
+                                <FlatList
+                                    data={searchResult?.length !== 0 ? searchResult : cookingSkills}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => <TouchableOpacity
+                                        style={[{
+                                            borderRadius: 10,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 10,
+                                            width: 250,
+                                            borderWidth: 0.5,
+                                            marginVertical: 5,
+                                            elevation: 2,
+                                        }, {
+                                            borderColor: GlobalStyles[theme].borderColor,
+                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                        }]}
+                                    >
+                                        <Text style={[{
+                                            textAlign: "center"
+                                        }, {
+                                            // fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }]}
+                                            onPress={() => handleChange('cookingSkills', item.value)}
+                                        >
+                                            {item.value}</Text>
+                                    </TouchableOpacity>
+                                    }
+                                    keyExtractor={item => item.key + item.value + Math.random()}
+                                />
+                            </View>
+                        </View>
+                    </Modal>
+
+                    {/* // Dietary Restrictions Modal // */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible5}>
+
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            <View style={[{
+                                borderRadius: 10,
+                                maxHeight: 400,
+                                padding: 35,
+                                paddingTop: 45,
+                                alignItems: "center",
+                                elevation: 5,
+                                borderWidth: 0.5,
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TouchableOpacity
+                                    style={{
+                                        position: 'absolute',
+                                        width: "100%",
+                                        alignItems: 'flex-end',
+                                        marginTop: 20,
+                                        marginRight: 20,
+                                        top: 0,
+                                        right: 0
+                                    }}
+                                    onPress={() => {
+                                        setModalVisible5(false)
+                                        setSearchResult([])
+                                    }}>
+                                    <EvilIcons name="close-o" size={30} color="red" />
+                                </TouchableOpacity>
+                                <TextInput
+                                    style={{
+                                        width: 250,
+                                        height: 40,
+                                        backgroundColor: "white",
+                                        borderRadius: 10,
+                                        paddingLeft: 10,
+                                        borderColor: 'black',
+                                        borderWidth: 0.5,
+                                    }}
+                                    placeholder={trans[language].SEARCH}
+                                    onChangeText={(text) => modalSearch("dietaryRestrictions", text)}
+                                />
+                                <FlatList
+                                    data={searchResult?.length !== 0 ? searchResult : dietaryRestrictions}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => <TouchableOpacity
+                                        style={[{
+                                            borderRadius: 10,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 10,
+                                            width: 250,
+                                            borderWidth: 0.5,
+                                            marginVertical: 5,
+                                            elevation: 2,
+                                        }, {
+                                            borderColor: GlobalStyles[theme].borderColor,
+                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                        }]}
+                                    >
+                                        <Text style={[{
+                                            textAlign: "center"
+                                        }, {
+                                            // fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }]}
+                                            onPress={() => handleChange('dietaryRestrictions', item.value)}
+                                        >
+                                            {item.value}</Text>
+                                    </TouchableOpacity>
+                                    }
+                                    keyExtractor={item => item.key + item.value + Math.random()}
+                                />
+                            </View>
+                        </View>
+                    </Modal>
+
                 </View>
             </ScrollView >
-        </KeyboardAvoidingView>
+        </KeyboardAvoidingView >
     );
 };
 

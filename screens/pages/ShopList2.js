@@ -24,6 +24,23 @@ import {
 import { products, mass, volume } from '../../assets/arrays/data'
 
 import TodoList from '../../components/TodoList';
+import GlobalStyles from '../../GlobalStyles';
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
+import trans from '../../Language'
 
 
 // const products = [
@@ -745,6 +762,22 @@ export default function ShopList2({ navigation, route }) {
     const [system, setSystem] = useState('metric');
     const [answer, setAnswer] = useState();
     const [todoListTitle, setTodoListTitle] = useState()
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        Oswald_400Regular,
+        SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
     // const [showPicker, setShowPicker] = useState(false);
     // const [date, setDate] = useState(todayDate);
     // const [fromDate, setFromDate] = useState(todayDate);
@@ -884,7 +917,7 @@ export default function ShopList2({ navigation, route }) {
     // };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container,{backgroundColor: GlobalStyles[theme].background}]}>
             <TodoList
                 answer={route?.params?.openShopList ? route?.params?.openShopList : answer}
                 navigation={navigation}
@@ -899,9 +932,8 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignContent: 'center',
-        paddingTop: 80,
-        backgroundColor: '#ecf0f1',
-        padding: 8,
+        // paddingTop: 80,
+        padding: 10,
 
     },
 });

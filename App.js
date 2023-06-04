@@ -87,7 +87,7 @@ const MainStackScreen = () => (
     <MainStack.Screen
       name="ShowShopList"
       component={ShowShopList}
-      options={{ title: "Shop List" }}
+      options={{ title: "Shop List", headerShown: true }}
     />
     <MainStack.Screen
       name="RecipeDetail"
@@ -107,7 +107,7 @@ const MainStackScreen = () => (
     <MainStack.Screen
       name="ShowOtherUser"
       component={ShowOtherUser}
-      options={{headerShown: true }}
+      options={{ headerShown: true }}
     />
   </MainStack.Navigator>
 )
@@ -115,7 +115,8 @@ const MainStackScreen = () => (
 
 const RootStack = createNativeStackNavigator();
 const RootStackScreen = ({ userToken }) => (
-  <RootStack.Navigator headerMode="none"
+  <RootStack.Navigator
+    headerMode="none"
     initialRouteName={userToken}
     screenOptions={{
       headerShown: false,

@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useContext, useRef, LegacyRef } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { Context } from "../../context/UserContext";
 
 import {
     View,
     Text,
-    Button,
     StyleSheet,
     TextInput,
     TouchableWithoutFeedback,
@@ -21,17 +20,18 @@ import {
     FlatList
 } from 'react-native'
 
-import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
+import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons } from '@expo/vector-icons';
 
 import uuid from 'react-native-uuid';
 
 import * as ImagePicker from 'expo-image-picker';
 
 import SwitchButton from '../../components/SwitchButton';
-import PopUp from '../../components/PopUp'
 import SpSheet from '../../components/SpSheet';
-import Conversions from '../Drawer/Conversions';
 import PopupModal from '../../components/PopupModal';
+import Banner from '../../components/Banner';
+import Conversions from '../Drawer/Conversions';
+import ImagesSwipe from '../../components/ImagesSwipe';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { createRecipe, updateRecipe } from '../../Redux/actions/recipes';
@@ -39,13 +39,7 @@ import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
 
 import * as SecureStore from 'expo-secure-store';
 import { useIsFocused } from '@react-navigation/native';
-import Banner from '../../components/Banner';
-import { SelectList } from 'react-native-dropdown-select-list';
 import { SelectCountry } from 'react-native-element-dropdown';
-import ImagesSwipe from '../../components/ImagesSwipe';
-import GlobalStyles from '../../GlobalStyles';
-import GlobalTextStyles from '../../GlobalTextStyles';
-
 
 const initialPreparation = {
     preparation: "",
@@ -60,18 +54,18 @@ const initialIngredients = {
 }
 
 const initialValue = {
-    cookTime: "0",
+    cookTime: "",
     creator: '',
     creatorId: '',
     difficulty: '',
     donwloads: [],
     foodCourse: "",
-    forHowMany: "0",
+    forHowMany: "",
     freeText: "",
     ingredients: [],
     likes: [],
     preparation: [],
-    prepTime: "0",
+    prepTime: "",
     recipeComments: [],
     recipeName: '',
     // recipePicture: { normal: [], small: [] },
@@ -253,7 +247,28 @@ const productList = [
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
+import { useFonts } from 'expo-font';
+import {
+    Roboto_400Regular,
+    Lato_400Regular,
+    Montserrat_400Regular,
+    Oswald_400Regular,
+    SourceCodePro_400Regular,
+    Slabo27px_400Regular,
+    Poppins_400Regular,
+    Lora_400Regular,
+    Rubik_400Regular,
+    PTSans_400Regular,
+    Karla_400Regular
+} from '@expo-google-fonts/dev';
+import GlobalFontStyles from '../../GlobalFontStyles';
+import GlobalStyles from '../../GlobalStyles';
+import GlobalTextStyles from '../../GlobalTextStyles';
+import trans from '../../Language'
+
 export default function NewRecipe({ route, navigation }) {
+    const dispatch = useDispatch();
+    const isFocused = useIsFocused();
     const [difficultyColor, setDifficultyColor] = useState("#66ccff")
     const [ingredients, setIngredients] = useState(initialIngredients)
     const [modalVisible, setModalVisible] = useState(false);
@@ -269,15 +284,27 @@ export default function NewRecipe({ route, navigation }) {
     const [popupModal, setPopupModal] = useState(false)
     const [userData, setUserData] = useState(null)
     const [cloudinaryToDelete, setCloudinaryToDelete] = useState([])
-    const [theme, setTheme] = useState('stylesLight')
     const [text, setText] = useState('normalText')
-
+    const [language, setLanguage] = useState("en")
+    const [theme, setTheme] = useState("stylesLight")
+    const [fontStyle, setFontStyle] = useState("Montserrat")
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Lato_400Regular,
+        Montserrat_400Regular,
+        // Oswald_400Regular,
+        // SourceCodePro_400Regular,
+        Slabo27px_400Regular,
+        Poppins_400Regular,
+        Lora_400Regular,
+        Rubik_400Regular,
+        PTSans_400Regular,
+        Karla_400Regular
+    })
     // const gotoRef = useRef(null)
-    const dispatch = useDispatch();
-    const isFocused = useIsFocused();
+    // const [yOffset, setYOffset] = useState(0)
 
     const redux = useSelector((state) => state)
-
 
     const { userContext, setUserContext } = useContext(Context)
 
@@ -317,7 +344,7 @@ export default function NewRecipe({ route, navigation }) {
             // setRecipeForm(route.params.recipe)
         }
     }, [route.params])
-    // console.log("322", recipeForm)
+
     useEffect(() => {
         setRecipeForm({ ...recipeForm, status: show })
     }, [show])
@@ -417,10 +444,10 @@ export default function NewRecipe({ route, navigation }) {
     const handleDifficulty = (text) => {
         switch (text._dispatchInstances.pendingProps.children) {
             case "Super Easy":
-                setDifficultyColor("lime")
+                setDifficultyColor(GlobalStyles[theme].green)
                 break
             case "Easy":
-                setDifficultyColor("greenyellow")
+                setDifficultyColor(GlobalStyles[theme].yesColor)
                 break
             case "Medium":
                 setDifficultyColor("orange")
@@ -429,7 +456,7 @@ export default function NewRecipe({ route, navigation }) {
                 setDifficultyColor("salmon")
                 break
             case "Super Hard":
-                setDifficultyColor("red")
+                setDifficultyColor(GlobalStyles[theme].noColor)
                 break
         }
         setRecipeForm({ ...recipeForm, difficulty: text._dispatchInstances.pendingProps.children })
@@ -477,7 +504,7 @@ export default function NewRecipe({ route, navigation }) {
     const addIngredient = () => {
         if (ingredients.product === "" || ingredients.quantity === "" || ingredients.units === "") return
         setRecipeForm({ ...recipeForm, ingredients: [...recipeForm.ingredients, ingredients] })
-        // setIngredients(initialIngredients)
+        setIngredients(initialIngredients)
     }
 
     const editIngredient = (product) => {
@@ -501,8 +528,7 @@ export default function NewRecipe({ route, navigation }) {
             setShowImage(0)
         }
     }
-    // console.log("recipeForm", recipeForm)
-    // console.log("NewRecipe3", cloudinaryToDelete)
+
     ////// page 03 - preparation steps
     const handlePreparation = (text) => {
         setPreparation({ step: recipeForm.preparation.length + 1, preparation: text })
@@ -565,930 +591,1349 @@ export default function NewRecipe({ route, navigation }) {
         route.params = undefined
     }
 
+    // Floating Button Test
+    const handleScroll = (event) => {
+        setYOffset(event.nativeEvent.contentOffset.y)
+    }
+
     return (
 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            {/* <ScrollView
-                showsVerticalScrollIndicator={false}
-            > */}
             <KeyboardAvoidingView
-                    // style={styles.container}
-                    style={{
-                        width: windowWidth, 
-                        maxHeight: windowHeight - 118,
-                        backgroundColor: GlobalStyles[theme].background
-                        // borderStyle: 'solid',
-                        // borderWidth: 1,
-                        // borderColor: 'black',
-    
-                    }}
-                    // behavior={Platform.OS === "ios" ? "padding" : "height"}
-                >
-            <ScrollView
-                // scrollView das 3 paginas
-                pagingEnabled
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                
+                style={{
+                    width: windowWidth,
+                    maxHeight: windowHeight - 118,
+                    backgroundColor: GlobalStyles[theme].background
+                }}
             >
-                {/* /// general */}
-                <ScrollView showsVerticalScrollIndicator={false}>
+                <ScrollView
+                    // scrollView das 3 paginas
+                    pagingEnabled
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                >
+                    {/* /// general page // */}
+                    <ScrollView showsVerticalScrollIndicator={false}>
 
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', width: windowWidth, position: 'relative', padding: 10 }}>
+                        <View style={{
+                            position: 'relative',
+                            flex: 1,
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            width: windowWidth,
+                            padding: 10
+                        }}>
 
-                        <Banner title={(route.params === undefined) ? "New Recipe" : "Update Recipe"} />
+                            <Banner title={(route.params === undefined) ? trans[language].NEW_RECIPE : trans[language].UPDATE_RECIPE} />
 
-                        <TextInput
-                            value={recipeForm.recipeName}
-                            style={[styles.inputLogo, { backgroundColor: GlobalStyles[theme].paperColor }]}
-                            // style={styles.input}
-                            placeholder='Recipe Name'
-                            onChangeText={text => handleOnChange('recipeName', text)}
-                        />
+                            <TextInput
+                                value={recipeForm.recipeName}
+                                style={[{
+                                    flexDirection: "row",
+                                    width: "100%",
+                                    minHeight: 40,
+                                    borderRadius: 10,
+                                    paddingLeft: 10,
+                                }, {
+                                    fontSize: 20,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme].fontColor,
+                                    backgroundColor: GlobalStyles[theme].paperColor
+                                }]}
+                                placeholder={trans[language].RECIPE_NAME}
+                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                onChangeText={text => handleOnChange('recipeName', text)}
+                            />
 
-                        <ImagesSwipe recipeFormRecipePicture={recipeForm.recipePicture} setShowImage={setShowImage} showImage={showImage} delIngredient={delIngredient} />
+                            <ImagesSwipe
+                                recipeFormRecipePicture={recipeForm.recipePicture}
+                                setShowImage={setShowImage}
+                                showImage={showImage}
+                                delIngredient={delIngredient}
+                            />
 
-                        {recipeForm.recipePicture.length < 3 &&
-                            <View style={[styles.genericButton, { marginTop: 0, backgroundColor: GlobalStyles[theme].buttonColor }]}>
-                                {recipeForm.recipePicture.length < 3 &&
-                                    <TouchableOpacity>
-                                        <Text style={{ fontSize: GlobalTextStyles[text].fontSize, fontWeight: '500' }} onPress={pickImage}>Add an image! {recipeForm.recipePicture.length}/3</Text>
-                                    </TouchableOpacity>}
-                            </View>
-                        }
-
-                        <View style={[styles.cookInfo, { backgroundColor: GlobalStyles[theme].paperColor }]}>
-                            <View style={styles.cookItem}>
-                                <Text style={{ marginBottom: 10 }}>Prep.Time</Text>
-                                <View style={styles.logoInput}>
-                                    <Entypo name="stopwatch" size={24} color="black" />
-                                    <TextInput
-                                        // value={JSON.stringify(recipeForm.prepTime)}
-                                        value={recipeForm.prepTime}
-                                        style={styles.numberInput}
-                                        keyboardType='numeric'
-                                        onChangeText={text => handleOnChange('prepTime', text)}
-                                    />
-                                    <Text>min</Text>
+                            {recipeForm.recipePicture.length < 3 &&
+                                <View style={[{
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: 10,
+                                    borderStyle: 'solid',
+                                    borderWidth: 0.5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 30,
+                                    marginBottom: 10,
+                                    marginTop: 0,
+                                }, {
+                                    borderColor: GlobalStyles[theme].borderColor,
+                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                }]}>
+                                    {recipeForm.recipePicture.length < 3 &&
+                                        <TouchableOpacity>
+                                            <Text style={{
+                                                fontSize: GlobalTextStyles[text].fontSize,
+                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                color: GlobalStyles[theme].fontColor
+                                            }} onPress={pickImage}>
+                                                {trans[language].ADD_A_IMAGE} {recipeForm.recipePicture.length}/3
+                                            </Text>
+                                        </TouchableOpacity>}
                                 </View>
-                            </View>
+                            }
 
-                            <View style={styles.cookItem}>
-                                <Text style={{ marginBottom: 10 }}>Cook Time</Text>
-                                <View style={styles.logoInput}>
-                                    <Entypo name="stopwatch" size={24} color="black" />
-                                    <TextInput
-                                        // value={JSON.stringify(recipeForm.cookTime)}
-                                        value={recipeForm.cookTime}
-                                        style={styles.numberInput}
-                                        keyboardType='numeric'
-                                        onChangeText={text => handleOnChange('cookTime', text)}
-                                    />
-                                    <Text>min</Text>
+                            {/* // Cook Time Area //  */}
+                            <View style={[{
+                                width: "100%",
+                                height: 90,
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                borderRadius: 10,
+                                padding: 10,
+                                marginBottom: 10,
+                            }, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+
+                                <View style={{
+                                    width: (windowWidth - 40) / 4,
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                }}>
+                                    <Text style={{
+                                        marginBottom: 10,
+                                        fontSize: GlobalTextStyles[text].fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }}>
+                                        {trans[language].PREP_TIME}
+                                    </Text>
+                                    <View style={{
+                                        width: "90%",
+                                        height: 40,
+                                        flexDirection: "row",
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                    }}>
+                                        <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                                        <TextInput
+                                        
+                                            value={recipeForm.prepTime}
+                                            placeholder="0"
+                                            placeholderTextColor={GlobalStyles[theme].fontColor}
+                                            style={[{
+                                                width: 30,
+                                                textAlign: "center",
+                                                borderStyle: 'solid',
+                                                borderBottomWidth: 0.5,
+                                            }, {
+                                                borderBottomColor: GlobalStyles[theme].borderColor,
+                                                fontSize: GlobalTextStyles[text].fontSize,
+                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                color: GlobalStyles[theme].fontColor
+                                            }]}
+                                            keyboardType='numeric'
+                                            onChangeText={text => handleOnChange('prepTime', text)}
+                                        />
+                                        <Text style={{
+                                            fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }}>
+                                            {trans[language].MIN}
+                                        </Text>
+                                    </View>
                                 </View>
-                            </View>
 
-                            <View style={styles.cookItem}>
-                                <Text style={{ marginBottom: 5 }}>Difficulty</Text>
-                                <View style={styles.logoInput}>
-                                    <MaterialCommunityIcons name="chef-hat" size={24} color="black" />
+                                <View style={{
+                                    width: (windowWidth - 40) / 4,
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                }}>
+                                    <Text style={{
+                                        marginBottom: 10,
+                                        fontSize: GlobalTextStyles[text].fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }}>
+                                        {trans[language].COOK_TIME}
+                                    </Text>
+                                    <View style={{
+                                        width: "90%",
+                                        height: 40,
+                                        flexDirection: "row",
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                    }}>
+                                        <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                                        <TextInput
+                                        placeholder="0"
+                                        placeholderTextColor={GlobalStyles[theme].fontColor}
+                                            value={recipeForm.cookTime}
+                                            style={[{
+                                                width: 30,
+                                                textAlign: "center",
+                                                borderStyle: 'solid',
+                                                borderBottomWidth: 0.5,
+                                            }, {
+                                                borderBottomColor: GlobalStyles[theme].borderColor,
+                                                fontSize: GlobalTextStyles[text].fontSize,
+                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                color: GlobalStyles[theme].fontColor
+                                            }]}
+                                            keyboardType='numeric'
+                                            onChangeText={text => handleOnChange('cookTime', text)}
+                                        />
+                                        <Text style={{
+                                            fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }}>
+                                            {trans[language].MIN}
+                                        </Text>
+                                    </View>
+                                </View>
 
-                                    <View style={styles.centeredView}>
-                                        <Modal
-                                            animationType="fade"
-                                            transparent={true}
-                                            visible={modalVisible}
-                                        >
-                                            <View style={styles.centeredView}>
-                                                <View style={styles.modalView}>
-                                                    <FlatList
-                                                        data={difficulty}
-                                                        showsVerticalScrollIndicator={false}
-                                                        renderItem={({ item }) => <Pressable
-                                                            style={[styles.button, styles.buttonClose, { backgroundColor: GlobalStyles[theme].buttonColor }]}
-                                                        >
-                                                            <Text style={styles.textStyle}
-                                                                onPress={(text) => handleDifficulty(text)}
-                                                            >{item.value}</Text>
-                                                        </Pressable>
+                                <View style={{
+                                    width: (windowWidth - 40) / 4,
+                                    height: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                }}>
+                                    <Text style={{
+                                        marginBottom: 5,
+                                        fontSize: GlobalTextStyles[text].fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }}>
+                                        {trans[language].DIFFICULTY}
+                                    </Text>
+                                    <View style={{
+                                        width: "90%",
+                                        height: 40,
+                                        flexDirection: "row",
+                                        alignItems: 'center',
+                                        justifyContent: 'space-around',
+                                    }}>
+                                        <MaterialCommunityIcons name="chef-hat" size={24} color={GlobalStyles[theme].fontColor} />
 
-                                                        }
-                                                        keyExtractor={item => item.key}
-                                                    />
-                                                </View>
-                                            </View>
-                                        </Modal>
-                                        <Pressable
-                                            style={[styles.button, styles.buttonOpen]}
-                                            backgroundColor={difficultyColor}
+                                        <TouchableOpacity
+                                            style={[{
+                                                width: 40,
+                                                height: 40,
+                                                borderRadius: 20,
+                                                padding: 10,
+                                                elevation: 2,
+                                                borderWidth: 0.5,
+                                                fontSize: 18,
+                                                backgroundColor: difficultyColor,
+                                                borderColor: GlobalStyles[theme].borderColor,
+                                            }]}
+                                            // backgroundColor={difficultyColor}
                                             onPress={() => setModalVisible(true)}
                                         >
                                             {(recipeForm.difficulty === "")
-                                                ? <Text style={styles.textStyle}>Dif</Text>
-                                                : <Text style={styles.textStyle}>{recipeForm.difficulty.split(" ")[0].slice(0, 1)}{recipeForm.difficulty.split(" ")[1]?.slice(0, 1)}</Text>}
-                                        </Pressable>
-                                    </View>
-                                </View>
-                            </View>
-
-                            <View style={styles.cookItem}>
-                                <Text style={{ marginBottom: 10 }}>Serves</Text>
-                                <View style={styles.logoInput}>
-                                    <Ionicons name="ios-people-circle-outline" size={24} color="black" />
-                                    <TextInput
-                                        // value={JSON.stringify(recipeForm.forHowMany)}
-                                        value={recipeForm.forHowMany}
-                                        style={styles.numberInput}
-                                        keyboardType='numeric'
-                                        onChangeText={text => handleOnChange('forHowMany', text)}
-                                    />
-                                    <Text>ppl.</Text>
-                                </View>
-                            </View>
-                        </View>
-
-                        <View style={styles.specialDiet}>
-                            <View style={styles.specialDietLogo}>
-                                {recipeForm.specialDiet.map(item => {
-                                    return logos.map(logo =>
-                                        (logo.name === item) &&
-                                        <TouchableOpacity key={uuid.v4()}
-                                            onPress={() => remove(`${logo.name}`, "specialDiet")}>
-                                            <Image
-                                                resizeMode='contain'
-                                                source={logo.image}
-                                                style={{ height: 45, width: 45, margin: 5 }}
-                                            />
+                                                ? <Text style={[{
+                                                    color: "black",
+                                                    fontWeight: "500",
+                                                    textAlign: "center"
+                                                }, { fontSize: GlobalTextStyles[text].fontSize, fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }]}>{trans[language].DIF}</Text>
+                                                : <Text style={[{
+                                                    color: "black",
+                                                    fontWeight: "500",
+                                                    textAlign: "center"
+                                                }, { fontSize: GlobalTextStyles[text].fontSize, fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }]}>{recipeForm.difficulty.split(" ")[0].slice(0, 1)}{recipeForm.difficulty.split(" ")[1]?.slice(0, 1)}</Text>}
                                         </TouchableOpacity>
-                                    )
-                                })}
-                            </View>
-
-                            <Pressable
-                                style={[styles.button, styles.buttonOpen2, {backgroundColor: GlobalStyles[theme].buttonColor}]}
-                                onPress={() => setModalVisible2(true)}>
-
-                                <Text style={[styles.textStyle, styles.textStyle2]}>S.Diet</Text>
-                            </Pressable>
-
-                            <Modal
-                                animationType="fade"
-                                transparent={true}
-                                visible={modalVisible2}>
-
-                                <View style={styles.centeredView}>
-                                    <View style={[styles.modalView, { height: 370 }]}>
-                                        <FlatList
-                                            data={logos}
-                                            showsVerticalScrollIndicator={false}
-                                            renderItem={({ item }) => <Pressable
-                                                style={[styles.button, styles.buttonClose, {backgroundColor: GlobalStyles[theme].buttonColor}]}>
-
-                                                <Text style={[styles.textStyle]}
-                                                    onPress={(text) => handleSpecialDiet(text)}>
-                                                    {item.name}</Text>
-                                            </Pressable>
-                                            }
-                                            keyExtractor={item => item.name}
-                                        />
                                     </View>
                                 </View>
-                            </Modal>
-                        </View>
 
-                        <View style={{ flexDirection: "row", width: '100%', marginBottom: 10, justifyContent: 'space-between' }}>
-                            <View style={{ backgroundColor: GlobalStyles[theme].paperColor, width: '79%', height: 40, borderRadius: 10 }}>
-                                <Pressable onPress={() => setRecipeForm({ ...recipeForm, foodCourse: "" })}>
-                                    <Text style={{ width: '100%', height: '100%', textAlign: 'center', textAlignVertical: 'center', fontSize: 16, fontWeight: '500' }}>
-                                        {recipeForm.foodCourse}
-                                    </Text>
-                                </Pressable>
-                            </View>
-
-                            <Pressable
-                                style={[styles.button, styles.buttonOpen2, { width: 70, backgroundColor: GlobalStyles[theme].buttonColor }]}
-                                onPress={() => setModalVisible4(true)}>
-
-                                <Text style={[styles.textStyle, styles.textStyle2, { width: 70 }]}>Course</Text>
-                            </Pressable>
-
-                            <Modal
-                                animationType="fade"
-                                transparent={true}
-                                visible={modalVisible4}>
-
-                                <View style={styles.centeredView}>
-                                    <View style={[styles.modalView, { height: 370 }]}>
-                                        <FlatList
-                                            data={foodCourses}
-                                            showsVerticalScrollIndicator={false}
-                                            renderItem={({ item }) => <Pressable
-                                                style={{
-                                                    width: 280,
-                                                    height: 40,
-                                                    borderColor: 'black',
-                                                    borderWidth: 0.5,
-                                                    borderRadius: 30,
-                                                    marginVertical: 5,
-                                                    backgroundColor: GlobalStyles[theme].buttonColor,
-                                                    // borderWidth: 0,
-                                                    color: '#FFFFFF',
-                                                    alignItems: 'center',
-                                                }}>
-
-                                                <Text style={[{ width: '100%', height: '100%', textAlign: 'center', textAlignVertical: 'center' }, styles.buttonTextStyle]}
-                                                    onPress={(text) => handleFoodCourse(text)}>
-                                                    {item.value}</Text>
-                                            </Pressable>
-                                            }
-                                            keyExtractor={item => item.key}
-                                        />
-                                    </View>
-                                </View>
-                            </Modal>
-                        </View>
-
-                        <View style={styles.inputTags}>
-                            <TouchableOpacity onPress={() => Alert.alert(
-                                'HashTag',
-                                'Just press "space" or "," to enter your HashTag, \nNo need for #. \nMaximum 20 Characters.\nTo delete one just click on it.',
-                                [
-                                    { text: "OK" }
-                                ])}>
-                                <FontAwesome5 name="hashtag" size={24} color="black" />
-                            </TouchableOpacity>
-
-                            <TextInput
-                                value={tagsValue}
-                                style={{ width: "100%", paddingLeft: 10 }}
-                                placeholder='Enter Your Tags'
-                                maxLength={21}
-                                onChangeText={text => handleOnChange('tags', text)} />
-                        </View>
-
-                        <View style={[styles.outputTags, {backgroundColor: GlobalStyles[theme].paperColor}]} >
-                            {recipeForm.tags.map(item => <Text key={uuid.v4()} onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
-                        </View>
-
-                        <View style={[styles.outputTags, { marginBottom: 0, position: "relative", backgroundColor: GlobalStyles[theme].paperColor }]}>
-                            <TextInput
-                                style={{ height: 120, textAlignVertical: 'top', }}
-                                placeholder='Free Text max 256 char.'
-                                value={recipeForm.freeText}
-                                onChangeText={text => handleOnChange('freeText', text)}
-                                keyboardType="default"
-                                maxLength={256}
-                                multiline={true}
-                            />
-                            <Text style={{ position: "absolute", bottom: 5, right: 10 }}>{recipeForm?.freeText?.length}/256</Text>
-                        </View>
-                    </View>
-                </ScrollView>
-
-                {/* /// ingredients */}
-                <View style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    height: windowHeight - 140,
-                    // maxHeight: 500,
-                    width: windowWidth,
-                    position: 'relative',
-                    padding: 10,
-                    backgroundColor: GlobalStyles[theme].background
-                }}>
-
-                    <Banner title="Ingredients" />
-
-                    <SpSheet text={"Open Units Convertor"} heightValue={550}><Conversions /></SpSheet>
-
-                    <View style={[styles.inputIngredients,{backgroundColor: GlobalStyles[theme].paperColor}]}>
-
-                        <TextInput
-                            value={ingredients.quantity}
-                            style={styles.quantity}
-                            keyboardType='numeric'
-                            placeholder='qty'
-                            onChangeText={text => handleIngredients('quantity', text)} />
-
-                        <View style={styles.centeredView}>
-                            <Modal
-                                animationType="fade"
-                                transparent={true}
-                                visible={modalVisible3}
-                            >
-                                <View style={styles.centeredView}>
-                                    <View style={[styles.modalView, styles.modalView2]}>
-                                        <FlatList
-                                            data={units}
-                                            showsVerticalScrollIndicator={false}
-                                            renderItem={({ item }) => <Pressable
-                                                style={[styles.button, styles.buttonClose, {backgroundColor: GlobalStyles[theme].buttonColor}]}>
-                                                <Text style={styles.textStyle}
-                                                    onPress={(text) => handleIngredients('units', text)}>
-                                                    {item.unit}
-                                                </Text>
-                                            </Pressable>
-                                            }
-                                            keyExtractor={item => uuid.v4()}
-                                        />
-                                    </View>
-                                </View>
-                            </Modal>
-
-                            <Pressable
-                                style={[styles.button3]}
-                                onPress={() => setModalVisible3(true)}
-                            >
-                                {(ingredients.units === "")
-                                    ? <Text style={styles.textStyle}>Un.</Text>
-                                    // : <Text style={styles.textStyle}>{ingredients.units}</Text>}
-                                    : <Text style={styles.textStyle}>{units.map(unit => unit.unit === ingredients.units && unit.abreviation)}</Text>}
-                            </Pressable>
-                        </View>
-
-                        {/* <TextInput
-                            value={ingredients.product}
-                            style={styles.product}
-                            placeholder='Ingredients'
-                            onChangeText={text => handleIngredients('product', text)} /> */}
-
-                        <SelectCountry
-                            style={styles.dropdown}
-                            containerStyle={styles.containerList}
-                            selectedTextStyle={styles.selectedTextStyle}
-                            placeholderStyle={styles.placeholderStyle}
-                            // imageStyle={styles.imageStyle}
-                            inputSearchStyle={styles.inputSearchStyle}
-                            iconStyle={styles.iconStyle}
-                            search
-                            maxHeight={300}
-                            value={ingredients.product}
-                            data={productList}
-                            valueField="key"
-                            labelField="value"
-                            // imageField="image"
-                            placeholder={ingredients?.product === "" ? "ingredients" : ingredients?.product}
-                            searchPlaceholder="Search..."
-                            onChange={(item) => handleIngredients('product', item.value)}
-
-                        />
-
-                        <TextInput
-                            value={ingredients.remarks}
-                            style={styles.remarks}
-                            placeholder='Remarks'
-                            onChangeText={text => handleIngredients('remarks', text)} />
-
-                        <TouchableOpacity
-                            onPress={addIngredient}
-                            style={{
-                                width: 45,
-                                height: '100%',
-                                backgroundColor: GlobalStyles[theme].buttonColor,
-                                borderTopRightRadius: 10,
-                                borderBottomRightRadius: 10,
-                            }}>
-                            <Text style={{
-                                width: '100%',
-                                height: '100%',
-                                textAlign: 'center',
-                                textAlignVertical: 'center',
-                                fontWeight: '500'
-                            }}>ADD</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {recipeForm.ingredients.map(item =>
-                        <View style={[styles.outputIngredients, {backgroundColor: GlobalStyles[theme].paperColor}]} key={uuid.v4()}>
-                            <Text style={styles.quantity}>{item.quantity}</Text>
-                            <Text style={styles.units}>{units.map(unit => unit.unit === item.units && unit.abreviation)}</Text>
-                            <Text style={styles.product}>{item.product}</Text>
-                            <Text style={styles.remarks}>{item.remarks}</Text>
-
-                            <View style={styles.buttons}>
-                                <TouchableOpacity style={styles.validation} onPress={() => editIngredient(item.product)}>
-                                    <Feather name="edit-3" size={24} color="black" />
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.validation} onPress={() => delIngredient(item.product, "ingredient")}>
-                                    <AntDesign name="delete" size={24} color="black" />
-                                </TouchableOpacity>
-                            </View>
-
-                        </View>)}
-                </View>
-
-                {/* /// preparation */}
-                <View style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    minHeight: windowHeight - 400,
-                    // height: 650,
-                    width: windowWidth,
-                    backgroundColor: GlobalStyles[theme].background,
-                    padding: 10
-                }}>
-
-                    <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', height: "80%" }}>
-
-                        <Banner title="Preparation" />
-
-                        <View style={[styles.inputPreparation, styles.inputIngredients, {backgroundColor: GlobalStyles[theme].paperColor}]}>
-
-                            <TextInput
-                                value={preparation.preparation}
-                                style={styles.preparation}
-                                keyboardType='ascii-capable'
-                                placeholder='Preparation Step'
-                                onChangeText={text => handlePreparation(text)}
-                            // multiline
-                            // numberOfLines={2}
-                            />
-                            <TouchableOpacity
-                                onPress={addStep}
-                                style={{
-                                    width: 45,
+                                <View style={{
+                                    width: (windowWidth - 40) / 4,
                                     height: '100%',
-                                    backgroundColor: GlobalStyles[theme].buttonColor,
-                                    borderTopRightRadius: 10,
-                                    borderBottomRightRadius: 10,
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
                                 }}>
-                                <Text style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    textAlign: 'center',
-                                    textAlignVertical: 'center',
-                                    fontWeight: '500'
-                                }}>ADD</Text>
-                            </TouchableOpacity>
-                        </View>
+                                    <Text style={{
+                                        marginBottom: 10,
+                                        fontSize: GlobalTextStyles[text].fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }}>
+                                        {trans[language].SERVES}
+                                    </Text>
+                                    <View style={{
+                                        width: "90%",
+                                        height: 40,
+                                        flexDirection: "row",
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                    }}>
+                                        <Ionicons name="ios-people-circle-outline" size={24} color={GlobalStyles[theme].fontColor} />
+                                        <TextInput
+                                            placeholder="0"
+                                            placeholderTextColor={GlobalStyles[theme].fontColor}
+                                            value={recipeForm.forHowMany}
+                                            style={[{
+                                                width: 30,
+                                                textAlign: "center",
+                                                borderStyle: 'solid',
+                                                borderBottomWidth: 0.5,
+                                            }, {
+                                                borderBottomColor: GlobalStyles[theme].borderColor,
+                                                fontSize: GlobalTextStyles[text].fontSize,
+                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                color: GlobalStyles[theme].fontColor
+                                            }]}
+                                            keyboardType='numeric'
+                                            onChangeText={text => handleOnChange('forHowMany', text)}
+                                        />
+                                        <Text style={{
+                                            fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }}>
+                                            {trans[language].PPL}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
 
-                        <FlatList
-                            data={recipeForm.preparation}
-                            showsVerticalScrollIndicator={false}
-                            renderItem={({ item }) =>
-                                <View style={[styles.outputPreparation,{backgroundColor: GlobalStyles[theme].paperColor}]} >
-                                    <Text style={styles.step} >Step {item.step}</Text>
-                                    <Text style={styles.prep} >{item.preparation}</Text>
-
-                                    <View style={styles.buttons} >
-                                        <TouchableOpacity style={styles.validation} onPress={() => editStep(item.step)}>
-                                            <Feather name="edit-3" size={24} color="black" />
+                            {/* // Food Courses Area // */}
+                            <View style={{
+                                width: "100%",
+                                height: 40,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 10,
+                                marginBottom: 10,
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                            }}>
+                                {recipeForm.foodCourse !== "" ?
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: "100%" }}>
+                                        <TouchableOpacity onPress={() => setModalVisible4(true)}
+                                            style={{
+                                                width: '90%',
+                                            }}>
+                                            <Text style={{
+                                                textAlign: 'center',
+                                                textAlignVertical: 'center',
+                                                fontSize: 16,
+                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                                color: GlobalStyles[theme].fontColor
+                                            }}>
+                                                {recipeForm.foodCourse}
+                                            </Text>
                                         </TouchableOpacity>
-                                        {(recipeForm.preparation[recipeForm.preparation.length - 1].step === item.step) &&
-                                            <TouchableOpacity style={styles.validation} onPress={() => delStep(item.step)}>
-                                                <AntDesign name="delete" size={24} color="black" />
-                                            </TouchableOpacity>
-                                        }
+                                        <TouchableOpacity
+                                            style={{
+                                                width: "10%",
+                                                alignItems: 'center',
+                                                justifyContent: "center",
+                                            }}
+                                            onPress={() => setRecipeForm({ ...recipeForm, foodCourse: "" })}>
+                                            <EvilIcons name="close-o" size={30} color="red" />
+                                        </TouchableOpacity>
+                                    </View>
+                                    :
+                                    <TouchableOpacity onPress={() => setModalVisible4(true)}
+                                        style={{ width: "100%" }}>
+                                        <Text style={{
+                                            textAlignVertical: 'center',
+                                            textAlign: 'left',
+                                            // alignContent: 'center',
+                                            height: '100%',
+                                            width: '100%',
+                                            fontSize: 15,
+                                            paddingLeft: 15,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor,
+                                        }}>
+                                            {trans[language].FOOD_COURSE}
+                                        </Text>
+                                    </TouchableOpacity>
+                                }
+                            </View>
+
+                            {/* // Special Diet Area // */}
+                            <View style={{
+                                flexDirection: "row",
+                                width: "100%",
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                marginBottom: 10,
+                            }}>
+                                <View style={[{
+                                    width: "79%",
+                                    justifyContent: 'flex-start',
+                                    borderRadius: 10,
+                                    paddingHorizontal: 5,
+                                    height: 40,
+                                    flexDirection: "row",
+                                    textAlignVertical: 'center',
+                                    flexWrap: 'wrap',
+                                }, { backgroundColor: GlobalStyles[theme].paperColor, }]}>
+                                    {recipeForm.specialDiet.length > 0 ?
+                                        recipeForm.specialDiet.map(item => {
+                                            return logos.map(logo =>
+                                                (logo.name === item) &&
+                                                <TouchableOpacity key={uuid.v4()}
+                                                    onPress={() => remove(`${logo.name}`, "specialDiet")}>
+                                                    <Image
+                                                        resizeMode='contain'
+                                                        source={logo.image}
+                                                        style={{ height: 35, width: 35, margin: 2.5 }}
+                                                    />
+                                                </TouchableOpacity>
+                                            )
+                                        }) :
+                                        <Text style={{
+                                            textAlignVertical: 'center',
+                                            alignContent: 'center',
+                                            height: '100%',
+                                            fontSize: 15,
+                                            paddingLeft: 10,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }}>
+                                            {trans[language].SPECIAL_DIET}
+                                        </Text>
+                                    }
+                                </View>
+
+                                <TouchableOpacity
+                                    style={[{
+                                        width: 70,
+                                        height: 40,
+                                        borderRadius: 10,
+                                        padding: 10,
+                                        elevation: 2,
+                                        borderWidth: 0.5,
+                                    }, {
+                                        borderColor: GlobalStyles[theme].borderColor,
+                                        backgroundColor: GlobalStyles[theme].buttonColor,
+                                    }]}
+                                    onPress={() => setModalVisible2(true)}>
+
+                                    <Text style={[{
+                                        width: 50,
+                                        textAlign: "center",
+                                        alignSelf: 'center'
+                                    }, {
+                                        fontSize: GlobalTextStyles[text].fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }]}>
+                                        {trans[language].SDIET}
+                                    </Text>
+                                </TouchableOpacity>
+
+                            </View>
+
+                            {/* // Tags Input // */}
+                            <View style={[{
+                                flexDirection: 'row',
+                                width: "100%",
+                                height: 40,
+                                alignItems: 'center',
+                                borderRadius: 10,
+                                paddingStart: 10,
+                                fontSize: 15
+                            }, {
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                            }]}>
+                                <TouchableOpacity onPress={() => Alert.alert(
+                                    trans[language].HASHTAG,
+                                    trans[language].HASHTAG_INFO,
+                                    [
+                                        { text: trans[language].OK }
+                                    ])}>
+                                    <FontAwesome5 name="hashtag" size={24} color={GlobalStyles[theme].fontColor} />
+                                </TouchableOpacity>
+
+                                <TextInput
+                                    value={tagsValue}
+                                    style={{
+                                        width: "100%",
+                                        paddingLeft: 10,
+                                        fontSize: GlobalTextStyles[text].fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }}
+                                    placeholder={trans[language].ENTER_YOUR_TAGS}
+                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    maxLength={21}
+                                    onChangeText={text => handleOnChange('tags', text)} />
+                            </View>
+
+                            {/* // Tags Output // */}
+                            <View style={[{
+                                minWidth: "100%",
+                                maxWidth: "100%",
+                                minHeight: 40,
+                                borderRadius: 10,
+                                marginTop: 10,
+                                fontSize: 15,
+                                padding: 10,
+                            }, {
+                                backgroundColor: GlobalStyles[theme].paperColor,
+                            }]} >
+                                {recipeForm.tags.map(item =>
+                                    <Text
+                                        key={uuid.v4()}
+                                        onPress={(text) => remove(text, "tags")}
+                                        style={{
+                                            marginBottom: 5,
+                                            fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }}
+                                    >
+                                        {item},
+                                    </Text>
+                                )}
+                            </View>
+
+                            {/* // Free Text // */}
+                            <View style={[{
+                                position: "relative",
+                                minWidth: "100%",
+                                maxWidth: "100%",
+                                minHeight: 40,
+                                borderRadius: 10,
+                                fontSize: 15,
+                                padding: 10,
+                                marginTop: 10,
+                                marginBottom: 0,
+                            }, {
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TextInput
+                                    style={{
+                                        height: 120,
+                                        textAlignVertical: 'top',
+                                        fontSize: GlobalTextStyles[text].fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }}
+                                    placeholder={trans[language].FREE_TEXT_MAX}
+                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    value={recipeForm.freeText}
+                                    onChangeText={text => handleOnChange('freeText', text)}
+                                    keyboardType="default"
+                                    maxLength={256}
+                                    multiline={true}
+                                />
+                                <Text
+                                    style={{
+                                        position: "absolute",
+                                        bottom: 5,
+                                        right: 10,
+                                        fontSize: GlobalTextStyles[text].fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor
+                                    }}>
+                                    {recipeForm?.freeText?.length}/256
+                                </Text>
+                            </View>
+                        </View>
+                    </ScrollView>
+
+                    {/* /// ingredients page // */}
+                    <View 
+                    style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+
+                    }}>
+                        <ScrollView showsVerticalScrollIndicator={false}
+                            // onScroll={handleScroll}
+                            style={{
+                                position: 'relative',
+                                height: windowHeight - 140,
+                                width: windowWidth,
+                                padding: 10,
+                                backgroundColor: GlobalStyles[theme].background
+                            }}>
+
+                            <Banner title={trans[language].INGREDIENTS} />
+
+                            <SpSheet text={trans[language].OPEN_UNITS_CONVERTOR} heightValue={550}><Conversions /></SpSheet>
+
+                            <View style={[{
+                                height: 50,
+                                width: "100%",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginVertical: 10,
+                                borderRadius: 10
+                            }, {
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+
+                                <TextInput
+                                    value={ingredients.quantity}
+                                    style={[{
+                                        width: "15%",
+                                        height: "100%",
+                                        // width: 50,
+                                        // paddingLeft: 10,
+                                        textAlign: 'center',
+                                        justifyContent: 'center',
+                                        textAlignVertical: 'center',
+                                        alignSelf: 'center',
+
+
+                                    }, {
+                                        fontSize: GlobalTextStyles[text].fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme].fontColor,
+                                    }]}
+                                    keyboardType='numeric'
+                                    placeholder={trans[language].QTY}
+                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    onChangeText={text => handleIngredients('quantity', text)}
+                                />
+
+                                <View style={{
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    width: "10%",
+                                    // width: 40,
+                                }}>
+                                    <TouchableOpacity
+                                        style={[{
+                                            width: "100%",
+                                            justifyContent: 'center',
+                                            textAlignVertical: 'center',
+
+                                        }]}
+                                        onPress={() => setModalVisible3(true)}
+                                    >
+                                        {(ingredients.units === "")
+                                            ? <Text style={{
+                                                textAlign: "center",
+                                                color: GlobalStyles[theme].fontColor,
+                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            }}>{trans[language].UN}</Text>
+                                            : <Text style={{
+                                                textAlign: "center",
+                                                color: GlobalStyles[theme].fontColor,
+                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                            }}>{units.map(unit => unit.unit === ingredients.units && unit.abreviation)}</Text>}
+                                    </TouchableOpacity>
+                                </View>
+
+                                <SelectCountry
+                                    style={{
+                                        height: "100%",
+                                        width: "35%",
+                                        paddingLeft: 5,
+                                    }}
+                                    containerStyle={{
+                                        width: 200,
+                                        borderRadius: 10,
+                                        backgroundColor: GlobalStyles[theme].paperColor,
+                                        borderColor: GlobalStyles[theme].borderColor,
+                                        color: GlobalStyles[theme].fontColor,
+                                    }}
+                                    selectedTextStyle={{
+                                        fontSize: 15,
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    }}
+                                    placeholderStyle={{
+                                        fontSize: 15,
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    }}
+                                    // imageStyle={styles.imageStyle}
+                                    inputSearchStyle={{
+                                        height: 40,
+                                        fontSize: 16,
+                                        width: "94%",
+                                        color: 'black',
+                                        backgroundColor: 'white',
+                                        borderRadius: 10,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    }}
+                                    iconStyle={{
+                                        width: 20,
+                                        height: 20,
+                                        tintColor: 'white'
+                                    }}
+                                    search
+                                    maxHeight={300}
+                                    value={ingredients.product}
+                                    data={productList}
+                                    valueField="key"
+                                    labelField="value"
+                                    placeholder={ingredients?.product === "" ? "ingredients" : ingredients?.product}
+                                    searchPlaceholder={trans[language].SEARCH}
+                                    onChange={(item) => handleIngredients('product', item.value)}
+                                />
+
+                                <TextInput
+                                    value={ingredients.remarks}
+                                    style={{
+                                        // width: "42%",
+                                        width: "26%",
+                                        textAlignVertical: 'center',
+                                        paddingLeft: 5,
+                                        fontSize: 15,
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    }}
+                                    placeholder='Remarks'
+                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    onChangeText={text => handleIngredients('remarks', text)}
+                                />
+
+                                <TouchableOpacity
+                                    onPress={addIngredient}
+                                    style={{
+                                        width: 50,
+                                        // paddingVertical: 10,
+                                        // paddingHorizontal: 20,
+                                        backgroundColor: GlobalStyles[theme].buttonColor,
+                                        borderTopRightRadius: 10,
+                                        borderBottomRightRadius: 10,
+                                    }}>
+                                    <Text style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        textAlign: 'center',
+                                        textAlignVertical: 'center',
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }}>{trans[language].ADD}</Text>
+                                </TouchableOpacity>
+
+                            </View>
+
+                            {recipeForm.ingredients.map(item =>
+                                <View style={[{
+                                    width: "100%",
+                                    height: 45,
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                    marginBottom: 10,
+                                    borderRadius: 10,
+                                }, {
+                                    backgroundColor: GlobalStyles[theme].paperColor
+                                }]} key={uuid.v4()}>
+                                    <Text style={{
+                                        width: "15%",
+                                        paddingLeft: 10,
+                                        justifyContent: 'center',
+                                        textAlignVertical: 'center',
+                                        textAlign: 'center',
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    }}>{item.quantity}</Text>
+                                    <Text style={{
+                                        width: "13%",
+                                        textAlignVertical: 'center',
+                                        textAlign: 'center',
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    }}>{units.map(unit => unit.unit === item.units && unit.abreviation)}</Text>
+                                    <Text style={{
+                                        width: "30%",
+                                        paddingLeft: 5,
+                                        textAlignVertical: 'center',
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    }}>{item.product}</Text>
+                                    <Text style={{
+                                        width: "27%",
+                                        textAlignVertical: 'center',
+                                        paddingLeft: 5,
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    }}>{item.remarks}</Text>
+
+                                    <View style={{
+                                        width: "15%",
+                                        flexDirection: "row",
+                                        alignSelf: 'center',
+                                        justifyContent: 'space-around'
+                                    }}>
+                                        <TouchableOpacity style={styles.validation} onPress={() => editIngredient(item.product)}>
+                                            <Feather name="edit-3" size={24} color={GlobalStyles[theme].fontColor} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={styles.validation} onPress={() => delIngredient(item.product, "ingredient")}>
+                                            <AntDesign name="delete" size={24} color={GlobalStyles[theme].fontColor} />
+                                        </TouchableOpacity>
                                     </View>
 
-                                </View>
+                                </View>)}
+
+
+                        </ScrollView>
+                    </View>
+
+                    {/* /// preparation page // */}
+                    <View 
+                    style={{
+                        flex: 1,
+                        minHeight: windowHeight - 400,
+                        width: windowWidth,
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: 10,
+                        backgroundColor: GlobalStyles[theme].background,
+                    }}>
+
+                        <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', height: "80%" }}>
+
+                            <Banner title={trans[language].PREPARATION} />
+
+                            <View style={[{
+                                minHeight: 50,
+                                width: "100%",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginVertical: 10,
+                                borderRadius: 10
+                            }, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+
+                                <TextInput
+                                    value={preparation.preparation}
+                                    style={{
+                                        width: "88%",
+                                        paddingLeft: 10,
+                                        paddingVertical: 5,
+                                        fontSize: 15,
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    }}
+                                    keyboardType='ascii-capable'
+                                    placeholder={trans[language].PREPARATION_STEP}
+                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    onChangeText={text => handlePreparation(text)}
+                                    multiline
+                                />
+                                <TouchableOpacity
+                                    onPress={addStep}
+                                    style={{
+                                        width: 45,
+                                        minHeight: 40,
+                                        justifyContent: 'center',
+                                        borderTopRightRadius: 10,
+                                        borderBottomRightRadius: 10,
+                                        backgroundColor: GlobalStyles[theme].buttonColor,
+
+                                    }}>
+                                    <Text style={{
+                                        width: '100%',
+                                        minHeight: 40,
+                                        textAlign: 'center',
+                                        textAlignVertical: 'center',
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }}>{trans[language].ADD}</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <FlatList
+                                data={recipeForm.preparation}
+                                showsVerticalScrollIndicator={false}
+                                renderItem={({ item }) =>
+                                    <View style={[{
+                                        flexDirection: "row",
+                                        width: "100%",
+                                        minHeight: 25,
+                                        textAlignVertical: 'center',
+                                        alignContent: "center",
+                                        marginBottom: 10,
+                                        borderRadius: 10,
+                                    }, { backgroundColor: GlobalStyles[theme].paperColor }]} >
+                                        <Text style={[{
+                                            width: 60,
+                                            paddingLeft: 10,
+                                            textAlignVertical: 'center',
+                                            paddingVertical: 5,
+                                        }, {
+                                            color: GlobalStyles[theme].fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        }]} >{trans[language].STEP} {item.step}</Text>
+                                        <Text style={[{
+                                            width: windowWidth - 140,
+                                            textAlignVertical: 'center',
+                                            justifyContent: 'flex-start',
+                                            paddingVertical: 5,
+                                        }, {
+                                            color: GlobalStyles[theme].fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        }]} >{item.preparation}</Text>
+
+                                        <View style={{
+                                            width: 60,
+                                            flexDirection: "row",
+                                            alignSelf: 'center',
+                                            justifyContent: 'space-around'
+                                        }} >
+                                            <TouchableOpacity style={styles.validation} onPress={() => editStep(item.step)}>
+                                                <Feather name="edit-3" size={24} color={GlobalStyles[theme].fontColor} />
+                                            </TouchableOpacity>
+                                            {(recipeForm.preparation[recipeForm.preparation.length - 1].step === item.step) &&
+                                                <TouchableOpacity style={styles.validation} onPress={() => delStep(item.step)}>
+                                                    <AntDesign name="delete" size={24} color={GlobalStyles[theme].fontColor} />
+                                                </TouchableOpacity>
+                                            }
+                                        </View>
+
+                                    </View>
+                                }
+                                keyExtractor={item => item.preparation}
+                            />
+                        </View>
+
+                        <SwitchButton text01={trans[language].PUBLIC} text02={trans[language].PRIVATE} show={(route.params === undefined) ? show : recipeForm.status} setShow={setShow} />
+
+                        < View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }} >
+                            <TouchableOpacity style={[{
+                                marginBottom: 10,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 10,
+                                borderStyle: 'solid',
+                                borderWidth: 0.5,
+                                paddingVertical: 10,
+                                paddingHorizontal: 20
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].noColor
+                            }]} onPress={clearForm}>
+                                <Text style={{
+                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                }}>
+                                    {trans[language].CLEAR_FORM}
+                                </Text>
+                            </TouchableOpacity>
+                            {(route.params === undefined)
+                                ? <TouchableOpacity style={[{
+                                    marginBottom: 10,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: 10,
+                                    borderStyle: 'solid',
+                                    borderWidth: 0.5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 20
+                                }, {
+                                    borderColor: GlobalStyles[theme].borderColor,
+                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                }]} onPress={handleAdd}>
+                                    <Text style={{
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }}>
+                                        {trans[language].ADD_RECIPE_TO_MY_BOOK}
+                                    </Text>
+                                </TouchableOpacity>
+                                : <TouchableOpacity style={[{
+                                    marginBottom: 10,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: 10,
+                                    borderStyle: 'solid',
+                                    borderWidth: 0.5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 30
+                                }, {
+                                    borderColor: GlobalStyles[theme].borderColor,
+                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                }]} onPress={handleEdit}>
+                                    <Text style={{
+                                        color: GlobalStyles[theme].fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    }}>{trans[language].UPDATE_RECIPE}</Text>
+                                </TouchableOpacity>
                             }
-                            keyExtractor={item => item.preparation}
-                        />
+                        </View>
+
                     </View>
 
-                    <SwitchButton text01="Public" text02="Private" show={(route.params === undefined) ? show : recipeForm.status} setShow={setShow} />
+                    {/* // Difficulty Modal // */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible}
+                    >
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            <View style={[{
+                                borderRadius: 10,
+                                maxHeight: 340,
+                                padding: 35,
+                                paddingVertical: 45,
+                                alignItems: "center",
+                                elevation: 5,
+                                borderWidth: 0.5,
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TouchableOpacity style={{
+                                    position: 'absolute',
+                                    width: "100%",
+                                    alignItems: 'flex-end',
+                                    marginTop: 20,
+                                    marginRight: 20,
+                                    top: 0,
+                                    right: 0
+                                }}
+                                    onPress={() => setModalVisible(false)}>
+                                    <EvilIcons name="close-o" size={30} color="red" />
+                                </TouchableOpacity>
+                                <FlatList
+                                    data={difficulty}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => <TouchableOpacity
+                                        style={[{
+                                            borderRadius: 10,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 10,
+                                            minWidth: 150,
+                                            borderWidth: 0.5,
+                                            marginVertical: 5,
+                                            elevation: 2,
+                                        }, {
+                                            borderColor: GlobalStyles[theme].borderColor,
+                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                        }]}
+                                    >
+                                        <Text style={[{
+                                            textAlign: "center"
+                                        }, {
+                                            fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }]}
+                                            onPress={(text) => handleDifficulty(text)}
+                                        >{item.value}</Text>
+                                    </TouchableOpacity>
 
-                    < View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }} >
-                        <TouchableOpacity style={[styles.genericButton,{backgroundColor: GlobalStyles[theme].noColor}]} onPress={clearForm}>
-                            <Text style={{fontWeight: '500'}}>Clear Form</Text>
-                        </TouchableOpacity>
-                        {(route.params === undefined)
-                            ? <TouchableOpacity style={[styles.genericButton,{backgroundColor: GlobalStyles[theme].buttonColor}]} onPress={handleAdd}>
-                                <Text style={{fontWeight: '500'}}>Add Recipe to My Book</Text>
-                            </TouchableOpacity>
-                            : <TouchableOpacity style={[styles.genericButton,{backgroundColor: GlobalStyles[theme].buttonColor}]} onPress={handleEdit}>
-                                <Text style={{fontWeight: '500'}}>Update Recipe</Text>
-                            </TouchableOpacity>
-                        }
-                    </View>
+                                    }
+                                    keyExtractor={item => item.key}
+                                />
+                            </View>
+                        </View>
+                    </Modal>
 
-                </View>
+                    {/* // Food Courses Modal // */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible4}>
 
-                <PopupModal message={redux?.recipe.message} popupModal={popupModal} />
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            <View style={[{
+                                borderRadius: 10,
+                                maxHeight: 400,
+                                padding: 35,
+                                paddingTop: 45,
+                                alignItems: "center",
+                                elevation: 5,
+                                borderWidth: 0.5,
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TouchableOpacity
+                                    style={{
+                                        position: 'absolute',
+                                        width: "100%",
+                                        alignItems: 'flex-end',
+                                        marginTop: 20,
+                                        marginRight: 20,
+                                        top: 0,
+                                        right: 0
+                                    }}
+                                    onPress={() => setModalVisible4(false)}>
+                                    <EvilIcons name="close-o" size={30} color="red" />
+                                </TouchableOpacity>
+                                <FlatList
+                                    data={foodCourses}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => <TouchableOpacity
+                                        style={[{
+                                            borderRadius: 10,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 10,
+                                            minWidth: 150,
+                                            borderWidth: 0.5,
+                                            marginVertical: 5,
+                                            elevation: 2,
+                                        }, {
+                                            borderColor: GlobalStyles[theme].borderColor,
+                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                        }]}
+                                    >
+                                        <Text style={[{
+                                            textAlign: "center"
+                                        }, {
+                                            fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }]}
+                                            onPress={(text) => handleFoodCourse(text)}>
+                                            {item.value}</Text>
+                                    </TouchableOpacity>
+                                    }
+                                    keyExtractor={item => item.key}
+                                />
+                            </View>
+                        </View>
+                    </Modal>
 
-            </ScrollView>
+                    {/* // Special Diet Modal // */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible2}>
+
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            <View style={[{
+                                borderRadius: 10,
+                                maxHeight: 400,
+                                padding: 35,
+                                paddingTop: 45,
+                                alignItems: "center",
+                                elevation: 5,
+                                borderWidth: 0.5,
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TouchableOpacity
+                                    style={{
+                                        position: 'absolute',
+                                        width: "100%",
+                                        alignItems: 'flex-end',
+                                        marginTop: 20,
+                                        marginRight: 20,
+                                        top: 0,
+                                        right: 0
+                                    }}
+                                    onPress={() => setModalVisible2(false)}>
+                                    <EvilIcons name="close-o" size={30} color="red" />
+                                </TouchableOpacity>
+                                <FlatList
+                                    data={logos}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => <TouchableOpacity
+                                        style={[{
+                                            borderRadius: 10,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 10,
+                                            minWidth: 150,
+                                            borderWidth: 0.5,
+                                            marginVertical: 5,
+                                            elevation: 2,
+                                        }, {
+                                            borderColor: GlobalStyles[theme].borderColor,
+                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                        }]}
+                                    >
+                                        <Text style={[{
+                                            textAlign: "center"
+                                        }, {
+                                            fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }]}
+                                            onPress={(text) => handleSpecialDiet(text)}>
+                                            {item.name}</Text>
+                                    </TouchableOpacity>
+                                    }
+                                    keyExtractor={item => item.name}
+                                />
+                            </View>
+                        </View>
+                    </Modal>
+
+                    {/* // Units Modal // */}
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible3}
+                    >
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            <View style={[{
+                                borderRadius: 10,
+                                maxHeight: 400,
+                                padding: 35,
+                                paddingTop: 45,
+                                alignItems: "center",
+                                elevation: 5,
+                                borderWidth: 0.5,
+                            }, {
+                                borderColor: GlobalStyles[theme].borderColor,
+                                backgroundColor: GlobalStyles[theme].paperColor
+                            }]}>
+                                <TouchableOpacity
+                                    style={{
+                                        position: 'absolute',
+                                        width: "100%",
+                                        alignItems: 'flex-end',
+                                        marginTop: 20,
+                                        marginRight: 20,
+                                        top: 0,
+                                        right: 0
+                                    }}
+                                    onPress={() => setModalVisible3(false)}>
+                                    <EvilIcons name="close-o" size={30} color="red" />
+                                </TouchableOpacity>
+                                <FlatList
+                                    data={units}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => <Pressable
+                                        style={[{
+                                            borderRadius: 10,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 10,
+                                            minWidth: 150,
+                                            borderWidth: 0.5,
+                                            marginVertical: 5,
+                                            elevation: 2,
+                                        }, {
+                                            borderColor: GlobalStyles[theme].borderColor,
+                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                        }]}
+                                    >
+                                        <Text style={[{
+                                            textAlign: "center"
+                                        }, {
+                                            fontSize: GlobalTextStyles[text].fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme].fontColor
+                                        }]}
+                                            onPress={(text) => handleIngredients('units', text)}>
+                                            {item.unit}
+                                        </Text>
+                                    </Pressable>
+                                    }
+                                    keyExtractor={item => uuid.v4()}
+                                />
+                            </View>
+                        </View>
+                    </Modal>
+
+                    <PopupModal message={redux?.recipe.message} popupModal={popupModal} />
+
+                </ScrollView>
             </KeyboardAvoidingView>
-            {/* </ScrollView > */}
         </TouchableWithoutFeedback >
     )
 }
 
-const styles = StyleSheet.create({
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-        width: 150,
-        borderWidth: 0.5,
-        borderColor: 'black'
-    },
-    buttonOpen: {
-        width: 40,
-        height: 40,
-        fontWeight: '500',
-        fontSize: 18
-    },
-    buttonOpen2: {
-        // backgroundColor: "#66ccff",
-        width: 70,
-        height: 40,
+const styles = StyleSheet.create({})
 
-    },
-    button3: {
-        width: 50,
-        height: "100%",
-        justifyContent: 'center',
-        textAlignVertical: 'center'
-    },
-    buttons: {
-        width: 60,
-        flexDirection: "row",
-        alignSelf: 'center',
-        justifyContent: 'space-around'
-    },
-    buttonClose: {
-        // backgroundColor: "#307ecc",
-        marginVertical: 5
-    },
-    buttonStyle: {
-        backgroundColor: '#66ccff',
-        borderWidth: 0,
-        color: '#FFFFFF',
-        borderColor: '#307ecc',
+{/* // Food Courses Area // */ }
+{/* <View style={{
+    flexDirection: "row",
+    width: '100%',
+    marginBottom: 10,
+    justifyContent: 'space-between'
+}}>
+    <View style={{
+        backgroundColor: GlobalStyles[theme].paperColor,
+        width: '79%',
         height: 40,
-        alignItems: 'center',
-        borderRadius: 30,
-        width: 100,
-    },
-    buttonTextStyle: {
-        color: 'black',
-        paddingVertical: 10,
-        fontSize: 16,
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    cookInfo: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: "100%",
-        height: 90,
-        borderRadius: 10,
-        padding: 10
-        // marginTop: 10
-    },
-    cookItem: {
-        width: (windowWidth - 40) / 4,
-        height: '100%',
-        // borderColor: 'black',
-        // borderWidth: 0.2,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        // backgroundColor: 'blue'
-    },
-    delImg: {
-        position: 'absolute',
-        bottom: 15,
-        right: 10,
-        zIndex: 10, elevation: 10,
-    },
-    genericButton: {
-        marginBottom: 10,
-        // width: 170,
-        // height: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 30,
-        borderStyle: 'solid',
-        borderColor: 'black',
-        borderWidth: 0.5,
-        paddingVertical: 10,
-        paddingHorizontal: 30
-    },
-    input: {
-        width: "100%",
-        height: 40,
-        borderRadius: 10,
-        // backgroundColor: "white",
-        paddingLeft: 10,
-    },
-    inputIngredients: {
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        height: 40,
-        marginVertical: 10,
         borderRadius: 10
-    },
-    inputLogo: {
-        flexDirection: "row",
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: "100%",
-        minHeight: 45,
-        borderRadius: 10,
-        paddingLeft: 10
-    },
-    inputPreparation: {
-        minHeight: 40
-    },
-    inputTags: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        minWidth: "90%",
-        width: "100%",
-        backgroundColor: "white",
-        height: 45,
-        borderRadius: 10,
-        paddingStart: 10,
-        fontSize: 16
-    },
-    logoInput: {
-        flexDirection: "row",
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: "90%",
-        height: 40,
-        // backgroundColor: 'red',
-        // height: '100%'
-    },
-    mainBody: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 20,
-    },
-    modalView: {
-        margin: 20,
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        height: 320,
-        maxHeight: 400,
-    },
-    modalView2: {
-        maxHeight: 600,
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: "center"
-    },
-    numberInput: {
-        width: 30,
-        // height: 30,
-        borderStyle: 'solid',
-        borderBottomWidth: 1,
-        borderBottomColor: 'black',
-        textAlign: "center",
-    },
-    outputIngredients: {
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        height: 35,
-        marginBottom: 10,
-        borderRadius: 10,
-    },
-    outputPreparation: {
-        width: "100%",
-        height: 35,
-        flexDirection: "row",
-        // justifyContent: "space-between",
-        minHeight: 25,
-        marginBottom: 10,
-        textAlignVertical: 'center',
-        borderRadius: 10,
-        alignContent: "center"
-    },
-    outputTags: {
-        minWidth: "100%",
-        maxWidth: "100%",
-        minHeight: 45,
-        borderRadius: 10,
-        marginTop: 10,
-        fontSize: 15,
-        padding: 10,
-    },
-    prep: {
-        width: 250,
-        textAlignVertical: 'center',
-        justifyContent: 'flex-start',
-    },
-    preparation: {
-        width: "88%",
-        paddingLeft: 10,
-    },
-    product: {
-        width: 110,
-        paddingLeft: 5,
-        textAlignVertical: 'center',
-    },
-    quantity: {
-        width: 40,
-        paddingLeft: 10,
-        justifyContent: 'center',
-        textAlignVertical: 'center'
-    },
-    remarks: {
-        width: 110,
-        textAlignVertical: 'center',
-        paddingLeft: 5
-    },
-    specialDiet: {
-        marginVertical: 10,
-        flexDirection: "row",
-        alignItems: 'center',
-        width: "100%",
-        justifyContent: 'space-between'
-    },
-    specialDietLogo: {
-        justifyContent: 'flex-start',
-        width: "79%",
-        backgroundColor: "white",
-        borderRadius: 10,
-        paddingHorizontal: 5,
-        minHeight: 55,
-        flexDirection: "row",
-        textAlignVertical: 'center',
-        flexWrap: 'wrap',
-    },
-    showTags: {
-        width: "80%",
-        backgroundColor: "white",
-        minHeight: 45,
-        borderBottomLeftRadius: 10,
-        borderTopLeftRadius: 10,
-        paddingLeft: 10,
-        textAlignVertical: 'center'
-    },
-    step: {
-        width: 60,
-        paddingLeft: 10,
-        textAlignVertical: 'center',
+    }}>
+        {recipeForm.foodCourse !== "" ?
+            <TouchableOpacity onPress={() => setRecipeForm({ ...recipeForm, foodCourse: "" })}>
+                <Text style={{
+                    width: '100%',
+                    height: '100%',
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    fontSize: 16,
+                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                    color: GlobalStyles[theme].fontColor
+                }}>
+                    {recipeForm.foodCourse}
+                </Text>
+            </TouchableOpacity>
+            : <Text style={{
+                height: '100%',
+                textAlignVertical: 'center',
+                fontSize: 15,
+                paddingLeft: 15,
+                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                color: GlobalStyles[theme].fontColor
+            }}>
+                {trans[language].FOOD_COURSE}
+            </Text>}
+    </View>
 
-    },
-    textStyle: {
-        color: "black",
-        fontWeight: "500",
-        textAlign: "center"
-    },
-    textStyle2: {
-        width: 50,
-        alignSelf: 'center'
+    <TouchableOpacity
+        style={[{
+            width: 70,
+            height: 40,
+            borderRadius: 10,
+            padding: 10,
+            elevation: 2,
+            borderWidth: 0.5,
+        }, {
+            color: GlobalStyles[theme].fontColor,
+            borderColor: GlobalStyles[theme].borderColor,
+            backgroundColor: GlobalStyles[theme].buttonColor
+        }]}
+        onPress={() => setModalVisible4(true)}>
 
-    },
-    units: {
-        width: 50,
-        textAlignVertical: 'center',
-        textAlign: 'center'
+        <Text style={[{
+            width: 70,
+            textAlign: "center",
+            alignSelf: 'center',
+        }, {
+            fontSize: GlobalTextStyles[text].fontSize,
+            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+            color: GlobalStyles[theme].fontColor
+        }]}>
+            {trans[language].COURSE}
+        </Text>
+    </TouchableOpacity>
 
-    },
-    dropdown: {
-        height: 40,
-        width: 130,
-        paddingLeft: 5,
-        // borderBottomColor: 'gray',
-        // borderBottomWidth: 0.5,
-        // backgroundColor: 'red',
-    },
-    containerList: {
-        // backgroundColor: "blue",
-        width: 200,
-    },
-    imageStyle: {
-        width: 24,
-        height: 24,
-    },
-    placeholderStyle: {
-        fontSize: 16,
-    },
-    selectedTextStyle: {
-        fontSize: 16,
-    },
-    iconStyle: {
-        width: 20,
-        height: 20,
-    },
-    inputSearchStyle: {
-        height: 40,
-        fontSize: 16,
-        width: "93%"
-    },
-})
+</View> */}
 
-{/* <View style={{ position: 'absolute', zIndex: 999, }}>
-                        <SelectList
-                            onSelect={() => handleIngredients('product', selected)}
-
-                            setSelected={(val) => setSelected(val)}
-                            data={productList}
-                            save="value"
-                            dropdownStyles={{
-                                backgroundColor: 'white'
-                            }}
-                        />
-                    </View> */}
-
-{/* <FlatList
-                        data={recipeForm.ingredients}
-                        showsVerticalScrollIndicator={false}
-                        renderItem={({ item }) => <View style={styles.outputIngredients}>
-                            <Text style={styles.quantity}>{item.quantity}</Text>
-                            <Text style={styles.units}>{units.map(unit => unit.unit === item.units && unit.abreviation)}</Text>
-                            <Text style={styles.product}>{item.product}</Text>
-                            <Text style={styles.remarks}>{item.remarks}</Text>
-
-                            <View style={styles.buttons}>
-                                <TouchableOpacity style={styles.validation} onPress={() => editIngredient(item.product)}>
-                                    <Feather name="edit-3" size={24} color="black" />
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.validation} onPress={() => delIngredient(item.product, "ingredient")}>
-                                    <AntDesign name="delete" size={24} color="black" />
-                                </TouchableOpacity>
-                            </View>
-
-                        </View>
-                        }
-                        keyExtractor={item => uuid.v4()}
-                    /> */}
-
-{/* <SelectList
-                            onSelect={() => handleIngredients('product', selected)}
-                            setSelected={setSelected}
-                            // placeholder={mailForm.reciverName ? mailForm.reciverName : "To:"}
-                            placeholder="Ingredients"
-                            // maxHeight="150"
-                            data={productList}
-                            search={true}
-                            // fontFamily="lato"
-                            save="value"
-                            boxStyles={{
-                                width: 130,
-                                borderWidth: 0,
-                                // borderBottomWidth: 2,
-                                // borderStyle: 'solid',
-                                // borderColor: 'black',
-
-                            }}
-                            dropdownItemStyles={{
-                                // width: 250,
-                                marginBottom: 10,
-
-                            }}
-                            dropdownStyles={{
-                                width: 250,
-                                height: 250,
-                                alignSelf: 'center',
-                                // backgroundColor: 'white',
-                                position: 'absolute',
-                                elevation: 999,
-                                zIndex: 999,
-                                top: 35,
-                                backgroundColor: 'cyan'
-                            }}
-                        // dropdownTextStyles={{
-
-                        //     // backgroundColor: 'red'
-                        // }}
-                        // arrowicon={
-                        //   <FontAwesome name="chevron-down" size={12} color={'black'} />
-                        // }
-                        // searchicon={
-                        //   <FontAwesome name="search" size={12} color={'black'} />
-                        // }
-                        /> */}
-{/* <View style={{ position: 'absolute', zIndex: 999, width: 130, left: 130 }}>
-                            <SelectList
-                                onSelect={() => handleIngredients('product', selected)}
-
-                                setSelected={(val) => setSelected(val)}
-                                data={productList}
-                                save="value"
-                                dropdownStyles={{
-                                    backgroundColor: 'white'
-                                }}
-                                boxStyles={{
-                                    backgroundColor: 'white'
-
-                                }}
-                            />
-                        </View> */}
+// Fixed Button
+{/* <TouchableOpacity
+ onPress={addIngredient}
+ style={{
+     position: "absolute",
+     top: 530 + yOffset,
+     right: 70,
+     paddingVertical: 10,
+     paddingHorizontal: 20,
+     backgroundColor: GlobalStyles[theme].buttonColor,
+     borderRadius: 10,
+ }}>
+ <Text style={{
+     width: '100%',
+     height: '100%',
+     textAlign: 'center',
+     textAlignVertical: 'center',
+     color: GlobalStyles[theme].fontColor,
+     fontFamily: GlobalFontStyles[fontStyle].fontStyle
+ }}>{trans[language].ADD}</Text>
+</TouchableOpacity> */}

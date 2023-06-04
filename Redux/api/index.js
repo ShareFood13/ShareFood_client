@@ -2,7 +2,8 @@ import axios from "axios"
 
 import * as SecureStore from 'expo-secure-store';
 
-const API = axios.create({ baseURL: 'https://d5e5-77-124-25-20.ngrok-free.app' })
+const API = axios.create({ baseURL: 'https://1c63-84-110-61-170.ngrok-free.app' })
+// const API = axios.create({ baseURL: 'http://localhost:3000/' })
 
 API.interceptors.request.use(async (req) => {
     if (await SecureStore.getItemAsync('storageData')) {
