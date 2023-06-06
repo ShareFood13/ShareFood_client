@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 
 export default StyleSheet.create({
-    stylesLight: {
+    Light: {
         background: "#eee",
         paperColor: "#FFFFFF",
         fontColor: "#2C2C2C",
@@ -18,7 +18,7 @@ export default StyleSheet.create({
         bluePurple: "#6F43FF",
         purple: "#AE43FF",
     },
-    stylesLight: {
+    Dark: {
         background: "#111",
         paperColor: "#222",
         fontColor: "#fff",

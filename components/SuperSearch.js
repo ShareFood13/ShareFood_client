@@ -1,11 +1,10 @@
 import { StyleSheet, Text, View, TextInput, Dimensions, TouchableOpacity, Alert, Modal, FlatList } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 
-import { Fontisto, FontAwesome, EvilIcons, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
-import GlobalStyles from '../GlobalStyles';
+import { Fontisto, FontAwesome, EvilIcons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { superSearch } from '../Redux/actions/superSearch';
-import { SelectList } from 'react-native-dropdown-select-list';
+import { Context } from '../context/UserContext';
 
 const foodCourses = [
     { key: 1, value: "Hors d'oeuvre (Appetizer)" },
@@ -72,21 +71,26 @@ import {
     PTSans_400Regular,
     Karla_400Regular
 } from '@expo-google-fonts/dev';
+import GlobalStyles from '../GlobalStyles';
 import GlobalFontStyles from './../GlobalFontStyles';
-import trans from '../Language'
 import GlobalTextStyles from '../GlobalTextStyles';
+import trans from '../Language'
+
+var theme = ""
+var language = ""
+var fontStyle = ""
 
 const SuperSearch = () => {
     const dispatch = useDispatch();
+
     const [textToSearch, setTextToSearch] = useState("")
     const [restrictions, setRestrictions] = useState({ sDiet: "", foodCourses: "" })
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible3, setModalVisible3] = useState(false)
+
     const [text, setText] = useState('normalText')
-    const [theme, setTheme] = useState("stylesLight")
-    const [language, setLanguage] = useState("en")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -101,9 +105,18 @@ const SuperSearch = () => {
         Karla_400Regular
     })
 
+    const { userContext, setUserContext } = useContext(Context)
 
-    const MODAL_TITLE = trans[language].HOW_TO_SEARCH
-    const MODAL_MSG = trans[language].SEARCH_MSG
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
+
+    const MODAL_TITLE = trans[language]?.HOW_TO_SEARCH
+    const MODAL_MSG = trans[language]?.SEARCH_MSG
 
     const onChangeSearch = (text) => {
         setTextToSearch(text)
@@ -120,13 +133,20 @@ const SuperSearch = () => {
     }
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: "center", width: windowWidth, padding: 10, }}>
+        <View style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: "center",
+            width: windowWidth,
+            padding: 10,
+            backgroundColor: GlobalStyles[theme]?.background
+        }}>
 
             <View style={{ width: "100%", height: 25 }}>
                 <TouchableOpacity
                     style={{ width: 25, alignSelf: 'flex-end', alignItems: 'center' }}
                     onPress={() => setModalVisible3(true)}>
-                    <FontAwesome name="question-circle-o" size={25} color={GlobalStyles[theme].fontColor} />
+                    <FontAwesome name="question-circle-o" size={25} color={GlobalStyles[theme]?.fontColor} />
                 </TouchableOpacity>
             </View>
 
@@ -137,8 +157,8 @@ const SuperSearch = () => {
                 borderBottomWidth: 2,
                 borderRadius: 10,
                 marginTop: 10,
-                backgroundColor: GlobalStyles[theme].paperColor,
-                borderBottomColor: GlobalStyles[theme].borderColor,
+                backgroundColor: GlobalStyles[theme]?.paperColor,
+                borderBottomColor: GlobalStyles[theme]?.borderColor,
             }, {
                 // width: windowWidth - 20,
                 // alignSelf: 'center',
@@ -146,8 +166,8 @@ const SuperSearch = () => {
             }]}>
                 <TextInput
                     onChangeText={text => onChangeSearch(text)}
-                    placeholder={trans[language].SEARCH_FOR}
-                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                    placeholder={trans[language]?.SEARCH_FOR}
+                    placeholderTextColor={GlobalStyles[theme]?.fontColor}
                     value={textToSearch}
                     style={[{
                         width: "90%",
@@ -156,8 +176,8 @@ const SuperSearch = () => {
                         paddingLeft: 10,
                         // height: "100%",
                     }, {
-                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                        color: GlobalStyles[theme].fontColor
+                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                        color: GlobalStyles[theme]?.fontColor
                     }]}
                 />
                 <TouchableOpacity onPress={searchFn} style={{
@@ -166,7 +186,7 @@ const SuperSearch = () => {
                     alignSelf: 'center',
                     justifyContent: 'center',
                 }}>
-                    <Fontisto name="search" size={24} color={GlobalStyles[theme].fontColor} />
+                    <Fontisto name="search" size={24} color={GlobalStyles[theme]?.fontColor} />
                 </TouchableOpacity>
             </View>
 
@@ -178,7 +198,7 @@ const SuperSearch = () => {
                 justifyContent: 'center',
                 marginVertical: 10,
                 borderRadius: 10,
-                backgroundColor: GlobalStyles[theme].paperColor,
+                backgroundColor: GlobalStyles[theme]?.paperColor,
             }}>
                 {restrictions.sDiet !== "" ?
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: "100%" }}>
@@ -190,8 +210,8 @@ const SuperSearch = () => {
                                 textAlign: 'center',
                                 textAlignVertical: 'center',
                                 fontSize: 16,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor
                             }}>
                                 {restrictions.sDiet}
                             </Text>
@@ -216,10 +236,10 @@ const SuperSearch = () => {
                             width: '100%',
                             fontSize: 15,
                             paddingLeft: 10,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                            color: GlobalStyles[theme].fontColor
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                            color: GlobalStyles[theme]?.fontColor
                         }}>
-                            {trans[language].SPECIAL_DIET}
+                            {trans[language]?.SPECIAL_DIET}
                         </Text>
                     </TouchableOpacity>
                 }
@@ -233,8 +253,8 @@ const SuperSearch = () => {
                         elevation: 2,
                         borderWidth: 0.5,
                     }, {
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].buttonColor,
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.buttonColor,
                     }]}
                     onPress={() => setModalVisible(true)}>
 
@@ -243,11 +263,11 @@ const SuperSearch = () => {
                         textAlign: "center",
                         alignSelf: 'center'
                     }, {
-                        fontSize: GlobalTextStyles[text].fontSize,
-                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                        color: GlobalStyles[theme].fontColor
+                        fontSize: GlobalTextStyles[text]?.fontSize,
+                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                        color: GlobalStyles[theme]?.fontColor
                     }]}>
-                        {trans[language].SDIET}
+                        {trans[language]?.SDIET}
                     </Text>
                 </TouchableOpacity> */}
 
@@ -260,7 +280,7 @@ const SuperSearch = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: 10,
-                backgroundColor: GlobalStyles[theme].paperColor,
+                backgroundColor: GlobalStyles[theme]?.paperColor,
             }}>
                 {restrictions.foodCourses !== "" ?
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: "100%" }}>
@@ -272,8 +292,8 @@ const SuperSearch = () => {
                                 textAlign: 'center',
                                 textAlignVertical: 'center',
                                 fontSize: 16,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor
                             }}>
                                 {restrictions.foodCourses}
                             </Text>
@@ -298,10 +318,10 @@ const SuperSearch = () => {
                             width: '100%',
                             fontSize: 15,
                             paddingLeft: 10,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                            color: GlobalStyles[theme].fontColor
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                            color: GlobalStyles[theme]?.fontColor
                         }}>
-                            {trans[language].FOOD_COURSE}
+                            {trans[language]?.FOOD_COURSE}
                         </Text>
                     </TouchableOpacity>
                 }
@@ -324,8 +344,8 @@ const SuperSearch = () => {
                         borderStyle: 'solid',
                         borderRadius: 20,
                         padding: 30,
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].paperColor,
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.paperColor,
                     }}>
                         <TouchableOpacity style={{
                             width: "100%",
@@ -343,14 +363,14 @@ const SuperSearch = () => {
                         <View style={{ flexDirection: 'column' }}>
                             <Text style={{
                                 fontSize: 20,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
                                 marginBottom: 10,
                             }}>{MODAL_TITLE}</Text>
                             <Text style={{
-                                color: GlobalStyles[theme].fontColor,
-                                fontSize: GlobalFontStyles[fontStyle].fontSize,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
+                                fontSize: GlobalFontStyles[fontStyle]?.fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                 paddingLeft: 20
                             }}>{MODAL_MSG}</Text>
                         </View>
@@ -378,8 +398,8 @@ const SuperSearch = () => {
                         elevation: 5,
                         borderWidth: 0.5,
                     }, {
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].paperColor
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.paperColor
                     }]}>
                         <TouchableOpacity
                             style={{
@@ -407,16 +427,16 @@ const SuperSearch = () => {
                                     marginVertical: 5,
                                     elevation: 2,
                                 }, {
-                                    borderColor: GlobalStyles[theme].borderColor,
-                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                    borderColor: GlobalStyles[theme]?.borderColor,
+                                    backgroundColor: GlobalStyles[theme]?.buttonColor
                                 }]}
                             >
                                 <Text style={[{
                                     textAlign: "center"
                                 }, {
-                                    fontSize: GlobalTextStyles[text].fontSize,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor
+                                    fontSize: GlobalTextStyles[text]?.fontSize,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor
                                 }]}
                                     onPress={() => onChange('sDiet', item.value)}
                                 >
@@ -449,8 +469,8 @@ const SuperSearch = () => {
                         elevation: 5,
                         borderWidth: 0.5,
                     }, {
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].paperColor
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.paperColor
                     }]}>
                         <TouchableOpacity
                             style={{
@@ -478,16 +498,16 @@ const SuperSearch = () => {
                                     marginVertical: 5,
                                     elevation: 2,
                                 }, {
-                                    borderColor: GlobalStyles[theme].borderColor,
-                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                    borderColor: GlobalStyles[theme]?.borderColor,
+                                    backgroundColor: GlobalStyles[theme]?.buttonColor
                                 }]}
                             >
                                 <Text style={[{
                                     textAlign: "center"
                                 }, {
-                                    fontSize: GlobalTextStyles[text].fontSize,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor
+                                    fontSize: GlobalTextStyles[text]?.fontSize,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor
                                 }]}
                                     onPress={() => onChange('foodCourses', item.value)}>
                                     {item.value}</Text>

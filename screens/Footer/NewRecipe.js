@@ -266,6 +266,9 @@ import GlobalStyles from '../../GlobalStyles';
 import GlobalTextStyles from '../../GlobalTextStyles';
 import trans from '../../Language'
 
+var theme = ""
+var language = ""
+var fontStyle = ""
 export default function NewRecipe({ route, navigation }) {
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
@@ -285,9 +288,9 @@ export default function NewRecipe({ route, navigation }) {
     const [userData, setUserData] = useState(null)
     const [cloudinaryToDelete, setCloudinaryToDelete] = useState([])
     const [text, setText] = useState('normalText')
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -307,6 +310,13 @@ export default function NewRecipe({ route, navigation }) {
     const redux = useSelector((state) => state)
 
     const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     useEffect(() => {
         if (redux?.recipe.message) {
@@ -430,7 +440,7 @@ export default function NewRecipe({ route, navigation }) {
         //     "cancelled": false
         //   }
         if (!result.canceled) {
-            setRecipeForm({ ...recipeForm, recipePicture: [...recipeForm.recipePicture, { path: result.assets[0].uri, base64: `data:image/jpg;base64,${result.assets[0].base64}` }] })
+            setRecipeForm({ ...recipeForm, recipePicture: [...recipeForm.recipePicture, { path: result.assets[0]?.uri, base64: `data:image/jpg;base64,${result.assets[0]?.base64}` }] })
         } else {
             Alert.alert(
                 'Adding pincture.',
@@ -444,10 +454,10 @@ export default function NewRecipe({ route, navigation }) {
     const handleDifficulty = (text) => {
         switch (text._dispatchInstances.pendingProps.children) {
             case "Super Easy":
-                setDifficultyColor(GlobalStyles[theme].green)
+                setDifficultyColor(GlobalStyles[theme]?.green)
                 break
             case "Easy":
-                setDifficultyColor(GlobalStyles[theme].yesColor)
+                setDifficultyColor(GlobalStyles[theme]?.yesColor)
                 break
             case "Medium":
                 setDifficultyColor("orange")
@@ -456,7 +466,7 @@ export default function NewRecipe({ route, navigation }) {
                 setDifficultyColor("salmon")
                 break
             case "Super Hard":
-                setDifficultyColor(GlobalStyles[theme].noColor)
+                setDifficultyColor(GlobalStyles[theme]?.noColor)
                 break
         }
         setRecipeForm({ ...recipeForm, difficulty: text._dispatchInstances.pendingProps.children })
@@ -521,7 +531,7 @@ export default function NewRecipe({ route, navigation }) {
         if (name === "picture") {
             const result1 = recipeForm.recipePicture.filter((item, index) => item.path.includes("cloudinary") && index === product)
             setCloudinaryToDelete([...cloudinaryToDelete, result1[0]?.path])
-            // console.log("NewRecipe1", result1[0].path)
+            // console.log("NewRecipe1", result1[0]?.path)
             const result2 = recipeForm.recipePicture.filter((item, index) => index !== product)
             // console.log("NewRecipe2", result2)
             setRecipeForm({ ...recipeForm, recipePicture: result2 })
@@ -554,7 +564,7 @@ export default function NewRecipe({ route, navigation }) {
 
     const editStep = (step) => {
         const result = recipeForm.preparation.filter(item => item.step === step)
-        setOldStep(result[0].step)
+        setOldStep(result[0]?.step)
         setPreparation(result[0])
     }
 
@@ -603,7 +613,7 @@ export default function NewRecipe({ route, navigation }) {
                 style={{
                     width: windowWidth,
                     maxHeight: windowHeight - 118,
-                    backgroundColor: GlobalStyles[theme].background
+                    backgroundColor: GlobalStyles[theme]?.background
                 }}
             >
                 <ScrollView
@@ -624,7 +634,7 @@ export default function NewRecipe({ route, navigation }) {
                             padding: 10
                         }}>
 
-                            <Banner title={(route.params === undefined) ? trans[language].NEW_RECIPE : trans[language].UPDATE_RECIPE} />
+                            <Banner title={(route.params === undefined) ? trans[language]?.NEW_RECIPE : trans[language]?.UPDATE_RECIPE} />
 
                             <TextInput
                                 value={recipeForm.recipeName}
@@ -636,12 +646,12 @@ export default function NewRecipe({ route, navigation }) {
                                     paddingLeft: 10,
                                 }, {
                                     fontSize: 20,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor,
-                                    backgroundColor: GlobalStyles[theme].paperColor
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    backgroundColor: GlobalStyles[theme]?.paperColor
                                 }]}
-                                placeholder={trans[language].RECIPE_NAME}
-                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                placeholder={trans[language]?.RECIPE_NAME}
+                                placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                 onChangeText={text => handleOnChange('recipeName', text)}
                             />
 
@@ -664,17 +674,17 @@ export default function NewRecipe({ route, navigation }) {
                                     marginBottom: 10,
                                     marginTop: 0,
                                 }, {
-                                    borderColor: GlobalStyles[theme].borderColor,
-                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                    borderColor: GlobalStyles[theme]?.borderColor,
+                                    backgroundColor: GlobalStyles[theme]?.buttonColor
                                 }]}>
                                     {recipeForm.recipePicture.length < 3 &&
                                         <TouchableOpacity>
                                             <Text style={{
-                                                fontSize: GlobalTextStyles[text].fontSize,
-                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                color: GlobalStyles[theme].fontColor
+                                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                color: GlobalStyles[theme]?.fontColor
                                             }} onPress={pickImage}>
-                                                {trans[language].ADD_A_IMAGE} {recipeForm.recipePicture.length}/3
+                                                {trans[language]?.ADD_A_IMAGE} {recipeForm.recipePicture.length}/3
                                             </Text>
                                         </TouchableOpacity>}
                                 </View>
@@ -690,21 +700,21 @@ export default function NewRecipe({ route, navigation }) {
                                 borderRadius: 10,
                                 padding: 10,
                                 marginBottom: 10,
-                            }, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                            }, { backgroundColor: GlobalStyles[theme]?.paperColor }]}>
 
                                 <View style={{
-                                    width: (windowWidth - 40) / 4,
+                                    width: (windowWidth - 40) / 4-5,
                                     height: '100%',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                 }}>
                                     <Text style={{
                                         marginBottom: 10,
-                                        fontSize: GlobalTextStyles[text].fontSize,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontSize: GlobalTextStyles[text]?.fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }}>
-                                        {trans[language].PREP_TIME}
+                                        {trans[language]?.PREP_TIME}
                                     </Text>
                                     <View style={{
                                         width: "90%",
@@ -713,49 +723,49 @@ export default function NewRecipe({ route, navigation }) {
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
                                     }}>
-                                        <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                                        <Entypo name="stopwatch" size={24} color={GlobalStyles[theme]?.fontColor} />
                                         <TextInput
                                         
                                             value={recipeForm.prepTime}
                                             placeholder="0"
-                                            placeholderTextColor={GlobalStyles[theme].fontColor}
+                                            placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                             style={[{
                                                 width: 30,
                                                 textAlign: "center",
                                                 borderStyle: 'solid',
                                                 borderBottomWidth: 0.5,
                                             }, {
-                                                borderBottomColor: GlobalStyles[theme].borderColor,
-                                                fontSize: GlobalTextStyles[text].fontSize,
-                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                color: GlobalStyles[theme].fontColor
+                                                borderBottomColor: GlobalStyles[theme]?.borderColor,
+                                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                color: GlobalStyles[theme]?.fontColor
                                             }]}
                                             keyboardType='numeric'
                                             onChangeText={text => handleOnChange('prepTime', text)}
                                         />
                                         <Text style={{
-                                            fontSize: GlobalTextStyles[text].fontSize,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor
+                                            fontSize: GlobalTextStyles[text]?.fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor
                                         }}>
-                                            {trans[language].MIN}
+                                            {trans[language]?.MIN}
                                         </Text>
                                     </View>
                                 </View>
 
                                 <View style={{
-                                    width: (windowWidth - 40) / 4,
+                                    width: (windowWidth - 40) / 4-5,
                                     height: '100%',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                 }}>
                                     <Text style={{
                                         marginBottom: 10,
-                                        fontSize: GlobalTextStyles[text].fontSize,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontSize: GlobalTextStyles[text]?.fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }}>
-                                        {trans[language].COOK_TIME}
+                                        {trans[language]?.COOK_TIME}
                                     </Text>
                                     <View style={{
                                         width: "90%",
@@ -764,10 +774,10 @@ export default function NewRecipe({ route, navigation }) {
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
                                     }}>
-                                        <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                                        <Entypo name="stopwatch" size={24} color={GlobalStyles[theme]?.fontColor} />
                                         <TextInput
                                         placeholder="0"
-                                        placeholderTextColor={GlobalStyles[theme].fontColor}
+                                        placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                             value={recipeForm.cookTime}
                                             style={[{
                                                 width: 30,
@@ -775,37 +785,37 @@ export default function NewRecipe({ route, navigation }) {
                                                 borderStyle: 'solid',
                                                 borderBottomWidth: 0.5,
                                             }, {
-                                                borderBottomColor: GlobalStyles[theme].borderColor,
-                                                fontSize: GlobalTextStyles[text].fontSize,
-                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                color: GlobalStyles[theme].fontColor
+                                                borderBottomColor: GlobalStyles[theme]?.borderColor,
+                                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                color: GlobalStyles[theme]?.fontColor
                                             }]}
                                             keyboardType='numeric'
                                             onChangeText={text => handleOnChange('cookTime', text)}
                                         />
                                         <Text style={{
-                                            fontSize: GlobalTextStyles[text].fontSize,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor
+                                            fontSize: GlobalTextStyles[text]?.fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor
                                         }}>
-                                            {trans[language].MIN}
+                                            {trans[language]?.MIN}
                                         </Text>
                                     </View>
                                 </View>
 
                                 <View style={{
-                                    width: (windowWidth - 40) / 4,
+                                    width: (windowWidth - 40) / 4-5,
                                     height: '100%',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                 }}>
                                     <Text style={{
                                         marginBottom: 5,
-                                        fontSize: GlobalTextStyles[text].fontSize,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontSize: GlobalTextStyles[text]?.fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }}>
-                                        {trans[language].DIFFICULTY}
+                                        {trans[language]?.DIFFICULTY}
                                     </Text>
                                     <View style={{
                                         width: "90%",
@@ -814,7 +824,7 @@ export default function NewRecipe({ route, navigation }) {
                                         alignItems: 'center',
                                         justifyContent: 'space-around',
                                     }}>
-                                        <MaterialCommunityIcons name="chef-hat" size={24} color={GlobalStyles[theme].fontColor} />
+                                        <MaterialCommunityIcons name="chef-hat" size={24} color={GlobalStyles[theme]?.fontColor} />
 
                                         <TouchableOpacity
                                             style={[{
@@ -826,7 +836,7 @@ export default function NewRecipe({ route, navigation }) {
                                                 borderWidth: 0.5,
                                                 fontSize: 18,
                                                 backgroundColor: difficultyColor,
-                                                borderColor: GlobalStyles[theme].borderColor,
+                                                borderColor: GlobalStyles[theme]?.borderColor,
                                             }]}
                                             // backgroundColor={difficultyColor}
                                             onPress={() => setModalVisible(true)}
@@ -836,29 +846,29 @@ export default function NewRecipe({ route, navigation }) {
                                                     color: "black",
                                                     fontWeight: "500",
                                                     textAlign: "center"
-                                                }, { fontSize: GlobalTextStyles[text].fontSize, fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }]}>{trans[language].DIF}</Text>
+                                                }, { fontSize: GlobalTextStyles[text]?.fontSize, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }]}>{trans[language]?.DIF}</Text>
                                                 : <Text style={[{
                                                     color: "black",
                                                     fontWeight: "500",
                                                     textAlign: "center"
-                                                }, { fontSize: GlobalTextStyles[text].fontSize, fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }]}>{recipeForm.difficulty.split(" ")[0].slice(0, 1)}{recipeForm.difficulty.split(" ")[1]?.slice(0, 1)}</Text>}
+                                                }, { fontSize: GlobalTextStyles[text]?.fontSize, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }]}>{recipeForm.difficulty.split(" ")[0]?.slice(0, 1)}{recipeForm.difficulty.split(" ")[1]?.slice(0, 1)}</Text>}
                                         </TouchableOpacity>
                                     </View>
                                 </View>
 
                                 <View style={{
-                                    width: (windowWidth - 40) / 4,
+                                    width: (windowWidth - 40) / 4-5,
                                     height: '100%',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                 }}>
                                     <Text style={{
                                         marginBottom: 10,
-                                        fontSize: GlobalTextStyles[text].fontSize,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontSize: GlobalTextStyles[text]?.fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }}>
-                                        {trans[language].SERVES}
+                                        {trans[language]?.SERVES}
                                     </Text>
                                     <View style={{
                                         width: "90%",
@@ -867,10 +877,10 @@ export default function NewRecipe({ route, navigation }) {
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
                                     }}>
-                                        <Ionicons name="ios-people-circle-outline" size={24} color={GlobalStyles[theme].fontColor} />
+                                        <Ionicons name="ios-people-circle-outline" size={24} color={GlobalStyles[theme]?.fontColor} />
                                         <TextInput
                                             placeholder="0"
-                                            placeholderTextColor={GlobalStyles[theme].fontColor}
+                                            placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                             value={recipeForm.forHowMany}
                                             style={[{
                                                 width: 30,
@@ -878,20 +888,20 @@ export default function NewRecipe({ route, navigation }) {
                                                 borderStyle: 'solid',
                                                 borderBottomWidth: 0.5,
                                             }, {
-                                                borderBottomColor: GlobalStyles[theme].borderColor,
-                                                fontSize: GlobalTextStyles[text].fontSize,
-                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                color: GlobalStyles[theme].fontColor
+                                                borderBottomColor: GlobalStyles[theme]?.borderColor,
+                                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                color: GlobalStyles[theme]?.fontColor
                                             }]}
                                             keyboardType='numeric'
                                             onChangeText={text => handleOnChange('forHowMany', text)}
                                         />
                                         <Text style={{
-                                            fontSize: GlobalTextStyles[text].fontSize,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor
+                                            fontSize: GlobalTextStyles[text]?.fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor
                                         }}>
-                                            {trans[language].PPL}
+                                            {trans[language]?.PPL}
                                         </Text>
                                     </View>
                                 </View>
@@ -905,7 +915,7 @@ export default function NewRecipe({ route, navigation }) {
                                 justifyContent: 'center',
                                 borderRadius: 10,
                                 marginBottom: 10,
-                                backgroundColor: GlobalStyles[theme].paperColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor,
                             }}>
                                 {recipeForm.foodCourse !== "" ?
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: "100%" }}>
@@ -917,8 +927,8 @@ export default function NewRecipe({ route, navigation }) {
                                                 textAlign: 'center',
                                                 textAlignVertical: 'center',
                                                 fontSize: 16,
-                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                color: GlobalStyles[theme].fontColor
+                                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                color: GlobalStyles[theme]?.fontColor
                                             }}>
                                                 {recipeForm.foodCourse}
                                             </Text>
@@ -944,10 +954,10 @@ export default function NewRecipe({ route, navigation }) {
                                             width: '100%',
                                             fontSize: 15,
                                             paddingLeft: 15,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor,
                                         }}>
-                                            {trans[language].FOOD_COURSE}
+                                            {trans[language]?.FOOD_COURSE}
                                         </Text>
                                     </TouchableOpacity>
                                 }
@@ -970,7 +980,7 @@ export default function NewRecipe({ route, navigation }) {
                                     flexDirection: "row",
                                     textAlignVertical: 'center',
                                     flexWrap: 'wrap',
-                                }, { backgroundColor: GlobalStyles[theme].paperColor, }]}>
+                                }, { backgroundColor: GlobalStyles[theme]?.paperColor, }]}>
                                     {recipeForm.specialDiet.length > 0 ?
                                         recipeForm.specialDiet.map(item => {
                                             return logos.map(logo =>
@@ -991,10 +1001,10 @@ export default function NewRecipe({ route, navigation }) {
                                             height: '100%',
                                             fontSize: 15,
                                             paddingLeft: 10,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor
                                         }}>
-                                            {trans[language].SPECIAL_DIET}
+                                            {trans[language]?.SPECIAL_DIET}
                                         </Text>
                                     }
                                 </View>
@@ -1008,8 +1018,8 @@ export default function NewRecipe({ route, navigation }) {
                                         elevation: 2,
                                         borderWidth: 0.5,
                                     }, {
-                                        borderColor: GlobalStyles[theme].borderColor,
-                                        backgroundColor: GlobalStyles[theme].buttonColor,
+                                        borderColor: GlobalStyles[theme]?.borderColor,
+                                        backgroundColor: GlobalStyles[theme]?.buttonColor,
                                     }]}
                                     onPress={() => setModalVisible2(true)}>
 
@@ -1018,11 +1028,11 @@ export default function NewRecipe({ route, navigation }) {
                                         textAlign: "center",
                                         alignSelf: 'center'
                                     }, {
-                                        fontSize: GlobalTextStyles[text].fontSize,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontSize: GlobalTextStyles[text]?.fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }]}>
-                                        {trans[language].SDIET}
+                                        {trans[language]?.SDIET}
                                     </Text>
                                 </TouchableOpacity>
 
@@ -1038,15 +1048,15 @@ export default function NewRecipe({ route, navigation }) {
                                 paddingStart: 10,
                                 fontSize: 15
                             }, {
-                                backgroundColor: GlobalStyles[theme].paperColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor,
                             }]}>
                                 <TouchableOpacity onPress={() => Alert.alert(
-                                    trans[language].HASHTAG,
-                                    trans[language].HASHTAG_INFO,
+                                    trans[language]?.HASHTAG,
+                                    trans[language]?.HASHTAG_INFO,
                                     [
-                                        { text: trans[language].OK }
+                                        { text: trans[language]?.OK }
                                     ])}>
-                                    <FontAwesome5 name="hashtag" size={24} color={GlobalStyles[theme].fontColor} />
+                                    <FontAwesome5 name="hashtag" size={24} color={GlobalStyles[theme]?.fontColor} />
                                 </TouchableOpacity>
 
                                 <TextInput
@@ -1054,12 +1064,12 @@ export default function NewRecipe({ route, navigation }) {
                                     style={{
                                         width: "100%",
                                         paddingLeft: 10,
-                                        fontSize: GlobalTextStyles[text].fontSize,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontSize: GlobalTextStyles[text]?.fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }}
-                                    placeholder={trans[language].ENTER_YOUR_TAGS}
-                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    placeholder={trans[language]?.ENTER_YOUR_TAGS}
+                                    placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                     maxLength={21}
                                     onChangeText={text => handleOnChange('tags', text)} />
                             </View>
@@ -1074,7 +1084,7 @@ export default function NewRecipe({ route, navigation }) {
                                 fontSize: 15,
                                 padding: 10,
                             }, {
-                                backgroundColor: GlobalStyles[theme].paperColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor,
                             }]} >
                                 {recipeForm.tags.map(item =>
                                     <Text
@@ -1082,9 +1092,9 @@ export default function NewRecipe({ route, navigation }) {
                                         onPress={(text) => remove(text, "tags")}
                                         style={{
                                             marginBottom: 5,
-                                            fontSize: GlobalTextStyles[text].fontSize,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor
+                                            fontSize: GlobalTextStyles[text]?.fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor
                                         }}
                                     >
                                         {item},
@@ -1104,18 +1114,18 @@ export default function NewRecipe({ route, navigation }) {
                                 marginTop: 10,
                                 marginBottom: 0,
                             }, {
-                                backgroundColor: GlobalStyles[theme].paperColor
+                                backgroundColor: GlobalStyles[theme]?.paperColor
                             }]}>
                                 <TextInput
                                     style={{
                                         height: 120,
                                         textAlignVertical: 'top',
-                                        fontSize: GlobalTextStyles[text].fontSize,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontSize: GlobalTextStyles[text]?.fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }}
-                                    placeholder={trans[language].FREE_TEXT_MAX}
-                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    placeholder={trans[language]?.FREE_TEXT_MAX}
+                                    placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                     value={recipeForm.freeText}
                                     onChangeText={text => handleOnChange('freeText', text)}
                                     keyboardType="default"
@@ -1127,9 +1137,9 @@ export default function NewRecipe({ route, navigation }) {
                                         position: "absolute",
                                         bottom: 5,
                                         right: 10,
-                                        fontSize: GlobalTextStyles[text].fontSize,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontSize: GlobalTextStyles[text]?.fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }}>
                                     {recipeForm?.freeText?.length}/256
                                 </Text>
@@ -1152,12 +1162,12 @@ export default function NewRecipe({ route, navigation }) {
                                 height: windowHeight - 140,
                                 width: windowWidth,
                                 padding: 10,
-                                backgroundColor: GlobalStyles[theme].background
+                                backgroundColor: GlobalStyles[theme]?.background
                             }}>
 
-                            <Banner title={trans[language].INGREDIENTS} />
+                            <Banner title={trans[language]?.INGREDIENTS} />
 
-                            <SpSheet text={trans[language].OPEN_UNITS_CONVERTOR} heightValue={550}><Conversions /></SpSheet>
+                            <SpSheet text={trans[language]?.OPEN_UNITS_CONVERTOR} heightValue={550}><Conversions /></SpSheet>
 
                             <View style={[{
                                 height: 50,
@@ -1167,7 +1177,7 @@ export default function NewRecipe({ route, navigation }) {
                                 marginVertical: 10,
                                 borderRadius: 10
                             }, {
-                                backgroundColor: GlobalStyles[theme].paperColor
+                                backgroundColor: GlobalStyles[theme]?.paperColor
                             }]}>
 
                                 <TextInput
@@ -1184,13 +1194,13 @@ export default function NewRecipe({ route, navigation }) {
 
 
                                     }, {
-                                        fontSize: GlobalTextStyles[text].fontSize,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor,
+                                        fontSize: GlobalTextStyles[text]?.fontSize,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor,
                                     }]}
                                     keyboardType='numeric'
-                                    placeholder={trans[language].QTY}
-                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    placeholder={trans[language]?.QTY}
+                                    placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                     onChangeText={text => handleIngredients('quantity', text)}
                                 />
 
@@ -1212,13 +1222,13 @@ export default function NewRecipe({ route, navigation }) {
                                         {(ingredients.units === "")
                                             ? <Text style={{
                                                 textAlign: "center",
-                                                color: GlobalStyles[theme].fontColor,
-                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            }}>{trans[language].UN}</Text>
+                                                color: GlobalStyles[theme]?.fontColor,
+                                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            }}>{trans[language]?.UN}</Text>
                                             : <Text style={{
                                                 textAlign: "center",
-                                                color: GlobalStyles[theme].fontColor,
-                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                                color: GlobalStyles[theme]?.fontColor,
+                                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                             }}>{units.map(unit => unit.unit === ingredients.units && unit.abreviation)}</Text>}
                                     </TouchableOpacity>
                                 </View>
@@ -1232,19 +1242,19 @@ export default function NewRecipe({ route, navigation }) {
                                     containerStyle={{
                                         width: 200,
                                         borderRadius: 10,
-                                        backgroundColor: GlobalStyles[theme].paperColor,
-                                        borderColor: GlobalStyles[theme].borderColor,
-                                        color: GlobalStyles[theme].fontColor,
+                                        backgroundColor: GlobalStyles[theme]?.paperColor,
+                                        borderColor: GlobalStyles[theme]?.borderColor,
+                                        color: GlobalStyles[theme]?.fontColor,
                                     }}
                                     selectedTextStyle={{
                                         fontSize: 15,
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                     }}
                                     placeholderStyle={{
                                         fontSize: 15,
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                     }}
                                     // imageStyle={styles.imageStyle}
                                     inputSearchStyle={{
@@ -1254,7 +1264,7 @@ export default function NewRecipe({ route, navigation }) {
                                         color: 'black',
                                         backgroundColor: 'white',
                                         borderRadius: 10,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                     }}
                                     iconStyle={{
                                         width: 20,
@@ -1268,7 +1278,7 @@ export default function NewRecipe({ route, navigation }) {
                                     valueField="key"
                                     labelField="value"
                                     placeholder={ingredients?.product === "" ? "ingredients" : ingredients?.product}
-                                    searchPlaceholder={trans[language].SEARCH}
+                                    searchPlaceholder={trans[language]?.SEARCH}
                                     onChange={(item) => handleIngredients('product', item.value)}
                                 />
 
@@ -1280,11 +1290,11 @@ export default function NewRecipe({ route, navigation }) {
                                         textAlignVertical: 'center',
                                         paddingLeft: 5,
                                         fontSize: 15,
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                     }}
                                     placeholder='Remarks'
-                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                     onChangeText={text => handleIngredients('remarks', text)}
                                 />
 
@@ -1294,7 +1304,7 @@ export default function NewRecipe({ route, navigation }) {
                                         width: 50,
                                         // paddingVertical: 10,
                                         // paddingHorizontal: 20,
-                                        backgroundColor: GlobalStyles[theme].buttonColor,
+                                        backgroundColor: GlobalStyles[theme]?.buttonColor,
                                         borderTopRightRadius: 10,
                                         borderBottomRightRadius: 10,
                                     }}>
@@ -1303,9 +1313,9 @@ export default function NewRecipe({ route, navigation }) {
                                         height: '100%',
                                         textAlign: 'center',
                                         textAlignVertical: 'center',
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
-                                    }}>{trans[language].ADD}</Text>
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
+                                    }}>{trans[language]?.ADD}</Text>
                                 </TouchableOpacity>
 
                             </View>
@@ -1319,7 +1329,7 @@ export default function NewRecipe({ route, navigation }) {
                                     marginBottom: 10,
                                     borderRadius: 10,
                                 }, {
-                                    backgroundColor: GlobalStyles[theme].paperColor
+                                    backgroundColor: GlobalStyles[theme]?.paperColor
                                 }]} key={uuid.v4()}>
                                     <Text style={{
                                         width: "15%",
@@ -1327,29 +1337,29 @@ export default function NewRecipe({ route, navigation }) {
                                         justifyContent: 'center',
                                         textAlignVertical: 'center',
                                         textAlign: 'center',
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                     }}>{item.quantity}</Text>
                                     <Text style={{
                                         width: "13%",
                                         textAlignVertical: 'center',
                                         textAlign: 'center',
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                     }}>{units.map(unit => unit.unit === item.units && unit.abreviation)}</Text>
                                     <Text style={{
                                         width: "30%",
                                         paddingLeft: 5,
                                         textAlignVertical: 'center',
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                     }}>{item.product}</Text>
                                     <Text style={{
                                         width: "27%",
                                         textAlignVertical: 'center',
                                         paddingLeft: 5,
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                     }}>{item.remarks}</Text>
 
                                     <View style={{
@@ -1359,10 +1369,10 @@ export default function NewRecipe({ route, navigation }) {
                                         justifyContent: 'space-around'
                                     }}>
                                         <TouchableOpacity style={styles.validation} onPress={() => editIngredient(item.product)}>
-                                            <Feather name="edit-3" size={24} color={GlobalStyles[theme].fontColor} />
+                                            <Feather name="edit-3" size={24} color={GlobalStyles[theme]?.fontColor} />
                                         </TouchableOpacity>
                                         <TouchableOpacity style={styles.validation} onPress={() => delIngredient(item.product, "ingredient")}>
-                                            <AntDesign name="delete" size={24} color={GlobalStyles[theme].fontColor} />
+                                            <AntDesign name="delete" size={24} color={GlobalStyles[theme]?.fontColor} />
                                         </TouchableOpacity>
                                     </View>
 
@@ -1381,12 +1391,12 @@ export default function NewRecipe({ route, navigation }) {
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         padding: 10,
-                        backgroundColor: GlobalStyles[theme].background,
+                        backgroundColor: GlobalStyles[theme]?.background,
                     }}>
 
                         <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', height: "80%" }}>
 
-                            <Banner title={trans[language].PREPARATION} />
+                            <Banner title={trans[language]?.PREPARATION} />
 
                             <View style={[{
                                 minHeight: 50,
@@ -1395,7 +1405,7 @@ export default function NewRecipe({ route, navigation }) {
                                 justifyContent: "space-between",
                                 marginVertical: 10,
                                 borderRadius: 10
-                            }, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                            }, { backgroundColor: GlobalStyles[theme]?.paperColor }]}>
 
                                 <TextInput
                                     value={preparation.preparation}
@@ -1404,12 +1414,12 @@ export default function NewRecipe({ route, navigation }) {
                                         paddingLeft: 10,
                                         paddingVertical: 5,
                                         fontSize: 15,
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                     }}
                                     keyboardType='ascii-capable'
-                                    placeholder={trans[language].PREPARATION_STEP}
-                                    placeholderTextColor={GlobalStyles[theme].fontColor}
+                                    placeholder={trans[language]?.PREPARATION_STEP}
+                                    placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                     onChangeText={text => handlePreparation(text)}
                                     multiline
                                 />
@@ -1421,7 +1431,7 @@ export default function NewRecipe({ route, navigation }) {
                                         justifyContent: 'center',
                                         borderTopRightRadius: 10,
                                         borderBottomRightRadius: 10,
-                                        backgroundColor: GlobalStyles[theme].buttonColor,
+                                        backgroundColor: GlobalStyles[theme]?.buttonColor,
 
                                     }}>
                                     <Text style={{
@@ -1429,9 +1439,9 @@ export default function NewRecipe({ route, navigation }) {
                                         minHeight: 40,
                                         textAlign: 'center',
                                         textAlignVertical: 'center',
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
-                                    }}>{trans[language].ADD}</Text>
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
+                                    }}>{trans[language]?.ADD}</Text>
                                 </TouchableOpacity>
                             </View>
 
@@ -1447,24 +1457,24 @@ export default function NewRecipe({ route, navigation }) {
                                         alignContent: "center",
                                         marginBottom: 10,
                                         borderRadius: 10,
-                                    }, { backgroundColor: GlobalStyles[theme].paperColor }]} >
+                                    }, { backgroundColor: GlobalStyles[theme]?.paperColor }]} >
                                         <Text style={[{
                                             width: 60,
                                             paddingLeft: 10,
                                             textAlignVertical: 'center',
                                             paddingVertical: 5,
                                         }, {
-                                            color: GlobalStyles[theme].fontColor,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        }]} >{trans[language].STEP} {item.step}</Text>
+                                            color: GlobalStyles[theme]?.fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        }]} >{trans[language]?.STEP} {item.step}</Text>
                                         <Text style={[{
                                             width: windowWidth - 140,
                                             textAlignVertical: 'center',
                                             justifyContent: 'flex-start',
                                             paddingVertical: 5,
                                         }, {
-                                            color: GlobalStyles[theme].fontColor,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                         }]} >{item.preparation}</Text>
 
                                         <View style={{
@@ -1474,11 +1484,11 @@ export default function NewRecipe({ route, navigation }) {
                                             justifyContent: 'space-around'
                                         }} >
                                             <TouchableOpacity style={styles.validation} onPress={() => editStep(item.step)}>
-                                                <Feather name="edit-3" size={24} color={GlobalStyles[theme].fontColor} />
+                                                <Feather name="edit-3" size={24} color={GlobalStyles[theme]?.fontColor} />
                                             </TouchableOpacity>
-                                            {(recipeForm.preparation[recipeForm.preparation.length - 1].step === item.step) &&
+                                            {(recipeForm.preparation[recipeForm.preparation.length - 1]?.step === item.step) &&
                                                 <TouchableOpacity style={styles.validation} onPress={() => delStep(item.step)}>
-                                                    <AntDesign name="delete" size={24} color={GlobalStyles[theme].fontColor} />
+                                                    <AntDesign name="delete" size={24} color={GlobalStyles[theme]?.fontColor} />
                                                 </TouchableOpacity>
                                             }
                                         </View>
@@ -1489,7 +1499,7 @@ export default function NewRecipe({ route, navigation }) {
                             />
                         </View>
 
-                        <SwitchButton text01={trans[language].PUBLIC} text02={trans[language].PRIVATE} show={(route.params === undefined) ? show : recipeForm.status} setShow={setShow} />
+                        <SwitchButton text01={trans[language]?.PUBLIC} text02={trans[language]?.PRIVATE} show={(route.params === undefined) ? show : recipeForm.status} setShow={setShow} />
 
                         < View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }} >
                             <TouchableOpacity style={[{
@@ -1502,14 +1512,14 @@ export default function NewRecipe({ route, navigation }) {
                                 paddingVertical: 10,
                                 paddingHorizontal: 20
                             }, {
-                                borderColor: GlobalStyles[theme].borderColor,
-                                backgroundColor: GlobalStyles[theme].noColor
+                                borderColor: GlobalStyles[theme]?.borderColor,
+                                backgroundColor: GlobalStyles[theme]?.noColor
                             }]} onPress={clearForm}>
                                 <Text style={{
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                    {trans[language].CLEAR_FORM}
+                                    {trans[language]?.CLEAR_FORM}
                                 </Text>
                             </TouchableOpacity>
                             {(route.params === undefined)
@@ -1523,14 +1533,14 @@ export default function NewRecipe({ route, navigation }) {
                                     paddingVertical: 10,
                                     paddingHorizontal: 20
                                 }, {
-                                    borderColor: GlobalStyles[theme].borderColor,
-                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                    borderColor: GlobalStyles[theme]?.borderColor,
+                                    backgroundColor: GlobalStyles[theme]?.buttonColor
                                 }]} onPress={handleAdd}>
                                     <Text style={{
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                     }}>
-                                        {trans[language].ADD_RECIPE_TO_MY_BOOK}
+                                        {trans[language]?.ADD_RECIPE_TO_MY_BOOK}
                                     </Text>
                                 </TouchableOpacity>
                                 : <TouchableOpacity style={[{
@@ -1543,13 +1553,13 @@ export default function NewRecipe({ route, navigation }) {
                                     paddingVertical: 10,
                                     paddingHorizontal: 30
                                 }, {
-                                    borderColor: GlobalStyles[theme].borderColor,
-                                    backgroundColor: GlobalStyles[theme].buttonColor
+                                    borderColor: GlobalStyles[theme]?.borderColor,
+                                    backgroundColor: GlobalStyles[theme]?.buttonColor
                                 }]} onPress={handleEdit}>
                                     <Text style={{
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
-                                    }}>{trans[language].UPDATE_RECIPE}</Text>
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
+                                    }}>{trans[language]?.UPDATE_RECIPE}</Text>
                                 </TouchableOpacity>
                             }
                         </View>
@@ -1576,8 +1586,8 @@ export default function NewRecipe({ route, navigation }) {
                                 elevation: 5,
                                 borderWidth: 0.5,
                             }, {
-                                borderColor: GlobalStyles[theme].borderColor,
-                                backgroundColor: GlobalStyles[theme].paperColor
+                                borderColor: GlobalStyles[theme]?.borderColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor
                             }]}>
                                 <TouchableOpacity style={{
                                     position: 'absolute',
@@ -1604,16 +1614,16 @@ export default function NewRecipe({ route, navigation }) {
                                             marginVertical: 5,
                                             elevation: 2,
                                         }, {
-                                            borderColor: GlobalStyles[theme].borderColor,
-                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                            borderColor: GlobalStyles[theme]?.borderColor,
+                                            backgroundColor: GlobalStyles[theme]?.buttonColor
                                         }]}
                                     >
                                         <Text style={[{
                                             textAlign: "center"
                                         }, {
-                                            fontSize: GlobalTextStyles[text].fontSize,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor
+                                            fontSize: GlobalTextStyles[text]?.fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor
                                         }]}
                                             onPress={(text) => handleDifficulty(text)}
                                         >{item.value}</Text>
@@ -1646,8 +1656,8 @@ export default function NewRecipe({ route, navigation }) {
                                 elevation: 5,
                                 borderWidth: 0.5,
                             }, {
-                                borderColor: GlobalStyles[theme].borderColor,
-                                backgroundColor: GlobalStyles[theme].paperColor
+                                borderColor: GlobalStyles[theme]?.borderColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor
                             }]}>
                                 <TouchableOpacity
                                     style={{
@@ -1675,16 +1685,16 @@ export default function NewRecipe({ route, navigation }) {
                                             marginVertical: 5,
                                             elevation: 2,
                                         }, {
-                                            borderColor: GlobalStyles[theme].borderColor,
-                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                            borderColor: GlobalStyles[theme]?.borderColor,
+                                            backgroundColor: GlobalStyles[theme]?.buttonColor
                                         }]}
                                     >
                                         <Text style={[{
                                             textAlign: "center"
                                         }, {
-                                            fontSize: GlobalTextStyles[text].fontSize,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor
+                                            fontSize: GlobalTextStyles[text]?.fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor
                                         }]}
                                             onPress={(text) => handleFoodCourse(text)}>
                                             {item.value}</Text>
@@ -1716,8 +1726,8 @@ export default function NewRecipe({ route, navigation }) {
                                 elevation: 5,
                                 borderWidth: 0.5,
                             }, {
-                                borderColor: GlobalStyles[theme].borderColor,
-                                backgroundColor: GlobalStyles[theme].paperColor
+                                borderColor: GlobalStyles[theme]?.borderColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor
                             }]}>
                                 <TouchableOpacity
                                     style={{
@@ -1745,16 +1755,16 @@ export default function NewRecipe({ route, navigation }) {
                                             marginVertical: 5,
                                             elevation: 2,
                                         }, {
-                                            borderColor: GlobalStyles[theme].borderColor,
-                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                            borderColor: GlobalStyles[theme]?.borderColor,
+                                            backgroundColor: GlobalStyles[theme]?.buttonColor
                                         }]}
                                     >
                                         <Text style={[{
                                             textAlign: "center"
                                         }, {
-                                            fontSize: GlobalTextStyles[text].fontSize,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor
+                                            fontSize: GlobalTextStyles[text]?.fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor
                                         }]}
                                             onPress={(text) => handleSpecialDiet(text)}>
                                             {item.name}</Text>
@@ -1786,8 +1796,8 @@ export default function NewRecipe({ route, navigation }) {
                                 elevation: 5,
                                 borderWidth: 0.5,
                             }, {
-                                borderColor: GlobalStyles[theme].borderColor,
-                                backgroundColor: GlobalStyles[theme].paperColor
+                                borderColor: GlobalStyles[theme]?.borderColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor
                             }]}>
                                 <TouchableOpacity
                                     style={{
@@ -1815,16 +1825,16 @@ export default function NewRecipe({ route, navigation }) {
                                             marginVertical: 5,
                                             elevation: 2,
                                         }, {
-                                            borderColor: GlobalStyles[theme].borderColor,
-                                            backgroundColor: GlobalStyles[theme].buttonColor
+                                            borderColor: GlobalStyles[theme]?.borderColor,
+                                            backgroundColor: GlobalStyles[theme]?.buttonColor
                                         }]}
                                     >
                                         <Text style={[{
                                             textAlign: "center"
                                         }, {
-                                            fontSize: GlobalTextStyles[text].fontSize,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            color: GlobalStyles[theme].fontColor
+                                            fontSize: GlobalTextStyles[text]?.fontSize,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor
                                         }]}
                                             onPress={(text) => handleIngredients('units', text)}>
                                             {item.unit}
@@ -1855,7 +1865,7 @@ const styles = StyleSheet.create({})
     justifyContent: 'space-between'
 }}>
     <View style={{
-        backgroundColor: GlobalStyles[theme].paperColor,
+        backgroundColor: GlobalStyles[theme]?.paperColor,
         width: '79%',
         height: 40,
         borderRadius: 10
@@ -1868,8 +1878,8 @@ const styles = StyleSheet.create({})
                     textAlign: 'center',
                     textAlignVertical: 'center',
                     fontSize: 16,
-                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                    color: GlobalStyles[theme].fontColor
+                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                    color: GlobalStyles[theme]?.fontColor
                 }}>
                     {recipeForm.foodCourse}
                 </Text>
@@ -1879,10 +1889,10 @@ const styles = StyleSheet.create({})
                 textAlignVertical: 'center',
                 fontSize: 15,
                 paddingLeft: 15,
-                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                color: GlobalStyles[theme].fontColor
+                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                color: GlobalStyles[theme]?.fontColor
             }}>
-                {trans[language].FOOD_COURSE}
+                {trans[language]?.FOOD_COURSE}
             </Text>}
     </View>
 
@@ -1895,9 +1905,9 @@ const styles = StyleSheet.create({})
             elevation: 2,
             borderWidth: 0.5,
         }, {
-            color: GlobalStyles[theme].fontColor,
-            borderColor: GlobalStyles[theme].borderColor,
-            backgroundColor: GlobalStyles[theme].buttonColor
+            color: GlobalStyles[theme]?.fontColor,
+            borderColor: GlobalStyles[theme]?.borderColor,
+            backgroundColor: GlobalStyles[theme]?.buttonColor
         }]}
         onPress={() => setModalVisible4(true)}>
 
@@ -1906,11 +1916,11 @@ const styles = StyleSheet.create({})
             textAlign: "center",
             alignSelf: 'center',
         }, {
-            fontSize: GlobalTextStyles[text].fontSize,
-            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-            color: GlobalStyles[theme].fontColor
+            fontSize: GlobalTextStyles[text]?.fontSize,
+            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+            color: GlobalStyles[theme]?.fontColor
         }]}>
-            {trans[language].COURSE}
+            {trans[language]?.COURSE}
         </Text>
     </TouchableOpacity>
 
@@ -1925,7 +1935,7 @@ const styles = StyleSheet.create({})
      right: 70,
      paddingVertical: 10,
      paddingHorizontal: 20,
-     backgroundColor: GlobalStyles[theme].buttonColor,
+     backgroundColor: GlobalStyles[theme]?.buttonColor,
      borderRadius: 10,
  }}>
  <Text style={{
@@ -1933,7 +1943,7 @@ const styles = StyleSheet.create({})
      height: '100%',
      textAlign: 'center',
      textAlignVertical: 'center',
-     color: GlobalStyles[theme].fontColor,
-     fontFamily: GlobalFontStyles[fontStyle].fontStyle
- }}>{trans[language].ADD}</Text>
+     color: GlobalStyles[theme]?.fontColor,
+     fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
+ }}>{trans[language]?.ADD}</Text>
 </TouchableOpacity> */}

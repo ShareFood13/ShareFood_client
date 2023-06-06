@@ -42,8 +42,13 @@ import {
 } from '@expo-google-fonts/dev';
 import GlobalFontStyles from '../GlobalFontStyles';
 import trans from '../Language'
+import { useContext } from 'react';
+import { useEffect } from 'react';
 
-
+import { Context } from '../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
 const logos = [
     { name: "Vegan", image: require('./../assets/images/logo/vegan.png') },
     { name: "Organic", image: require('./../assets/images/logo/organic.png') },
@@ -72,9 +77,9 @@ const logos = [
 ]
 
 const ShowMealDetail = ({ meal, recipes, sDietMeal, closeModal }) => {
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -88,7 +93,14 @@ const ShowMealDetail = ({ meal, recipes, sDietMeal, closeModal }) => {
         PTSans_400Regular,
         Karla_400Regular
     })
-
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
     return (
         <View style={styles.centeredView}>
             {/* <View style={styles.mealCard}>
@@ -138,9 +150,9 @@ const ShowMealDetail = ({ meal, recipes, sDietMeal, closeModal }) => {
                             <EvilIcons name="close-o" size={30} color="red" />
                         </TouchableOpacity>
 
-                        {[...Array(20)].map((_, index) => (
+                        {[...Array(20)]?.map((_, index) => (
                             <View key={index} style={styles.line} >
-                                {index === 1 && <Text style={{ fontSize: 20, marginBottom: 18, position: 'absolute', paddingLeft: 20, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{meal?.mealName}</Text>}
+                                {index === 1 && <Text style={{ fontSize: 20, marginBottom: 18, position: 'absolute', paddingLeft: 20, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{meal?.mealName}</Text>}
                             </View>
                         ))}
 
@@ -156,7 +168,7 @@ const ShowMealDetail = ({ meal, recipes, sDietMeal, closeModal }) => {
                                 // userContext?.result?.recipesId.map
                                 recipes.map((item, index) => {
                                     if (item._id === recipeId && item.isDeleted === false) {
-                                        return <Text key={uuid.v4()} style={{ fontSize: 16, top: 30 * index, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{item.recipeName}</Text>
+                                        return <Text key={uuid.v4()} style={{ fontSize: 16, top: 30 * index, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{item.recipeName}</Text>
                                     }
                                 })
                             )}

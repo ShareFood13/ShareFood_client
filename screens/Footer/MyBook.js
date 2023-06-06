@@ -49,6 +49,9 @@ import GlobalFontStyles from '../../GlobalFontStyles';
 import trans from '../../Language'
 import GlobalStyles from '../../GlobalStyles';
 
+var theme = ""
+var language = ""
+var fontStyle = ""
 export default function MyBook({ route, navigation }) {
     const { userContext, setUserContext } = useContext(Context)
     const isFocused = useIsFocused();
@@ -59,10 +62,9 @@ export default function MyBook({ route, navigation }) {
     const [refreshing, setRefreshing] = useState(false)
 
     const [filter, setFilter] = useState('All');
-    const [theme, setTheme] = useState('stylesLight')
-    const [newList, setNewList] = useState([]);
-    const [language, setLanguage] = useState("en");
-    const [fontStyle, setFontStyle] = useState("Montserrat");
+    // const [theme, setTheme] = useState('stylesLight')
+    // const [language, setLanguage] = useState("en");
+    // const [fontStyle, setFontStyle] = useState("Montserrat");
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -82,6 +84,14 @@ export default function MyBook({ route, navigation }) {
     const [myRecipes, setMyRecipes] = useState(redux.recipe.recipes)
     // console.log("myBook redux", redux.recipe.recipes)
     // console.log(fromNewRecipe)
+
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     useEffect(() => {
         setMyRecipes(redux.recipe.recipes)
@@ -166,12 +176,12 @@ export default function MyBook({ route, navigation }) {
     }
 
     return (
-        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme]?.background }]}>
 
             <TextInput
                 onChangeText={text => onChangeSearch(text)}
-                placeholder={trans[language].SEARCH}
-                placeholderTextColor={GlobalStyles[theme].fontColor}
+                placeholder={trans[language]?.SEARCH}
+                placeholderTextColor={GlobalStyles[theme]?.fontColor}
                 style={[{
                     width: "100%",
                     height: 40,
@@ -183,10 +193,10 @@ export default function MyBook({ route, navigation }) {
                     borderRadius: 10,
                     borderWidth: 0.5,
                 }, {
-                    color: GlobalStyles[theme].fontColor,
-                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                    borderColor: GlobalStyles[theme].fontColor,
-                    backgroundColor: GlobalStyles[theme].paperColor,
+                    color: GlobalStyles[theme]?.fontColor,
+                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                    borderColor: GlobalStyles[theme]?.fontColor,
+                    backgroundColor: GlobalStyles[theme]?.paperColor,
                 }]}
             />
 
@@ -208,15 +218,15 @@ export default function MyBook({ route, navigation }) {
                                 borderTopLeftRadius: 20,
                                 borderTopRightRadius: 20,
                             },
-                            { backgroundColor: filter === item ? GlobalStyles[theme].buttonColor : GlobalStyles[theme].lightBlue },
-                            { borderBottomColor: filter === item ? GlobalStyles[theme].buttonColor : GlobalStyles[theme].fontColor },
+                            { backgroundColor: filter === item ? GlobalStyles[theme]?.buttonColor : GlobalStyles[theme]?.lightBlue },
+                            { borderBottomColor: filter === item ? GlobalStyles[theme]?.buttonColor : GlobalStyles[theme]?.fontColor },
                         ]}
                         onPress={() => pageFilter(item)}>
                         <Text style={{
                             textAlign: 'center',
                             fontSize: 16,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                            color: filter === item ? GlobalStyles[theme].fontColor : GlobalStyles[theme].fontColor
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                            color: filter === item ? GlobalStyles[theme]?.fontColor : GlobalStyles[theme]?.fontColor
                         }}>
                             {item}
                         </Text>
@@ -227,8 +237,8 @@ export default function MyBook({ route, navigation }) {
             {<FlatList
                 data={myRecipes}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ backgroundColor: GlobalStyles[theme].background }}
-                style={[{ backgroundColor: GlobalStyles[theme].background }]}
+                contentContainerStyle={{ backgroundColor: GlobalStyles[theme]?.background }}
+                style={[{ backgroundColor: GlobalStyles[theme]?.background }]}
                 renderItem={({ item }) => !item?.isDeleted &&
                     <RecipeCard recipe={item} key={item._id} navigation={navigation} />}
                 refreshControl={

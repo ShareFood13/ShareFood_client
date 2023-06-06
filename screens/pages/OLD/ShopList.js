@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Text, View, StyleSheet, Button } from 'react-native';
 import Constants from 'expo-constants';
 import { useState } from 'react';
-import products from '../../assets/arrays/data'
+import products from '../../../assets/arrays/data'
 
 
 

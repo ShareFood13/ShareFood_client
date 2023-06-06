@@ -19,11 +19,16 @@ import {
 } from '@expo-google-fonts/dev';
 import GlobalFontStyles from '../GlobalFontStyles';
 import trans from '../Language'
-
+import { useContext } from 'react';
+import { Context } from '../context/UserContext';
+import { useEffect } from 'react';
+var theme = ""
+var language = ""
+var fontStyle = ""
 const PopupModal = ({ message, popupModal }) => {
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -37,7 +42,14 @@ const PopupModal = ({ message, popupModal }) => {
         PTSans_400Regular,
         Karla_400Regular
     })
-
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
     return (
         <Modal
             animationType="none"
@@ -55,13 +67,13 @@ const PopupModal = ({ message, popupModal }) => {
                     borderWidth: 0.5,
                     borderStyle: 'solid',
                     borderRadius: 20,
-                    borderColor: GlobalStyles[theme].borderColor,
-                    backgroundColor: GlobalStyles[theme].paperColor,
+                    borderColor: GlobalStyles[theme]?.borderColor,
+                    backgroundColor: GlobalStyles[theme]?.paperColor,
                 }}>
                     <Text style={{
                         fontSize: 20,
-                        color: GlobalStyles[theme].fontColor,
-                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        color: GlobalStyles[theme]?.fontColor,
+                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                     }}>
                         {message}
                     </Text>

@@ -29,11 +29,16 @@ import {
 } from '@expo-google-fonts/dev';
 import GlobalFontStyles from '../GlobalFontStyles';
 import trans from '../Language'
-
+import { useContext } from 'react';
+import { useEffect } from 'react';
+import { Context } from '../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
 const UserHomeCard = ({ user, navigation, userId }) => {
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -49,6 +54,14 @@ const UserHomeCard = ({ user, navigation, userId }) => {
     })
     const dispatch = useDispatch()
 
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     const openOtherUser = (userInfo) => {
         navigation.navigate("ShowOtherUser", { userInfo })
@@ -68,9 +81,9 @@ const UserHomeCard = ({ user, navigation, userId }) => {
                 padding: 10,
                 borderRadius: 10,
                 borderWidth: 0.5,
-                borderColor: GlobalStyles[theme].fontColor,
+                borderColor: GlobalStyles[theme]?.fontColor,
                 marginHorizontal: 5,
-                backgroundColor: GlobalStyles[theme].paperColor,
+                backgroundColor: GlobalStyles[theme]?.paperColor,
             }}>
                 <Image
                     source={require("../assets/images/user-profile.jpeg")}
@@ -82,12 +95,12 @@ const UserHomeCard = ({ user, navigation, userId }) => {
                         width: 90,
                         borderRadius: 45,
                         borderWidth: 0.5,
-                        borderColor: GlobalStyles[theme].fontColor,
+                        borderColor: GlobalStyles[theme]?.fontColor,
                         // marginTop: 10,
                     }}
                 />
                 <View style={{ height: 40, flexDirection: 'column', justifyContent: 'center' }}>
-                    <Text style={{ marginBottom: 0, overflow: 'hidden', height: 20, fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }}>{user.userName}</Text>
+                    <Text style={{ marginBottom: 0, overflow: 'hidden', height: 20, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }}>{user.userName}</Text>
                     {/* <Text style={{ marginBottom: 0 }}>{user.userName}</Text> */}
                 </View>
 
@@ -98,13 +111,13 @@ const UserHomeCard = ({ user, navigation, userId }) => {
                         width: 90,
                         justifyContent: 'center',
                         borderWidth: 0.5,
-                        borderColor: GlobalStyles[theme].fontColor,
+                        borderColor: GlobalStyles[theme]?.fontColor,
                         borderRadius: 5,
-                        backgroundColor: GlobalStyles[theme].lightBlue,
+                        backgroundColor: GlobalStyles[theme]?.lightBlue,
                         // paddingHorizontal: 25,
                         // marginBottom: 10,
                     }}>
-                    <Text style={{fontSize: 15, textAlign: 'center' }}>{trans[language].FOLLOW}</Text>
+                    <Text style={{fontSize: 15, textAlign: 'center' }}>{trans[language]?.FOLLOW}</Text>
                 </TouchableOpacity>
             </View>
         </TouchableOpacity>

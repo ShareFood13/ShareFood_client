@@ -51,7 +51,7 @@ const UserCarrousel = ({ otherUsersList, following, navigation, userId }) => {
                     //         marginHorizontal: 5,
                     //         alignItems: 'center',
                     //         justifyContent: 'center',
-                    //         backgroundColor: GlobalStyles[theme].paperColor
+                    //         backgroundColor: GlobalStyles[theme]?.paperColor
                     //     }}>
                     //         <Image
                     //             source={require("../assets/images/user-profile.jpeg")}
@@ -71,7 +71,7 @@ const UserCarrousel = ({ otherUsersList, following, navigation, userId }) => {
                     //                 borderRadius: 5,
                     //                 paddingHorizontal: 15,
                     //                 marginBottom: 5,
-                    //                 backgroundColor: GlobalStyles[theme].lightBlue
+                    //                 backgroundColor: GlobalStyles[theme]?.lightBlue
                     //             }}>
                     //             <Text style={{ fontWeight: '400', }}>Follow</Text>
                     //         </TouchableOpacity>

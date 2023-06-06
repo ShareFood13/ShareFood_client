@@ -29,7 +29,11 @@ import {
 import GlobalFontStyles from '../GlobalFontStyles';
 import GlobalStyles from '../GlobalStyles';
 import trans from '../Language';
-
+import { Context } from '../context/UserContext';
+import { useContext } from 'react';
+var theme = ""
+var language = ""
+var fontStyle = ""
 export default function DatePicker({
     pickerType,
     infoPickerFunction,
@@ -42,9 +46,9 @@ export default function DatePicker({
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
     var currentDate = '';
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -59,6 +63,14 @@ export default function DatePicker({
         Karla_400Regular
     })
 
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
     const onChange = (event, selectedDate) => {
         currentDate = selectedDate;
         setShow(false);
@@ -102,10 +114,10 @@ export default function DatePicker({
                         }}>
                         <Text style={{
                             width: '30%',
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>
-                            {trans[language].BIRTHDATE}:
+                            {trans[language]?.BIRTHDATE}:
                         </Text>
                         <View
                             style={{
@@ -119,41 +131,41 @@ export default function DatePicker({
                                 borderRadius: 10,
                             }}>
                             <Text style={{
-                                color: GlobalStyles[theme].fontColor,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                             }}>
                                 {date.toISOString().split('T')[0]}
                             </Text>
                             <TouchableOpacity style={{ width: "20%", alignItems: 'center', justifyContent: 'center' }} onPress={showDatepicker}>
-                                <Ionicons name="calendar-outline" size={30} color={GlobalStyles[theme].fontColor} />
+                                <Ionicons name="calendar-outline" size={30} color={GlobalStyles[theme]?.fontColor} />
                             </TouchableOpacity>
                         </View>
                     </View>
                     :
                     <View
-                        style={[styles.outPuts, {backgroundColor: GlobalStyles[theme].paperColor,}]}
+                        style={[styles.outPuts, {backgroundColor: GlobalStyles[theme]?.paperColor,}]}
                     >
                         <Text style={{
                             width: "80%",
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                         }}>
-                            {trans[language].DATE_PICKED}: {date.toISOString().split('T')[0]}
+                            {trans[language]?.DATE_PICKED}: {date.toISOString().split('T')[0]}
                         </Text>
                         <TouchableOpacity style={{ width: "20%", alignItems: 'center', justifyContent: 'center' }} onPress={showDatepicker}>
-                            <Ionicons name="calendar-outline" size={30} color={GlobalStyles[theme].fontColor} />
+                            <Ionicons name="calendar-outline" size={30} color={GlobalStyles[theme]?.fontColor} />
                         </TouchableOpacity>
                     </View>
             )}
             {pickerType === 'time' && (
                 <View
-                    style={[styles.outPuts, {backgroundColor: GlobalStyles[theme].paperColor,}]}
+                    style={[styles.outPuts, {backgroundColor: GlobalStyles[theme]?.paperColor,}]}
                 >
                     <Text style={{ 
                         width: "80%", 
-                        color: GlobalStyles[theme].fontColor,
-                        fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>
-                        {trans[language].TIME_PICKED}: {date.toLocaleTimeString('he-IL')}
+                        color: GlobalStyles[theme]?.fontColor,
+                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>
+                        {trans[language]?.TIME_PICKED}: {date.toLocaleTimeString('he-IL')}
                     </Text>
                     <TouchableOpacity
                         style={{
@@ -162,7 +174,7 @@ export default function DatePicker({
                             justifyContent: 'center'
                         }}
                         onPress={showTimepicker}>
-                        <MaterialCommunityIcons name="clock-time-three-outline" size={30} color={GlobalStyles[theme].fontColor} />
+                        <MaterialCommunityIcons name="clock-time-three-outline" size={30} color={GlobalStyles[theme]?.fontColor} />
                     </TouchableOpacity>
                 </View>
             )}

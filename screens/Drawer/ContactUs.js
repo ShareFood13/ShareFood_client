@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 
 import {
     View,
@@ -23,8 +23,9 @@ import {
 
 import { MaterialIcons, Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { sendToSharedFood } from '../../Redux/actions/auth';
+
 
 import * as SecureStore from 'expo-secure-store';
 import Banner from '../../components/Banner';
@@ -55,12 +56,17 @@ import {
 import GlobalFontStyles from '../../GlobalFontStyles';
 import trans from '../../Language'
 
+import { Context } from '../../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
+
 export default function ContactUs({ navigation }) {
     const [user, setUser] = useState()
     const [contactUsForm, setContactUsForm] = useState(initialValue)
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -74,6 +80,16 @@ export default function ContactUs({ navigation }) {
         PTSans_400Regular,
         Karla_400Regular
     })
+
+    const redux = useSelector((state) => state)
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     const dispatch = useDispatch();
 
@@ -96,60 +112,60 @@ export default function ContactUs({ navigation }) {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
+            <View style={[styles.container, { backgroundColor: GlobalStyles[theme]?.background }]}>
 
-                {/* <Banner title={trans[language].CONTACT_US} /> */}
+                {/* <Banner title={trans[language]?.CONTACT_US} /> */}
 
-                <Text style={{ marginVertical: 10, fontSize: 16, fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }}>{trans[language].PLEASE_CONTACT_US}</Text>
-                <Text style={{ marginVertical: 10, fontSize: 16, fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }}>{trans[language].WE_ARE_HERE}</Text>
+                <Text style={{ marginVertical: 10, fontSize: 16, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }}>{trans[language]?.PLEASE_CONTACT_US}</Text>
+                <Text style={{ marginVertical: 10, fontSize: 16, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }}>{trans[language]?.WE_ARE_HERE}</Text>
 
-                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme]?.paperColor }]}>
                     {/* <Text style={{ width: "20%", }}>From:</Text> */}
                     <TextInput
                         value={user?.userUserName}
-                        style={[styles.input, { fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }]}
+                        style={[styles.input, { fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }]}
                         placeholder={user?.userUserName}
-                        placeholderTextColor={GlobalStyles[theme].fontColor}
+                        placeholderTextColor={GlobalStyles[theme]?.fontColor}
                         onChangeText={text => handleOnChange('fromUserName', text)} />
                 </View>
 
-                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme]?.paperColor }]}>
                     {/* <Text style={{ width: "20%", }}>E-mail:</Text> */}
                     <TextInput
                         value={user?.userEmail}
-                        style={[styles.input, { fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }]}
+                        style={[styles.input, { fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }]}
                         placeholder={user?.userEmail}
-                        placeholderTextColor={GlobalStyles[theme].fontColor}
+                        placeholderTextColor={GlobalStyles[theme]?.fontColor}
                         onChangeText={text => handleOnChange('fromEmail', text)} />
                 </View>
 
-                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme]?.paperColor }]}>
                     {/* <Text style={{ width: "20%", }}>Subject:</Text> */}
                     <TextInput
                         value={contactUsForm.subject}
-                        style={[styles.input, { fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }]}
-                        placeholder={trans[language].SUBJECT}
-                        placeholderTextColor={GlobalStyles[theme].fontColor}
+                        style={[styles.input, { fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }]}
+                        placeholder={trans[language]?.SUBJECT}
+                        placeholderTextColor={GlobalStyles[theme]?.fontColor}
                         onChangeText={text => handleOnChange('subject', text)} />
                 </View>
 
-                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme]?.paperColor }]}>
                     {/* <Text style={{ width: "20%", }}>Title:</Text> */}
                     <TextInput
                         value={contactUsForm.title}
-                        style={[styles.input, { fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }]}
-                        placeholder={trans[language].TITLE + ":"}
-                        placeholderTextColor={GlobalStyles[theme].fontColor}
+                        style={[styles.input, { fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }]}
+                        placeholder={trans[language]?.TITLE + ":"}
+                        placeholderTextColor={GlobalStyles[theme]?.fontColor}
                         onChangeText={text => handleOnChange('title', text)} />
                 </View>
 
-                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme].paperColor, minHeight: 150, alignItems: 'flex-start' }]}>
+                <View style={[styles.viewInput, { backgroundColor: GlobalStyles[theme]?.paperColor, minHeight: 150, alignItems: 'flex-start' }]}>
                     {/* <Text style={{ width: "20%", paddingTop: 10 }}>Message:</Text> */}
                     <TextInput
                         value={contactUsForm.message}
-                        style={[styles.input, { minHeight: 150, textAlignVertical: 'top', paddingTop: 10 },, { fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }]}
-                        placeholder={trans[language].MESSAGE}
-                        placeholderTextColor={GlobalStyles[theme].fontColor}
+                        style={[styles.input, { minHeight: 150, textAlignVertical: 'top', paddingTop: 10 },, { fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }]}
+                        placeholder={trans[language]?.MESSAGE}
+                        placeholderTextColor={GlobalStyles[theme]?.fontColor}
                         multiline
                         numberOfLines={5}
                         onChangeText={text => handleOnChange('message', text)} />
@@ -166,10 +182,10 @@ export default function ContactUs({ navigation }) {
                         borderStyle: 'solid',
                         borderWidth: 0.5,
                     }, { 
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].buttonColor }]}
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.buttonColor }]}
                     onPress={() => sendContactUs()}>
-                    <Text style={{ color: 'white', fontSize: 16, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].SEND_MAIL}</Text>
+                    <Text style={{ color: 'white', fontSize: 16, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{trans[language]?.SEND_MAIL}</Text>
                 </TouchableOpacity>
             </View>
         </TouchableWithoutFeedback>

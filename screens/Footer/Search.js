@@ -1,21 +1,39 @@
-import React, { useContext, useState } from 'react'
-import { View, Text, Button, StyleSheet, FlatList, TouchableOpacity, Image, Dimensions, KeyboardAvoidingView, Platform } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
+import {
+    View,
+    Text, 
+    Button, 
+    StyleSheet, 
+    FlatList, 
+    TouchableOpacity, 
+    Image, 
+    Dimensions, 
+    KeyboardAvoidingView, 
+    Platform
+} from 'react-native'
 import { Context } from "../../context/UserContext";
 import SuperSearch from '../../components/SuperSearch';
 import { useDispatch, useSelector } from 'react-redux';
 import GlobalStyles from '../../GlobalStyles';
+
 const windowWidth = Dimensions.get('window').width
 
+var theme = ""
+var language = ""
+var fontStyle = ""
 
 export default function Search({ navigation }) {
-    const { userContext } = useContext(Context)
     const redux = useSelector((state) => state)
-    const [theme, setTheme] = useState("stylesLight")
 
+    const { userContext, setUserContext } = useContext(Context)
+
+    theme = userContext?.settings?.theme
+    language = userContext?.settings?.language?.value
+    fontStyle = userContext?.settings?.fontStyle
 
     return (
         <KeyboardAvoidingView
-            style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}
+            style={[styles.container, { backgroundColor: GlobalStyles[theme]?.background }]}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
             <FlatList

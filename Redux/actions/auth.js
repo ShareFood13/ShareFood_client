@@ -1,4 +1,4 @@
-import { AUTH, SENDPASS, USER_INFO, SEND_TO_US, AUTH_ERROR, SAVE_PROFILE, CLEAR_ERROR, START_FOLLOWING, STOP_FOLLOWING, FOLLOW_ERROR,CLEAR_MSG } from "../constants/constantsTypes"
+import { AUTH, SENDPASS, USER_INFO, SEND_TO_US, AUTH_ERROR, SAVE_PROFILE, CLEAR_ERROR, START_FOLLOWING, STOP_FOLLOWING, SAVE_SETTINGS, FOLLOW_ERROR,CLEAR_MSG,  } from "../constants/constantsTypes"
 import * as api from "../api"
 
 export const signin = (formData) => async (dispatch) => {
@@ -91,6 +91,19 @@ export const saveProfile = (_id, profileForm) => async (dispatch) => {
     } catch (error) {
 
         console.log("auth saveProfile profileForm", error)
+    }
+}
+
+export const saveSettings = (_id, settingsForm) => async (dispatch) => {
+
+    try {
+
+        const { data } = await api.saveSettings(_id, settingsForm)
+
+        dispatch({ type: SAVE_SETTINGS, data })
+    } catch (error) {
+
+        console.log("auth saveSettings settingsForm", error)
     }
 }
 

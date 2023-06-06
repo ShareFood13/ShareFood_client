@@ -35,9 +35,13 @@ import {
     PTSans_400Regular,
     Karla_400Regular
 } from '@expo-google-fonts/dev';
-
-const SwitchButton = ({ text01, text02, setShow, show }) => {
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+import { useContext } from 'react';
+import { Context } from '../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
+const SwitchButton = ({ text01, text02, setShow, show, handleChange, name }) => {
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -51,6 +55,14 @@ const SwitchButton = ({ text01, text02, setShow, show }) => {
         PTSans_400Regular,
         Karla_400Regular
     })
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     return (
         <View style={styles.switch}>
@@ -67,8 +79,8 @@ const SwitchButton = ({ text01, text02, setShow, show }) => {
                 position: 'absolute',
                 left: 0,
             }}
-                onPress={() => setShow(text01)}>
-                <Text style={{fontFamily: GlobalFontStyles[fontStyle].fontStyle}}>{text01}</Text>
+                onPress={() => {!name ? setShow(text01) : handleChange(name, text01)}}>
+                <Text style={{fontFamily: GlobalFontStyles[fontStyle]?.fontStyle}}>{text01}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{
                 flexDirection: 'row',
@@ -83,8 +95,8 @@ const SwitchButton = ({ text01, text02, setShow, show }) => {
                 position: 'absolute',
                 right: 0
             }}
-                onPress={() => setShow(text02)}>
-                <Text style={{fontFamily: GlobalFontStyles[fontStyle].fontStyle}}>{text02}</Text>
+                onPress={() => {!name  ? setShow(text02) : handleChange(name, text02)}}>
+                <Text style={{fontFamily: GlobalFontStyles[fontStyle]?.fontStyle}}>{text02}</Text>
             </TouchableOpacity>
         </View>
     )

@@ -17,9 +17,16 @@ import {
 } from '@expo-google-fonts/dev';
 import GlobalFontStyles from '../GlobalFontStyles';
 
+import { Context } from '../context/UserContext';
+import { useContext } from 'react';
+import { useEffect } from 'react';
+var theme = ""
+var language = ""
+var fontStyle = ""
+
 const Banner = ({ title }) => {
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -34,10 +41,19 @@ const Banner = ({ title }) => {
         Karla_400Regular
     })
     
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
+
     return (
         <Text style={[styles.banner, {
-            backgroundColor: GlobalStyles[theme].bannerColor, 
-            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+            backgroundColor: GlobalStyles[theme]?.bannerColor, 
+            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
         }]}>{title}</Text>
     )
 }

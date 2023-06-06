@@ -2,7 +2,7 @@ import axios from "axios"
 
 import * as SecureStore from 'expo-secure-store';
 
-const API = axios.create({ baseURL: 'https://1c63-84-110-61-170.ngrok-free.app' })
+const API = axios.create({ baseURL: 'https://6db7-2-54-189-51.ngrok-free.app' })
 // const API = axios.create({ baseURL: 'http://localhost:3000/' })
 
 API.interceptors.request.use(async (req) => {
@@ -53,6 +53,7 @@ export const delMyMail = (mailId, listToDelete) => API.put(`/api/mymails/${mailI
 export const mailView = (mailId) => API.put(`/api/mymails/mailView/${mailId}`)
 
 export const saveProfile = (_id, profileForm) => API.put(`/api/user/userprofile/${_id}`, profileForm)
+export const saveSettings = (_id, settingsForm) => API.put(`/api/user/usersettings/${_id}`, settingsForm)
 
 export const saveShopList = (shopList) => API.post(`/api/shoplist/save`, shopList)
 export const updateShopList = (_id, updatedShopList) => API.patch(`/api/shoplist/update/${_id}`, updatedShopList)

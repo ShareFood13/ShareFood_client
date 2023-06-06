@@ -30,9 +30,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useDispatch, useSelector } from 'react-redux';
 
-import { getUserInfo } from '../../Redux/actions/auth'
+import { getUserInfo } from '../../../Redux/actions/auth'
 
-import { createMyMail, getMyMails, getSendedMails, deleteMyMail } from '../../Redux/actions/mymails';
+import { createMyMail, getMyMails, getSendedMails, deleteMyMail } from '../../../Redux/actions/mymails';
 
 import Constants from 'expo-constants';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';

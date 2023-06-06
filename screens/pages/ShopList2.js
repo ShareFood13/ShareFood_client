@@ -42,6 +42,12 @@ import {
 import GlobalFontStyles from '../../GlobalFontStyles';
 import trans from '../../Language'
 
+import { Context } from '../../context/UserContext';
+import { useContext } from 'react';
+var theme = ""
+var language = ""
+var fontStyle = ""
+var system = ""
 
 // const products = [
 //     {
@@ -754,17 +760,18 @@ const myMeals = [
 ]
 
 export default function ShopList2({ navigation, route }) {
+    const recipeData = route.params
+    
     const todayDate = new Date();
     var newArray = []
 
-    const recipeData = route.params
-    console.log("ShopList2 recipeData.recipe", recipeData.recipe)
-    const [system, setSystem] = useState('metric');
+
+    // const [system, setSystem] = useState('metric');
     const [answer, setAnswer] = useState();
     const [todoListTitle, setTodoListTitle] = useState()
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -794,6 +801,16 @@ export default function ShopList2({ navigation, route }) {
     // if(route.params.mealName){
     //     setTodoListTitle(route.params.mealName)
     // }
+
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+            system = userContext?.settings?.sytem
+        }
+    }, [userContext])
 
     useEffect(() => {
         createShopList()
@@ -917,7 +934,7 @@ export default function ShopList2({ navigation, route }) {
     // };
 
     return (
-        <View style={[styles.container,{backgroundColor: GlobalStyles[theme].background}]}>
+        <View style={[styles.container,{backgroundColor: GlobalStyles[theme]?.background}]}>
             <TodoList
                 answer={route?.params?.openShopList ? route?.params?.openShopList : answer}
                 navigation={navigation}

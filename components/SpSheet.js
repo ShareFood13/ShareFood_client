@@ -18,10 +18,15 @@ import {
     PTSans_400Regular,
     Karla_400Regular
 } from '@expo-google-fonts/dev';
-
+import { useContext } from 'react';
+import { useEffect } from 'react';
+import { Context } from '../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
 const SpSheet = ({ text, children, heightValue }) => {
-    const [theme, setTheme] = useState('stylesLight')
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [theme, setTheme] = useState('stylesLight')
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -35,7 +40,14 @@ const SpSheet = ({ text, children, heightValue }) => {
         PTSans_400Regular,
         Karla_400Regular
     })
-
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
     const TestComp = () => {
         return (
             children
@@ -58,8 +70,8 @@ const SpSheet = ({ text, children, heightValue }) => {
                         borderStyle: 'solid',
                         borderWidth: 0.5,
                     }, { 
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].buttonColor 
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.buttonColor 
                     }]}
                     onPress={() => {
                         const spSheet = SPSheet;
@@ -68,7 +80,7 @@ const SpSheet = ({ text, children, heightValue }) => {
                             dragTopOnly: true,
                             height: heightValue,
                             keyboardHeightAdjustment: true,//boolean	re-adjusts the height when the keyboard is opened	false
-                            // background: GlobalStyles[theme].background, 	        //string	'red',rgba(0, 0, 0, 0.5)
+                            // background: GlobalStyles[theme]?.background, 	        //string	'red',rgba(0, 0, 0, 0.5)
                             // height:	  500          //number	auto height (min: 250)	250
                             // duration:	        //number	animation time used when opening	250(ms)
                             // closeDuration:	    //number	animation time used when closing	300(ms)
@@ -87,7 +99,7 @@ const SpSheet = ({ text, children, heightValue }) => {
                     }}
                 >
 
-                    <Text style={{ color: GlobalStyles[theme].fontColor, fontSize: 16, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{text}</Text>
+                    <Text style={{ color: GlobalStyles[theme]?.fontColor, fontSize: 16, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{text}</Text>
                 </TouchableOpacity>
             </View>
         </Root>

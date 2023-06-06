@@ -37,13 +37,13 @@ const CarouselCardItem = ({ item, index }) => {
         Karla_400Regular
     })
     return (
-        <View style={[styles.container, {backgroundColor: GlobalStyles[theme].background}]} key={index}>
+        <View style={[styles.container, {backgroundColor: GlobalStyles[theme]?.background}]} key={index}>
             <Image
                 source={{ uri: item.imgUrl }}
                 style={styles.image}
             />
-            <Text style={[styles.header, {color: GlobalStyles[theme].fontColor, fontFamily: GlobalFontStyles[fontStyle].fontStyle}]}>{item.title}</Text>
-            <Text style={[styles.body, {color: GlobalStyles[theme].fontColor, fontFamily: GlobalFontStyles[fontStyle].fontStyle}]}>{item.body}</Text>
+            <Text style={[styles.header, {color: GlobalStyles[theme]?.fontColor, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle}]}>{item.title}</Text>
+            <Text style={[styles.body, {color: GlobalStyles[theme]?.fontColor, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle}]}>{item.body}</Text>
         </View>
     )
 }

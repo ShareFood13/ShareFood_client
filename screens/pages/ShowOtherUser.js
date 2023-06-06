@@ -42,26 +42,39 @@ import PopupModal from '../../components/PopupModal';
 import GridList from '../../components/GridList';
 import trans from '../../Language';
 
+var theme = ""
+var language = ""
+var fontStyle = ""
+
 const ShowOtherUser = ({ navigation, route }) => {
     var countRecipe = 0
     const { userInfo } = route.params
-    navigation.setOptions({ title: userInfo.userName }) // causa um warning Cannot update a component while rendering a diff comp
-    const { userContext, setUserContext } = useContext(Context)
+    navigation.setOptions({ title: userInfo.userName }) // TODO causa um warning Cannot update a component while rendering a diff comp
     const isFocused = useIsFocused();
     const dispatch = useDispatch()
 
     const [userId, setUserId] = useState()
     const [popupModal, setPopupModal] = useState(false)
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
     const [showPictures, setShowPictures] = useState("grid")
     const [moreHeight, setMoreHeight] = useState(true)
 
     const redux = useSelector((state) => state)
     userInfo.recipesId?.map(recipe => !recipe.isDeleted && countRecipe++)
+    
+    // console.log("ShowOtherUsers", userInfo)
+    // console.log("ShowOtherUser redux", redux?.auth?.authData?.message)
+    
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
-    console.log("ShowOtherUsers", userInfo)
-    console.log("ShowOtherUser redux", redux?.auth?.authData?.message)
 
     useEffect(() => {
         if (redux?.auth?.message !== "") {
@@ -93,9 +106,9 @@ const ShowOtherUser = ({ navigation, route }) => {
 
     const Header = () => {
         return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'flex-start', alignContent: 'center', backgroundColor: GlobalStyles[theme].background }}>
+            <SafeAreaView style={{ flex: 1, justifyContent: 'flex-start', alignContent: 'center', backgroundColor: GlobalStyles[theme]?.background }}>
 
-                {!userContext.following.includes(userInfo._id)
+                {!userContext.profile.following.includes(userInfo._id)
                     ? <TouchableOpacity
                         onPress={() => startFollowingFn(userInfo._id)}
                         style={{
@@ -103,7 +116,7 @@ const ShowOtherUser = ({ navigation, route }) => {
                             borderWidth: 1,
                             borderColor: 'black',
                             paddingHorizontal: 7,
-                            backgroundColor: GlobalStyles[theme].lightBlue,
+                            backgroundColor: GlobalStyles[theme]?.lightBlue,
                             // marginBottom: 20
                         }}>
                         <Text style={{ 
@@ -111,9 +124,9 @@ const ShowOtherUser = ({ navigation, route }) => {
                               fontSize: 18, 
                               textAlign: 'center', 
                               textAlignVertical: 'center' ,
-                              color: GlobalStyles[theme].fontColor,
+                              color: GlobalStyles[theme]?.fontColor,
                             }}>
-                                {trans[language].START_FOLLOWING}
+                                {trans[language]?.START_FOLLOWING}
                             </Text>
                     </TouchableOpacity>
                     : <TouchableOpacity
@@ -121,9 +134,9 @@ const ShowOtherUser = ({ navigation, route }) => {
                         style={{
                             height: 40,
                             borderBottomWidth: 0.5,
-                            borderColor: GlobalStyles[theme].borderColor,
+                            borderColor: GlobalStyles[theme]?.borderColor,
                             paddingHorizontal: 7,
-                            backgroundColor: GlobalStyles[theme].lightBlue,
+                            backgroundColor: GlobalStyles[theme]?.lightBlue,
                             // marginBottom: 20
                         }}>
                         <Text style={{ 
@@ -131,8 +144,8 @@ const ShowOtherUser = ({ navigation, route }) => {
                             fontSize: 18, 
                             textAlign: 'center', 
                             textAlignVertical: 'center' ,
-                            color: GlobalStyles[theme].fontColor,
-                            }}>{trans[language].STOP_FOLLOWING}</Text>
+                            color: GlobalStyles[theme]?.fontColor,
+                            }}>{trans[language]?.STOP_FOLLOWING}</Text>
                     </TouchableOpacity>
                 }
 
@@ -158,7 +171,7 @@ const ShowOtherUser = ({ navigation, route }) => {
                     countRecipe={countRecipe}
                     userInfo={userInfo}
                 // userImage={redux?.auth?.authData?.result?.profile?.profilePicture.base64}
-                // userContext={userContext}
+                // userContext={userContext.profile}
                 />
 
                 {/* OLD BannerFollowers */}
@@ -192,7 +205,7 @@ const ShowOtherUser = ({ navigation, route }) => {
                 </View>
             </View> */}
 
-                <UserAbout userContext={userInfo?.profile} setMoreHeight={setMoreHeight} moreHeight={moreHeight} />
+                <UserAbout userContext={userContext?.profile} setMoreHeight={setMoreHeight} moreHeight={moreHeight} />
 
                 {/* OLD userAbout */}
                 {/* <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10, paddingVertical: 10 }}>
@@ -245,10 +258,10 @@ const ShowOtherUser = ({ navigation, route }) => {
                 {/* OLD GridList */}
                 {/* <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-around', alignSelf: 'center', height: 40, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'black', marginBottom: 15 }}>
                     <TouchableOpacity onPress={() => setShowPictures("grid")}>
-                        <MaterialIcons name="grid-on" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                        <MaterialIcons name="grid-on" size={24} color={GlobalStyles[theme]?.fontColor} style={{ width: 40, textAlign: 'center' }} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setShowPictures("list")}>
-                        <Foundation name="list" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                        <Foundation name="list" size={24} color={GlobalStyles[theme]?.fontColor} style={{ width: 40, textAlign: 'center' }} />
                     </TouchableOpacity>
 
                 </View> */}
@@ -263,8 +276,8 @@ const ShowOtherUser = ({ navigation, route }) => {
                 <FlatList
                     ListHeaderComponent={<Header />}
                     data={userInfo?.recipesId}
-                    contentContainerStyle={{backgroundColor: GlobalStyles[theme].background}}
-                    style={{backgroundColor: GlobalStyles[theme].background}}
+                    contentContainerStyle={{backgroundColor: GlobalStyles[theme]?.background}}
+                    style={{backgroundColor: GlobalStyles[theme]?.background}}
                     showsVerticalScrollIndicator={false}
                     numColumns={3}
                     initialNumToRender={9}

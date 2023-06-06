@@ -37,7 +37,6 @@ import { createEvent, updateEvent, fetchEvents, deleteEvent } from '../../Redux/
 import { getMeals, createMeal, updateMeal, deleteMeal } from '../../Redux/actions/meals';
 import { deleteRecipe, addRecipeTo } from '../../Redux/actions/recipes'
 
-// import { Context } from "../../context/UserContext";
 import FloatingButton from '../../components/FloatingButton'
 import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
@@ -63,6 +62,10 @@ import GlobalStyles from '../../GlobalStyles';
 import trans from '../../Language'
 import GlobalTextStyles from '../../GlobalTextStyles';
 
+import { Context } from '../../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
 const logos = [
     { name: "Vegan", image: require('../../assets/images/logo/vegan.png') },
     { name: "Organic", image: require('../../assets/images/logo/organic.png') },
@@ -92,17 +95,19 @@ const logos = [
 
 export default function RecipeDetail({ navigation, route }) {
     const { recipeFromHome, recipeDetailFlag } = route.params
-    // console.log("RecipeDetail recipeFromHome", recipeFromHome, recipeDetailFlag)
+    var difficultyColor = ""
+    const todayDate = new Date().toJSON().slice(0, 10)
+
     const [show, setShow] = useState('ingredients')
     const [modalVisible, setModalVisible] = useState(false)
     const [addTo, setAddTo] = useState(null)
     const [popupModal, setPopupModal] = useState(false)
     const [userId, setUserId] = useState()
     const [showImage, setShowImage] = useState(false)
-    const [language, setLanguage] = useState("en")
     const [text, setText] = useState('normalText')
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -116,20 +121,24 @@ export default function RecipeDetail({ navigation, route }) {
         PTSans_400Regular,
         Karla_400Regular
     })
-    var difficultyColor = ""
 
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
 
     const redux = useSelector((state) => state)
-    // console.log("RecipeDetail redux", redux?.recipe?.recipe)
-    const recipeData = recipeFromHome !== undefined ? recipeFromHome : redux?.recipe?.recipe
-
-    // console.log("RecipeDetail recipeData", recipeData)
-
-
     const eventList = redux?.event?.events
     const mealList = redux?.meal?.meals
+    const recipeData = recipeFromHome !== undefined ? recipeFromHome : redux?.recipe?.recipe
+
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
+
 
     // useEffect(() => {
     //     onRefresh()
@@ -146,7 +155,6 @@ export default function RecipeDetail({ navigation, route }) {
     //     wait(3000).then(() => setRefreshing(false))//.then(dispatch(getMeals(userId)))
     // }, []);
 
-    const todayDate = new Date().toJSON().slice(0, 10)
 
     useEffect(() => {
         if (redux?.recipe.message !== "") {
@@ -219,10 +227,10 @@ export default function RecipeDetail({ navigation, route }) {
 
     switch (recipeData?.difficulty) {
         case "Super Easy":
-            difficultyColor = GlobalStyles[theme].green
+            difficultyColor = GlobalStyles[theme]?.green
             break
         case "Easy":
-            difficultyColor = GlobalStyles[theme].yesColor
+            difficultyColor = GlobalStyles[theme]?.yesColor
             break
         case "Medium":
             difficultyColor = "orange"
@@ -231,7 +239,7 @@ export default function RecipeDetail({ navigation, route }) {
             difficultyColor = "salmon"
             break
         case "Super Hard":
-            difficultyColor = GlobalStyles[theme].noColor
+            difficultyColor = GlobalStyles[theme]?.noColor
             break
     }
 
@@ -240,7 +248,7 @@ export default function RecipeDetail({ navigation, route }) {
         <ScrollView style={{ marginTop: recipeDetailFlag ? 40 : 0 }}
             showsVerticalScrollIndicator={false}
         >
-            <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
+            <View style={[styles.container, { backgroundColor: GlobalStyles[theme]?.background }]}>
 
                 <View style={{
                     height: 45,
@@ -249,14 +257,14 @@ export default function RecipeDetail({ navigation, route }) {
                     alignItems: 'center',
                     borderBottomWidth: 1,
                     borderRadius: 10,
-                    borderColor: GlobalStyles[theme].fontColor,
-                    backgroundColor: GlobalStyles[theme].paperColor
+                    borderColor: GlobalStyles[theme]?.fontColor,
+                    backgroundColor: GlobalStyles[theme]?.paperColor
                 }}>
-                    <Text style={{ fontSize: 30, color: GlobalStyles[theme].fontColor }}>{recipeData?.recipeName}</Text>
+                    <Text style={{ fontSize: 30, color: GlobalStyles[theme]?.fontColor }}>{recipeData?.recipeName}</Text>
                 </View>
 
                 <View style={{ height: 30, width: "100%", alignItems: "flex-end", marginTop: 5 }}>
-                    <Text style={{ color: GlobalStyles[theme].fontColor }}>by_{recipeData?.creator}</Text>
+                    <Text style={{ color: GlobalStyles[theme]?.fontColor }}>by_{recipeData?.creator}</Text>
                 </View>
 
                 <ImagesSwipe recipeFormRecipePicture={recipeData.recipePicture.normal} setShowImage={setShowImage} showImage={showImage} />
@@ -276,8 +284,8 @@ export default function RecipeDetail({ navigation, route }) {
                     alignSelf: 'center',
                     marginBottom: 10
                 }}>
-                    <Text style={{ color: GlobalStyles[theme].fontColor }}><AntDesign name="like2" size={24} color={GlobalStyles[theme].fontColor} /> {recipeData?.likes?.length}</Text>
-                    <Text style={{ color: GlobalStyles[theme].fontColor }}><AntDesign name="hearto" size={24} color={GlobalStyles[theme].fontColor} /> {recipeData?.downloads?.length} </Text>
+                    <Text style={{ color: GlobalStyles[theme]?.fontColor }}><AntDesign name="like2" size={24} color={GlobalStyles[theme]?.fontColor} /> {recipeData?.likes?.length}</Text>
+                    <Text style={{ color: GlobalStyles[theme]?.fontColor }}><AntDesign name="hearto" size={24} color={GlobalStyles[theme]?.fontColor} /> {recipeData?.downloads?.length} </Text>
                 </View>
 
                 <View style={[{
@@ -289,7 +297,7 @@ export default function RecipeDetail({ navigation, route }) {
                     borderRadius: 10,
                     padding: 10,
                     marginBottom: 10,
-                }, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                }, { backgroundColor: GlobalStyles[theme]?.paperColor }]}>
                     <View style={{
                         width: (windowWidth - 40) / 4,
                         height: '100%',
@@ -298,11 +306,11 @@ export default function RecipeDetail({ navigation, route }) {
                     }}>
                         <Text style={{
                             marginBottom: 10,
-                            fontSize: GlobalTextStyles[text].fontSize,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                            color: GlobalStyles[theme].fontColor
+                            fontSize: GlobalTextStyles[text]?.fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                            color: GlobalStyles[theme]?.fontColor
                         }}>
-                            {trans[language].PREP_TIME}
+                            {trans[language]?.PREP_TIME}
                         </Text>
                         <View style={{
                             width: "90%",
@@ -311,24 +319,24 @@ export default function RecipeDetail({ navigation, route }) {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                         }}>
-                            <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                            <Entypo name="stopwatch" size={24} color={GlobalStyles[theme]?.fontColor} />
                             <Text style={[{
                                 width: 30,
                                 textAlign: "center",
                                 borderStyle: 'solid',
                                 borderBottomWidth: 0.5,
                             }, {
-                                borderBottomColor: GlobalStyles[theme].borderColor,
-                                fontSize: GlobalTextStyles[text].fontSize,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor
+                                borderBottomColor: GlobalStyles[theme]?.borderColor,
+                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor
                             }]}>{recipeData?.prepTime}</Text>
                             <Text style={{
-                                fontSize: GlobalTextStyles[text].fontSize,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor
+                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor
                             }}>
-                                {trans[language].MIN}
+                                {trans[language]?.MIN}
                             </Text>
                         </View>
                     </View>
@@ -341,11 +349,11 @@ export default function RecipeDetail({ navigation, route }) {
                     }}>
                         <Text style={{
                             marginBottom: 10,
-                            fontSize: GlobalTextStyles[text].fontSize,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                            color: GlobalStyles[theme].fontColor
+                            fontSize: GlobalTextStyles[text]?.fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                            color: GlobalStyles[theme]?.fontColor
                         }}>
-                            {trans[language].COOK_TIME}
+                            {trans[language]?.COOK_TIME}
                         </Text>
                         <View style={{
                             width: "90%",
@@ -354,24 +362,24 @@ export default function RecipeDetail({ navigation, route }) {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                         }}>
-                            <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                            <Entypo name="stopwatch" size={24} color={GlobalStyles[theme]?.fontColor} />
                             <Text style={[{
                                 width: 30,
                                 textAlign: "center",
                                 borderStyle: 'solid',
                                 borderBottomWidth: 0.5,
                             }, {
-                                borderBottomColor: GlobalStyles[theme].borderColor,
-                                fontSize: GlobalTextStyles[text].fontSize,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor
+                                borderBottomColor: GlobalStyles[theme]?.borderColor,
+                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor
                             }]}>{recipeData?.cookTime}</Text>
                             <Text style={{
-                                fontSize: GlobalTextStyles[text].fontSize,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor
+                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor
                             }}>
-                                {trans[language].MIN}
+                                {trans[language]?.MIN}
                             </Text>
                         </View>
                     </View>
@@ -384,11 +392,11 @@ export default function RecipeDetail({ navigation, route }) {
                     }}>
                         <Text style={{
                             marginBottom: 5,
-                            fontSize: GlobalTextStyles[text].fontSize,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                            color: GlobalStyles[theme].fontColor
+                            fontSize: GlobalTextStyles[text]?.fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                            color: GlobalStyles[theme]?.fontColor
                         }}>
-                            {trans[language].DIFFICULTY}
+                            {trans[language]?.DIFFICULTY}
                         </Text>
                         <View style={{
                             width: "90%",
@@ -397,7 +405,7 @@ export default function RecipeDetail({ navigation, route }) {
                             alignItems: 'center',
                             justifyContent: 'space-around',
                         }}>
-                            <MaterialCommunityIcons name="chef-hat" size={24} color={GlobalStyles[theme].fontColor} />
+                            <MaterialCommunityIcons name="chef-hat" size={24} color={GlobalStyles[theme]?.fontColor} />
 
                             <View style={[{
                                 width: 40,
@@ -408,7 +416,7 @@ export default function RecipeDetail({ navigation, route }) {
                                 borderWidth: 0.5,
                                 fontSize: 18,
                                 backgroundColor: difficultyColor,
-                                borderColor: GlobalStyles[theme].borderColor,
+                                borderColor: GlobalStyles[theme]?.borderColor,
                             }]}>
                                 <Text style={{
                                     width: 40,
@@ -416,9 +424,9 @@ export default function RecipeDetail({ navigation, route }) {
                                     textAlign: 'center',
                                     textAlignVertical: "center",
                                     fontSize: 18,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                 }}>
-                                    {recipeData?.difficulty?.split(" ")[0].slice(0, 1)}{recipeData?.difficulty?.split(" ")[1]?.slice(0, 1)}
+                                    {recipeData?.difficulty?.split(" ")[0]?.slice(0, 1)}{recipeData?.difficulty?.split(" ")[1]?.slice(0, 1)}
                                 </Text>
                             </View>
                         </View>
@@ -432,11 +440,11 @@ export default function RecipeDetail({ navigation, route }) {
                     }}>
                         <Text style={{
                             marginBottom: 10,
-                            fontSize: GlobalTextStyles[text].fontSize,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                            color: GlobalStyles[theme].fontColor
+                            fontSize: GlobalTextStyles[text]?.fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                            color: GlobalStyles[theme]?.fontColor
                         }}>
-                            {trans[language].SERVES}
+                            {trans[language]?.SERVES}
                         </Text>
                         <View style={{
                             width: "90%",
@@ -445,30 +453,30 @@ export default function RecipeDetail({ navigation, route }) {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                         }}>
-                            <Ionicons name="ios-people-circle-outline" size={24} color={GlobalStyles[theme].fontColor} />
+                            <Ionicons name="ios-people-circle-outline" size={24} color={GlobalStyles[theme]?.fontColor} />
                             <Text style={[{
                                 width: 30,
                                 textAlign: "center",
                                 borderStyle: 'solid',
                                 borderBottomWidth: 0.5,
                             }, {
-                                borderBottomColor: GlobalStyles[theme].borderColor,
-                                fontSize: GlobalTextStyles[text].fontSize,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor
+                                borderBottomColor: GlobalStyles[theme]?.borderColor,
+                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor
                             }]}>{recipeData?.prepTime}</Text>
                             <Text style={{
-                                fontSize: GlobalTextStyles[text].fontSize,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor
+                                fontSize: GlobalTextStyles[text]?.fontSize,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor
                             }}>
-                                {trans[language].PPL}
+                                {trans[language]?.PPL}
                             </Text>
                         </View>
                     </View>
                 </View>
 
-                <View style={[styles.specialDietLogo, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                <View style={[styles.specialDietLogo, { backgroundColor: GlobalStyles[theme]?.paperColor }]}>
                     {recipeData?.specialDiet?.map(item => {
                         return logos.map(logo =>
                             (logo.name === item) ?
@@ -485,22 +493,22 @@ export default function RecipeDetail({ navigation, route }) {
                     )}
                 </View>
 
-                <Text style={[styles.outputTags, { backgroundColor: GlobalStyles[theme].paperColor }]} >
+                <Text style={[styles.outputTags, { backgroundColor: GlobalStyles[theme]?.paperColor }]} >
                     <Text style={{
-                        fontSize: GlobalTextStyles[text].fontSize,
-                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                        color: GlobalStyles[theme].fontColor
+                        fontSize: GlobalTextStyles[text]?.fontSize,
+                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                        color: GlobalStyles[theme]?.fontColor
                     }}>{recipeData?.foodCourse}</Text>
                 </Text>
 
-                <View style={[styles.outputTags, { flexDirection: 'row', backgroundColor: GlobalStyles[theme].paperColor }]} >
-                    <FontAwesome5 name="hashtag" size={24} color={GlobalStyles[theme].fontColor} />
+                <View style={[styles.outputTags, { flexDirection: 'row', backgroundColor: GlobalStyles[theme]?.paperColor }]} >
+                    <FontAwesome5 name="hashtag" size={24} color={GlobalStyles[theme]?.fontColor} />
                     {recipeData?.tags?.map(item => <Text key={uuid.v4()}
                         style={{
                             textAlignVertical: 'center',
-                            fontSize: GlobalTextStyles[text].fontSize,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                            color: GlobalStyles[theme].fontColor
+                            fontSize: GlobalTextStyles[text]?.fontSize,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                            color: GlobalStyles[theme]?.fontColor
                         }}
                     // onPress={(text) => remove(text, "tags")}
                     >{item}, </Text>)}
@@ -557,36 +565,36 @@ export default function RecipeDetail({ navigation, route }) {
                 {show === "ingredients"
                     ? <View style={{ width: "100%", alignItems: 'center', minHeight: 200 }}>
                         {recipeData?.ingredients?.map(item =>
-                            <View style={[styles.outputIngredients, {backgroundColor: GlobalStyles[theme].paperColor}]} key={uuid.v4()}>
+                            <View style={[styles.outputIngredients, {backgroundColor: GlobalStyles[theme]?.paperColor}]} key={uuid.v4()}>
                                 <Text style={[styles.quantity, {
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor
                                 }]}>{item.quantity}</Text>
                                 <Text style={[styles.units, {
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor
                                 }]}>{item.units}</Text>
                                 <Text style={[styles.product, {
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor
                                 }]}>{item.product}</Text>
                                 <Text style={[styles.remarks, {
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor
                                 }]}>{item.remarks}</Text>
                             </View>
                         )}
                     </View>
                     : <View style={{ width: "100%", alignItems: 'center', minHeight: 200 }}>
                         {recipeData?.preparation.map(item =>
-                            <View style={[styles.outputPreparation, {backgroundColor: GlobalStyles[theme].paperColor}]} key={uuid.v4()}>
+                            <View style={[styles.outputPreparation, {backgroundColor: GlobalStyles[theme]?.paperColor}]} key={uuid.v4()}>
                                 <Text style={[styles.step, {
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor
                                 }]} key={uuid.v4()}>Step {item.step}</Text>
                                 <Text style={[styles.prep, {
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor
                                 }]} key={uuid.v4()}>{item.preparation}</Text>
                             </View>
                         )}
@@ -607,12 +615,12 @@ export default function RecipeDetail({ navigation, route }) {
                             {addTo === null ?
                                 <View >
                                     <TouchableOpacity
-                                        style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
+                                        style={[styles.genericButton, { backgroundColor: GlobalStyles[theme]?.buttonColor }]}
                                         onPress={() => setAddTo("meal")}>
                                         <Text style={{ color: 'white', fontWeight: '700' }}>To Meal</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
-                                        style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
+                                        style={[styles.genericButton, { backgroundColor: GlobalStyles[theme]?.buttonColor }]}
                                         onPress={() => setAddTo("event")}>
                                         <Text style={{ color: 'white', fontWeight: '700' }}>To Event</Text>
                                     </TouchableOpacity>
@@ -627,7 +635,7 @@ export default function RecipeDetail({ navigation, route }) {
                                             contentContainerStyle={{ alignContent: 'center' }}
                                             renderItem={({ item }) =>
                                                 !item.isDeleted && <TouchableOpacity
-                                                    style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
+                                                    style={[styles.genericButton, { backgroundColor: GlobalStyles[theme]?.buttonColor }]}
                                                     onPress={() => addRecipeToFc(item)}>
                                                     <Text >{item.mealName}</Text>
                                                 </TouchableOpacity>
@@ -645,7 +653,7 @@ export default function RecipeDetail({ navigation, route }) {
                                             renderItem={({ item }) =>
                                                 // item.eventDate >= todayDate &&
                                                 <TouchableOpacity
-                                                    style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
+                                                    style={[styles.genericButton, { backgroundColor: GlobalStyles[theme]?.buttonColor }]}
                                                     onPress={() => addRecipeToFc(item)}>
                                                     <Text >{item.eventName}</Text>
                                                 </TouchableOpacity>

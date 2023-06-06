@@ -28,7 +28,11 @@ import uuid from 'react-native-uuid';
 import { useDispatch, useSelector } from 'react-redux';
 import Banner from '../../components/Banner';
 
-
+import { Context } from '../../context/UserContext';
+import { useContext } from 'react';
+var theme = ""
+var language = ""
+var fontStyle = ""
 
 const ShowEventDetail = ({ navigation, route }) => {
     const { eventData } = route.params
@@ -36,6 +40,14 @@ const ShowEventDetail = ({ navigation, route }) => {
     const redux = useSelector((state) => state)
     const recipesList = redux?.recipe?.recipes
 
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     const openRecipe = (recipe) => {
         navigation.push('RecipeDetail', { recipe: recipe })

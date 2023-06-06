@@ -31,10 +31,9 @@ import * as SecureStore from 'expo-secure-store';
 
 import { Entypo, Ionicons, MaterialCommunityIcons, Feather, AntDesign, FontAwesome5, EvilIcons } from '@expo/vector-icons';
 
-import { Context } from "../../context/UserContext"
-
 import { useDispatch, useSelector } from 'react-redux';
 import { createEvent, updateEvent, fetchEvents, deleteEvent } from '../../Redux/actions/events';
+import { Context } from '../../context/UserContext';
 
 import SwitchButton from '../../components/SwitchButton'
 import DatePicker2 from '../../components/DatePicker';
@@ -89,6 +88,9 @@ const initialValue = {
 
 import trans from "../../Language"
 
+var theme = ""
+var language = ""
+var fontStyle = ""
 const Mycallendar = ({ navigation }) => {
     const todayDate = new Date()
 
@@ -115,9 +117,9 @@ const Mycallendar = ({ navigation }) => {
     const [popupModal, setPopupModal] = useState(false)
     const [fromDate, setFromDate] = useState()
     const [toDate, setToDate] = useState()
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState('stylesLight')
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState('stylesLight')
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -134,11 +136,20 @@ const Mycallendar = ({ navigation }) => {
 
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
-    // const { userContext, setUserContext } = useContext(Context)
 
     const redux = useSelector((state) => state)
     const eventList = redux?.event?.events
 
+    const { userContext, setUserContext } = useContext(Context)
+
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+            console.log(theme,language,fontStyle)
+        }
+    }, [userContext])
     // useEffect(
     //     () => navigation.addListener('focus', () => dispatch(fetchEvents(userId))),
     //     []
@@ -192,7 +203,7 @@ const Mycallendar = ({ navigation }) => {
     ////////////////////////////
 
     const infoPickerFunction = (pickerType, selectedDate, formTypeInput) => {
-        console.log(pickerType, selectedDate, formTypeInput)
+        // console.log(pickerType, selectedDate, formTypeInput)
         const info =
             pickerType === 'date'
                 ? selectedDate.toISOString().split('T')[0]
@@ -284,7 +295,7 @@ const Mycallendar = ({ navigation }) => {
 
                 // eventList?.map(item => console.log(item.date === strTime))
                 eventList?.map(item => (item.eventDate === strTime) &&
-                    items[strTime].push({ ...item, day: strTime }))
+                    items[strTime]?.push({ ...item, day: strTime }))
                 // }
             }
             const newItems = {};
@@ -304,35 +315,35 @@ const Mycallendar = ({ navigation }) => {
                 marginRight: 10,
                 marginTop: 10,
                 borderWidth: 0.5,
-                backgroundColor: GlobalStyles[theme].paperColor,
-                borderColor: GlobalStyles[theme].borderColor,
+                backgroundColor: GlobalStyles[theme]?.paperColor,
+                borderColor: GlobalStyles[theme]?.borderColor,
                 // backgroundColor: "white",
                 // borderColor: "black",
             }} >
                 <Card>
                     <Card.Content
-                        style={{ backgroundColor: GlobalStyles[theme].paperColor }}
+                        style={{ backgroundColor: GlobalStyles[theme]?.paperColor }}
                     >
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <TouchableOpacity style={{ width: "90%" }} onPress={() => openShowEventDetail(item)}>
                                 <Text style={{
-                                    color: GlobalStyles[theme].fontColor,
+                                    color: GlobalStyles[theme]?.fontColor,
                                     // color: "black",
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
                                     {item.eventName}
                                 </Text>
                                 <Text style={{
-                                    color: GlobalStyles[theme].fontColor,
+                                    color: GlobalStyles[theme]?.fontColor,
                                     // color: "black",
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
                                     {item.occasion}
                                 </Text>
                                 <Text style={{
-                                    color: GlobalStyles[theme].fontColor,
+                                    color: GlobalStyles[theme]?.fontColor,
                                     // color: "black",
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
                                     {item.eventTime.slice(0, 5)}
                                 </Text>
@@ -342,13 +353,13 @@ const Mycallendar = ({ navigation }) => {
                                 <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => editEvent(item)}>
                                     <Feather name="edit-3" size={24}
                                         // color="black"
-                                        color={GlobalStyles[theme].fontColor}
+                                        color={GlobalStyles[theme]?.fontColor}
                                     />
                                 </TouchableOpacity>
                                 <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => { setModalAlert(true); setItemDelete(item) }}>
                                     <AntDesign name="delete" size={24}
                                         // color="black"
-                                        color={GlobalStyles[theme].fontColor}
+                                        color={GlobalStyles[theme]?.fontColor}
                                     />
                                 </TouchableOpacity>
                             </View>
@@ -362,8 +373,8 @@ const Mycallendar = ({ navigation }) => {
     const createShopList = () => {
         var filter = [];
         // console.log(fromToForm)
-        console.log(fromDate, " to ", toDate)
-        console.log("eventList", eventList)
+        // console.log(fromDate, " to ", toDate)
+        // console.log("eventList", eventList)
         // eventList.map((event) =>
         //     event.eventDate >= fromToForm.fromDate && event.eventDate <= fromToForm.toDate
         //         ? filter.push(event.recipesId[0])
@@ -381,7 +392,7 @@ const Mycallendar = ({ navigation }) => {
                 ? event.recipesId.map(item => filter.push(item)) //filter.push(event.recipesId[0])
                 : null
         );
-        console.log(filter)
+        // console.log(filter)
         var newMyRecipes = [];
         // filter.map((myEvent) => {
         //     myEvent.ingredients.map((ingredient) => newMyRecipes.push(ingredient));
@@ -395,7 +406,7 @@ const Mycallendar = ({ navigation }) => {
                 }
             })
         )
-        console.log("newMyRecipes", newMyRecipes)
+        // console.log("newMyRecipes", newMyRecipes)
         navigation.navigate('Main', { screen: 'ShowShopList', params: { recipe: newMyRecipes, showType: "events", eventName: `from ${fromDate} to ${toDate}` } })
 
     }
@@ -423,9 +434,9 @@ const Mycallendar = ({ navigation }) => {
                         borderColor: 'black',
                         borderWidth: 0.5,
                         borderStyle: 'solid',
-                        backgroundColor: GlobalStyles[theme].buttonColor
+                        backgroundColor: GlobalStyles[theme]?.buttonColor
                     }}>
-                    <Text style={{ color: 'white', fontSize: 20, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].ADD_NEW_EVENT}</Text>
+                    <Text style={{ color: 'white', fontSize: 20, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{trans[language]?.ADD_NEW_EVENT}</Text>
 
                 </View>
             </TouchableOpacity>
@@ -434,24 +445,24 @@ const Mycallendar = ({ navigation }) => {
     return (
 
         < View style={[styles.container,
-        { backgroundColor: GlobalStyles[theme].background }
+        { backgroundColor: GlobalStyles[theme]?.background }
         ]} >
 
             < View style={{ alignItems: 'center', padding: 10 }} >
 
-                {/* <Banner title={trans[language].MY_CALENDAR} /> */}
+                {/* <Banner title={trans[language]?.MY_CALENDAR} /> */}
 
                 <SpSheet
-                    text={trans[language].CREATE_SHOP_LIST}
+                    text={trans[language]?.CREATE_SHOP_LIST}
                     heightValue={370}
                     style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: '100%' }}
                 >
-                    <View style={{ alignItems: 'center', padding: 10, backgroundColor: GlobalStyles[theme].background }}>
+                    <View style={{ alignItems: 'center', padding: 10, backgroundColor: GlobalStyles[theme]?.background }}>
                         <Text style={{
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>
-                            {trans[language].FROM_DATE}:
+                            {trans[language]?.FROM_DATE}:
                         </Text>
                         <DatePicker2
                             pickerType="date"
@@ -461,10 +472,10 @@ const Mycallendar = ({ navigation }) => {
 
                         />
                         <Text style={{
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>
-                            {trans[language].TO_DATE}:
+                            {trans[language]?.TO_DATE}:
                         </Text>
                         <DatePicker2
                             pickerType="date"
@@ -485,16 +496,16 @@ const Mycallendar = ({ navigation }) => {
                                 borderRadius: 10,
                                 borderStyle: 'solid',
                                 borderWidth: 0.5,
-                                borderColor: GlobalStyles[theme].borderColor,
-                                backgroundColor: GlobalStyles[theme].buttonColor,
+                                borderColor: GlobalStyles[theme]?.borderColor,
+                                backgroundColor: GlobalStyles[theme]?.buttonColor,
                             }]}
                             onPress={() => createShopList()}>
                             <Text style={{
                                 fontSize: 16,
-                                color: GlobalStyles[theme].fontColor,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                color: GlobalStyles[theme]?.fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                             }}>
-                                {trans[language].CREATE_SHOP_LIST}
+                                {trans[language]?.CREATE_SHOP_LIST}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -522,28 +533,28 @@ const Mycallendar = ({ navigation }) => {
                         borderWidth: 2,
                         marginTop: 8,
                         borderRadius: 10,
-                        borderColor: GlobalStyles[theme].buttonColor,
-                        backgroundColor: GlobalStyles[theme].buttonColor,
+                        borderColor: GlobalStyles[theme]?.buttonColor,
+                        backgroundColor: GlobalStyles[theme]?.buttonColor,
                     }} />;
                 }}
                 rende
-                calendarStyle={{ maxHeight: 600, borderColor: GlobalStyles[theme].fontColor, borderWidth: 1, }}
+                calendarStyle={{ maxHeight: 600, borderColor: GlobalStyles[theme]?.fontColor, borderWidth: 1, }}
                 theme={{
-                    backgroundColor: GlobalStyles[theme].background,
-                    agendaDayNumColor: GlobalStyles[theme].fontColor,
-                    agendaDayTextColor: GlobalStyles[theme].fontColor,
-                    agendaTodayColor: GlobalStyles[theme].buttonColor,
-                    calendarBackground: GlobalStyles[theme].paperColor,
-                    dotColor: GlobalStyles[theme].buttonColor,
-                    textColor: GlobalStyles[theme].fontColor,
-                    monthTextColor: GlobalStyles[theme].fontColor,
-                    dayTextColor: GlobalStyles[theme].fontColor,
-                    todayDotColor: GlobalStyles[theme].buttonColor,
-                    selectedDayTextColor: GlobalStyles[theme].fontColor,
-                    selectedDayBackgroundColor: GlobalStyles[theme].buttonColor,
-                    textDayFontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                    textMonthFontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                    todayButtonFontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                    backgroundColor: GlobalStyles[theme]?.background,
+                    agendaDayNumColor: GlobalStyles[theme]?.fontColor,
+                    agendaDayTextColor: GlobalStyles[theme]?.fontColor,
+                    agendaTodayColor: GlobalStyles[theme]?.buttonColor,
+                    calendarBackground: GlobalStyles[theme]?.paperColor,
+                    dotColor: GlobalStyles[theme]?.buttonColor,
+                    textColor: GlobalStyles[theme]?.fontColor,
+                    monthTextColor: GlobalStyles[theme]?.fontColor,
+                    dayTextColor: GlobalStyles[theme]?.fontColor,
+                    todayDotColor: GlobalStyles[theme]?.buttonColor,
+                    selectedDayTextColor: GlobalStyles[theme]?.fontColor,
+                    selectedDayBackgroundColor: GlobalStyles[theme]?.buttonColor,
+                    textDayFontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                    textMonthFontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                    todayButtonFontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                     textDisabledColor: "#cccccc",
                     // todayBackgroundColor: 'red',
                     // todayTextColor: 'blue',
@@ -574,7 +585,7 @@ const Mycallendar = ({ navigation }) => {
                 visible={modalVisible}
             >
                 <View style={styles.centeredView}>
-                    <View style={[styles.modalView, { backgroundColor: GlobalStyles[theme].paperColor }]}>
+                    <View style={[styles.modalView, { backgroundColor: GlobalStyles[theme]?.paperColor }]}>
 
                         <TouchableOpacity style={{
                             width: "100%",
@@ -587,9 +598,9 @@ const Mycallendar = ({ navigation }) => {
                         </TouchableOpacity>
 
                         <TextInput
-                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle].fontStyle }]}
+                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }]}
                             placeholderTextColor="black"
-                            placeholder={trans[language].EVENT_NAME}
+                            placeholder={trans[language]?.EVENT_NAME}
                             value={eventForm.eventName}
                             onChangeText={text => handleOnChange('eventName', text)} />
 
@@ -607,34 +618,34 @@ const Mycallendar = ({ navigation }) => {
                         />
 
                         <TextInput
-                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle].fontStyle }]}
+                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }]}
                             placeholderTextColor="black"
-                            placeholder={trans[language].OCCASION}
+                            placeholder={trans[language]?.OCCASION}
                             value={eventForm.occasion}
                             onChangeText={text => handleOnChange('occasion', text)} />
 
                         <TextInput
-                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle].fontStyle }]}
+                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }]}
                             placeholderTextColor="black"
-                            placeholder={trans[language].HOW_MANY_GUESTS}
+                            placeholder={trans[language]?.HOW_MANY_GUESTS}
                             keyboardType='numeric'
                             value={eventForm.howManyGuests}
                             onChangeText={text => handleOnChange('howManyGuests', text)} />
 
                         <TextInput
-                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle].fontStyle }]}
+                            style={[styles.outPuts, { fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }]}
                             placeholderTextColor="black"
-                            placeholder={trans[language].FREE_TEXT}
+                            placeholder={trans[language]?.FREE_TEXT}
                             value={eventForm.freeText}
                             onChangeText={text => handleOnChange('freeText', text)} />
 
-                        <SwitchButton text01={trans[language].PUBLIC} text02={trans[language].PRIVATE} show={show} setShow={setShow} />
+                        <SwitchButton text01={trans[language]?.PUBLIC} text02={trans[language]?.PRIVATE} show={show} setShow={setShow} />
 
                         <Pressable onPress={() => setAlarm2(!alarm2)} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                             <View style={{ width: 52, height: 27, borderRadius: 25, borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid', justifyContent: 'center', marginRight: 10 }}>
                                 <View style={{ width: 25, height: 25, borderRadius: 25, backgroundColor: alarm2 ? "green" : 'red', alignSelf: alarm2 ? 'flex-end' : 'flex-start', borderColor: 'black', borderWidth: 0.5, borderStyle: 'solid', marginHorizontal: 1 }} />
                             </View>
-                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].SET_ALARM}</Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{trans[language]?.SET_ALARM}</Text>
                         </Pressable>
 
                         {alarm2 && <View style={{ width: "100%", alignItems: 'center' }}>
@@ -655,14 +666,14 @@ const Mycallendar = ({ navigation }) => {
 
                         {!modalFromEdit ?
                             <TouchableOpacity
-                                style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
+                                style={[styles.genericButton, { backgroundColor: GlobalStyles[theme]?.buttonColor }]}
                                 onPress={() => addNewEvent()}>
-                                <Text style={{ color: 'white', fontSize: 16, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].SAVE}</Text>
+                                <Text style={{ color: 'white', fontSize: 16, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{trans[language]?.SAVE}</Text>
                             </TouchableOpacity>
                             : <TouchableOpacity
-                                style={[styles.genericButton, { backgroundColor: GlobalStyles[theme].buttonColor }]}
+                                style={[styles.genericButton, { backgroundColor: GlobalStyles[theme]?.buttonColor }]}
                                 onPress={() => updatEvent()}>
-                                <Text style={{ color: 'white', fontSize: 16, fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].UPDATE}</Text>
+                                <Text style={{ color: 'white', fontSize: 16, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{trans[language]?.UPDATE}</Text>
                             </TouchableOpacity>
                         }
 
@@ -692,45 +703,45 @@ const Mycallendar = ({ navigation }) => {
                         borderRadius: 10,
                         elevation: 5,
                     }, {
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].paperColor
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.paperColor
                     }]}>
                         <View>
                             <Text style={{
                                 fontSize: 16,
                                 marginBottom: 10,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
                             }}>
-                                {trans[language].ARE_YOU_SURE}
+                                {trans[language]?.ARE_YOU_SURE}
                             </Text>
                             <Text style={{
                                 fontSize: 16,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
                             }}>
-                                {trans[language].EVENT_PERMANET_DELETE}
+                                {trans[language]?.EVENT_PERMANET_DELETE}
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row', width: "100%", justifyContent: "space-around", marginTop: 20 }}>
                             <TouchableOpacity
                                 onPress={() => delEvent(itemDelete)}>
                                 <Text style={{
-                                    color: GlobalStyles[theme].buttonColor,
+                                    color: GlobalStyles[theme]?.buttonColor,
                                     fontSize: 16,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                    {trans[language].DELETE}
+                                    {trans[language]?.DELETE}
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => { setModalAlert(false); setItemDelete({}) }}>
                                 <Text style={{
-                                    color: GlobalStyles[theme].buttonColor,
+                                    color: GlobalStyles[theme]?.buttonColor,
                                     fontSize: 16,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                    {trans[language].CANCEL}
+                                    {trans[language]?.CANCEL}
                                 </Text>
                             </TouchableOpacity>
 
@@ -739,7 +750,7 @@ const Mycallendar = ({ navigation }) => {
                 </View>
             </Modal>
 
-            {/* <View style={{ width: '100%', backgroundColor: GlobalStyles[theme].buttonColor }}>
+            {/* <View style={{ width: '100%', backgroundColor: GlobalStyles[theme]?.buttonColor }}>
                 <Button title='Add new Event' onPress={() => setModalVisible(true)} />
             </View> */}
             <Footer />

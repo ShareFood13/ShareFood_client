@@ -68,12 +68,15 @@ import {
 import GlobalFontStyles from '../GlobalFontStyles';
 import GlobalStyles from '../GlobalStyles';
 import trans from '../Language'
-
+import { Context } from '../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
 export default function RecipeCard({ recipe, navigation }) {
     const dispatch = useDispatch()
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -87,7 +90,14 @@ export default function RecipeCard({ recipe, navigation }) {
         PTSans_400Regular,
         Karla_400Regular
     })
-
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
     const openRecipe = (recipe) => {
         // navigation.push('RecipeDetail', { recipeData: recipe })
         // console.log("RecipeCard", recipe._id)
@@ -99,12 +109,12 @@ export default function RecipeCard({ recipe, navigation }) {
     }
     // console.log(recipe?.recipePicture?.small)
     return (
-        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
-            <View style={[styles.recipeCard, { backgroundColor: GlobalStyles[theme].paperColor, borderColor: GlobalStyles[theme].borderColor }]}>
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme]?.background }]}>
+            <View style={[styles.recipeCard, { backgroundColor: GlobalStyles[theme]?.paperColor, borderColor: GlobalStyles[theme]?.borderColor }]}>
                 <View style={styles.subCard}>
 
                     <TouchableOpacity style={styles.left} onPress={() => openRecipe(recipe)}>
-                        <Text style={{ width: "100%", textAlign: 'center', fontFamily: GlobalFontStyles[fontStyle].fontStyle, color: GlobalStyles[theme].fontColor }}>{recipe?.recipeName}</Text>
+                        <Text style={{ width: "100%", textAlign: 'center', fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }}>{recipe?.recipeName}</Text>
 
                         <View style={{
                             flexDirection: 'row',
@@ -134,16 +144,16 @@ export default function RecipeCard({ recipe, navigation }) {
                         </View>
 
                         <View style={{ flexDirection: 'row', width: 170, justifyContent: 'space-between', alignSelf: 'center' }}>
-                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>
-                                <AntDesign name="like2" size={24} color={GlobalStyles[theme].fontColor} />
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }}>
+                                <AntDesign name="like2" size={24} color={GlobalStyles[theme]?.fontColor} />
                                 {recipe?.likes?.length}
                             </Text>
-                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>
-                                <AntDesign name="hearto" size={24} color={GlobalStyles[theme].fontColor} />
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }}>
+                                <AntDesign name="hearto" size={24} color={GlobalStyles[theme]?.fontColor} />
                                 {recipe?.downloads?.length}
                             </Text>
-                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>
-                                <Entypo name="stopwatch" size={24} color={GlobalStyles[theme].fontColor} />
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, color: GlobalStyles[theme]?.fontColor }}>
+                                <Entypo name="stopwatch" size={24} color={GlobalStyles[theme]?.fontColor} />
                                 {Number(recipe?.cookTime) + Number(recipe?.prepTime)}
                             </Text>
                         </View>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useContext } from 'react';
 import * as React from 'react';
 import {
     Text,
@@ -18,6 +18,7 @@ import Constants from 'expo-constants';
 import { Picker } from '@react-native-picker/picker';
 
 import { DataTable } from 'react-native-paper';
+import { useDispatch, useSelector } from 'react-redux';
 
 import uuid from 'react-native-uuid';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -259,6 +260,11 @@ import {
 } from '@expo-google-fonts/dev';
 import GlobalFontStyles from '../../GlobalFontStyles';
 import trans from '../../Language'
+import { Context } from '../../context/UserContext';
+
+var theme = ""
+var language = ""
+var fontStyle = ""
 
 export default function Conversions() {
     const [show, setShow] = useState('mass');
@@ -268,9 +274,9 @@ export default function Conversions() {
     const [toUnitShow, setToUnitShow] = useState('');
     const [value, setValue] = useState(0);
     const [multi, setMulti] = useState(1);
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -284,7 +290,19 @@ export default function Conversions() {
         PTSans_400Regular,
         Karla_400Regular
     })
+    const redux = useSelector((state) => state)
+    
     const [test, setTest] = useState(1);
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+            console.log(theme,language,fontStyle)
+        }
+    }, [userContext])
+
     var array = [];
     const handleChange = (text) => {
         setFromUnit(text);
@@ -350,9 +368,9 @@ export default function Conversions() {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background, }]}>
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme]?.background, }]}>
 
-            {/* <Banner title={trans[language].UNITS_CONVERTOR} /> */}
+            {/* <Banner title={trans[language]?.UNITS_CONVERTOR} /> */}
 
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={{
@@ -388,7 +406,7 @@ export default function Conversions() {
                                 // left: 0,
                             }}
                             onPress={() => handleButtonPress('mass')}>
-                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].MASS}</Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{trans[language]?.MASS}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={{
@@ -405,7 +423,7 @@ export default function Conversions() {
                                 // right: '33%'
                             }}
                             onPress={() => handleButtonPress('volume')}>
-                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].VOLUME}</Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{trans[language]?.VOLUME}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={{
@@ -422,7 +440,7 @@ export default function Conversions() {
                                 // right: 0
                             }}
                             onPress={() => handleButtonPress('temperature')}>
-                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}>{trans[language].TEMPERATURE}</Text>
+                            <Text style={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}>{trans[language]?.TEMPERATURE}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -432,7 +450,7 @@ export default function Conversions() {
                         <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
                             <TextInput
                                 placeholder='0.000'
-                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                 value={value}
                                 keyboardType={'numeric'}
                                 onChangeText={(text) => setValue(text)}
@@ -446,13 +464,13 @@ export default function Conversions() {
                                     borderWidth: 0.5,
                                     borderStyle: 'solid',
                                     fontSize: 18,
-                                    backgroundColor: GlobalStyles[theme].paperColor,
-                                    borderColor: GlobalStyles[theme].borderColor,
-                                    color: GlobalStyles[theme].fontColor,
+                                    backgroundColor: GlobalStyles[theme]?.paperColor,
+                                    borderColor: GlobalStyles[theme]?.borderColor,
+                                    color: GlobalStyles[theme]?.fontColor,
                                 }}
                             />
                             <View style={{
-                                borderColor: GlobalStyles[theme].borderColor,
+                                borderColor: GlobalStyles[theme]?.borderColor,
                                 borderWidth: 0.5
                             }}>
                                 <Picker
@@ -461,18 +479,18 @@ export default function Conversions() {
                                         height: 55,
                                         alignSelf: 'center',
                                         paddingLeft: 10,
-                                        color: GlobalStyles[theme].fontColor,
-                                        backgroundColor: GlobalStyles[theme].paperColor,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        backgroundColor: GlobalStyles[theme]?.paperColor,
                                     }}
                                     selectedValue={fromUnit}
                                     onValueChange={(text) => setFromUnitHandler(text)}>
-                                    <Picker.Item label={trans[language].FROM + "..."}
+                                    <Picker.Item label={trans[language]?.FROM + "..."}
                                         value="From..."
-                                        color={GlobalStyles[theme].fontColor}
-                                        fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                        color={GlobalStyles[theme]?.fontColor}
+                                        fontFamily={GlobalFontStyles[fontStyle]?.fontStyle}
                                         style={{
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            backgroundColor: GlobalStyles[theme].paperColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            backgroundColor: GlobalStyles[theme]?.paperColor,
                                             width: 150,
                                         }}
                                     />
@@ -482,11 +500,11 @@ export default function Conversions() {
                                                 label={elem.unit}
                                                 value={elem.unit}
                                                 key={uuid.v4()}
-                                                color={GlobalStyles[theme].fontColor}
-                                                fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                color={GlobalStyles[theme]?.fontColor}
+                                                fontFamily={GlobalFontStyles[fontStyle]?.fontStyle}
                                                 style={{
-                                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                    backgroundColor: GlobalStyles[theme]?.paperColor,
                                                 }} />
                                         ))
                                         : show === 'volume'
@@ -495,11 +513,11 @@ export default function Conversions() {
                                                     label={elem.unit}
                                                     value={elem.unit}
                                                     key={uuid.v4()}
-                                                    color={GlobalStyles[theme].fontColor}
-                                                    fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                    color={GlobalStyles[theme]?.fontColor}
+                                                    fontFamily={GlobalFontStyles[fontStyle]?.fontStyle}
                                                     style={{
-                                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                        backgroundColor: GlobalStyles[theme].paperColor
+                                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                        backgroundColor: GlobalStyles[theme]?.paperColor
                                                     }} />
                                             ))
                                             : temperature.map((elem) => (
@@ -507,11 +525,11 @@ export default function Conversions() {
                                                     label={elem.unit}
                                                     value={elem.unit}
                                                     key={uuid.v4()}
-                                                    color={GlobalStyles[theme].fontColor}
-                                                    fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                    color={GlobalStyles[theme]?.fontColor}
+                                                    fontFamily={GlobalFontStyles[fontStyle]?.fontStyle}
                                                     style={{
-                                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                        backgroundColor: GlobalStyles[theme].paperColor
+                                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                        backgroundColor: GlobalStyles[theme]?.paperColor
                                                     }} />
                                             ))}
                                 </Picker>
@@ -521,7 +539,7 @@ export default function Conversions() {
                         <SimpleLineIcons
                             name="arrow-down-circle"
                             size={40}
-                            color={GlobalStyles[theme].buttonColor}
+                            color={GlobalStyles[theme]?.buttonColor}
                             style={{ alignSelf: 'center' }}
                         />
 
@@ -538,10 +556,10 @@ export default function Conversions() {
                                     borderWidth: 0.5,
                                     borderStyle: 'solid',
                                     fontSize: 18,
-                                    color: GlobalStyles[theme].fontColor,
-                                    borderColor: GlobalStyles[theme].borderColor,
-                                    backgroundColor: GlobalStyles[theme].paperColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    borderColor: GlobalStyles[theme]?.borderColor,
+                                    backgroundColor: GlobalStyles[theme]?.paperColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
                                 {/* {multi !== 1 && (show !== 'temperature'
                                     ? (value * multi).toFixed(3)
@@ -551,26 +569,26 @@ export default function Conversions() {
                                 {convertResult}
                             </Text>
 
-                            <View style={{ borderColor: GlobalStyles[theme].borderColor, borderWidth: 0.5 }}>
+                            <View style={{ borderColor: GlobalStyles[theme]?.borderColor, borderWidth: 0.5 }}>
                                 <Picker
                                     style={{
                                         width: 150,
                                         height: 55,
                                         alignSelf: 'center',
                                         paddingLeft: 10,
-                                        color: GlobalStyles[theme].fontColor,
-                                        backgroundColor: GlobalStyles[theme].paperColor,
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        backgroundColor: GlobalStyles[theme]?.paperColor,
                                     }}
                                     selectedValue={toUnitShow}
                                     onValueChange={(text) => setTo(text)}>
                                     <Picker.Item
-                                        label={trans[language].TO + "..."}
+                                        label={trans[language]?.TO + "..."}
                                         value="To..."
-                                        color={GlobalStyles[theme].fontColor}
-                                        fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                        color={GlobalStyles[theme]?.fontColor}
+                                        fontFamily={GlobalFontStyles[fontStyle]?.fontStyle}
                                         style={{
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                            backgroundColor: GlobalStyles[theme].paperColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                            backgroundColor: GlobalStyles[theme]?.paperColor,
                                             width: 150,
                                         }} />
                                     {show === 'mass'
@@ -578,11 +596,11 @@ export default function Conversions() {
                                             <Picker.Item
                                                 value={elem.unit}
                                                 key={uuid.v4()}
-                                                color={GlobalStyles[theme].fontColor}
-                                                fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                color={GlobalStyles[theme]?.fontColor}
+                                                fontFamily={GlobalFontStyles[fontStyle]?.fontStyle}
                                                 style={{
-                                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                    backgroundColor: GlobalStyles[theme]?.paperColor,
                                                 }}
                                             />
                                         ))
@@ -592,11 +610,11 @@ export default function Conversions() {
                                                     label={elem.unit}
                                                     value={elem.unit}
                                                     key={uuid.v4()}
-                                                    color={GlobalStyles[theme].fontColor}
-                                                    fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                    color={GlobalStyles[theme]?.fontColor}
+                                                    fontFamily={GlobalFontStyles[fontStyle]?.fontStyle}
                                                     style={{
-                                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                        backgroundColor: GlobalStyles[theme].paperColor
+                                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                        backgroundColor: GlobalStyles[theme]?.paperColor
                                                     }}
                                                 />
                                             ))
@@ -604,11 +622,11 @@ export default function Conversions() {
                                                 <Picker.Item label={elem.unit}
                                                     value={elem.unit}
                                                     key={uuid.v4()}
-                                                    color={GlobalStyles[theme].fontColor}
-                                                    fontFamily={GlobalFontStyles[fontStyle].fontStyle}
+                                                    color={GlobalStyles[theme]?.fontColor}
+                                                    fontFamily={GlobalFontStyles[fontStyle]?.fontStyle}
                                                     style={{
-                                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                                        backgroundColor: GlobalStyles[theme].paperColor
+                                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                                        backgroundColor: GlobalStyles[theme]?.paperColor
                                                     }}
                                                 />
                                             ))}
@@ -620,8 +638,8 @@ export default function Conversions() {
                                         // placeholder={toUnitShow === "" ? "To..." : toUnitShow}
                                         placeholder="To..."
                                         save="value"
-                                        inputStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
-                                        dropdownTextStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
+                                        inputStyles={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}
+                                        dropdownTextStyles={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}
                                         boxStyles={{
                                             width: 150,
                                             // height: 55,
@@ -629,8 +647,8 @@ export default function Conversions() {
                                             borderStyle: 'solid',
                                             borderColor: 'black',
                                             // marginRight: 20,
-                                            backgroundColor: GlobalStyles[theme].paperColor,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                            backgroundColor: GlobalStyles[theme]?.paperColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
 
                                         }}
                                         dropdownItemStyles={{
@@ -653,15 +671,15 @@ export default function Conversions() {
                                             data={volumeUnit}
                                             placeholder="To..."
                                             save="value"
-                                            inputStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
-                                            dropdownTextStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
+                                            inputStyles={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}
+                                            dropdownTextStyles={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}
                                             boxStyles={{
                                                 width: 150,
                                                 borderWidth: 0.5,
                                                 borderStyle: 'solid',
                                                 borderColor: 'black',
-                                                backgroundColor: GlobalStyles[theme].paperColor,
-                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                                backgroundColor: GlobalStyles[theme]?.paperColor,
+                                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
 
                                             }}
                                             dropdownItemStyles={{
@@ -683,15 +701,15 @@ export default function Conversions() {
                                             data={temperatureUnit}
                                             placeholder="To..."
                                             save="value"
-                                            inputStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
-                                            dropdownTextStyles={{ fontFamily: GlobalFontStyles[fontStyle].fontStyle }}
+                                            inputStyles={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}
+                                            dropdownTextStyles={{ fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }}
                                             boxStyles={{
                                                 width: 150,
                                                 borderWidth: 0.5,
                                                 borderStyle: 'solid',
                                                 borderColor: 'black',
-                                                backgroundColor: GlobalStyles[theme].paperColor,
-                                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                                backgroundColor: GlobalStyles[theme]?.paperColor,
+                                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
 
                                             }}
                                             dropdownItemStyles={{
@@ -721,8 +739,8 @@ export default function Conversions() {
                         borderTopRightRadius: 10,
                         borderWidth: 0.5,
                         borderStyle: 'solid',
-                        backgroundColor: (fromUnit !== "" && toUnit !== "") ? GlobalStyles[theme].buttonColor : '#ddd',
-                        borderColor: GlobalStyles[theme].borderColor,
+                        backgroundColor: (fromUnit !== "" && toUnit !== "") ? GlobalStyles[theme]?.buttonColor : '#ddd',
+                        borderColor: GlobalStyles[theme]?.borderColor,
                     }}
                         disabled={(fromUnit !== "" && toUnit !== "") ? false : true}>
                         {convert.map(elem =>
@@ -732,8 +750,8 @@ export default function Conversions() {
                                     width: '100%',
                                     textAlign: 'center',
                                     fontSize: 14.2,
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
                                 {elem}
                             </Text>)}
@@ -746,68 +764,68 @@ export default function Conversions() {
                     alignSelf: 'center',
                     borderStyle: 'solid',
                     borderWidth: 0.5,
-                    borderColor: GlobalStyles[theme].borderColor,
-                    backgroundColor: GlobalStyles[theme].paperColor,
+                    borderColor: GlobalStyles[theme]?.borderColor,
+                    backgroundColor: GlobalStyles[theme]?.paperColor,
                 }}>
                     <DataTable style={{ width: '100%' }}>
                         <DataTable.Header style={{
                             width: '100%',
-                            borderBottomColor: GlobalStyles[theme].borderColor,
+                            borderBottomColor: GlobalStyles[theme]?.borderColor,
                             borderBottomWidth: 0.5,
                         }}>
                             <DataTable.Title textStyle={{
                                 fontSize: 15,
-                                color: GlobalStyles[theme].fontColor,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                color: GlobalStyles[theme]?.fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                             }}>
-                                {trans[language].OVEN_LEVEL}
+                                {trans[language]?.OVEN_LEVEL}
                             </DataTable.Title>
                             <DataTable.Title
                                 style={{ flexDirection: 'row', justifyContent: 'center' }}
                                 textStyle={{
                                     fontSize: 15,
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                {trans[language].FAHRENHEIT}
+                                {trans[language]?.FAHRENHEIT}
                             </DataTable.Title>
                             <DataTable.Title
                                 style={{ flexDirection: 'row', justifyContent: 'center' }}
                                 textStyle={{
                                     fontSize: 15,
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                {trans[language].CELSIUS}
+                                {trans[language]?.CELSIUS}
                             </DataTable.Title>
                         </DataTable.Header>
 
-                        {ovenLevels[language].map((level) => (
+                        {ovenLevels[language]?.map((level) => (
                             <DataTable.Row key={uuid.v4()}
                                 style={{
-                                    borderBottomColor: GlobalStyles[theme].borderColor,
+                                    borderBottomColor: GlobalStyles[theme]?.borderColor,
                                     borderBottomWidth: 0.5,
                                 }}>
                                 <DataTable.Cell
                                     textStyle={{
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                     }}
                                     style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
                                     {level.level}
                                 </DataTable.Cell>
                                 <DataTable.Cell
                                     textStyle={{
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                     }}
                                     style={{ flexDirection: 'row', justifyContent: 'center' }}>
                                     {level.imperial}
                                 </DataTable.Cell>
                                 <DataTable.Cell
                                     textStyle={{
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                     }}
                                     style={{ flexDirection: 'row', justifyContent: 'center' }}>
                                     {level.metric}

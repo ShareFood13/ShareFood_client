@@ -74,13 +74,16 @@ import {
 } from '@expo-google-fonts/dev';
 import GlobalFontStyles from '../GlobalFontStyles';
 import trans from '../Language'
-
+import { Context } from '../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
 export default function MealCard({ meal, navigation, openMeal, remove, editMeal, delMeal }) {
     const [modalAlert, setModalAlert] = useState(false)
     const [mealDelete, setMealDelete] = useState({})
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -94,7 +97,14 @@ export default function MealCard({ meal, navigation, openMeal, remove, editMeal,
         PTSans_400Regular,
         Karla_400Regular
     })
-
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
     return (
         <View
             style={{
@@ -109,8 +119,8 @@ export default function MealCard({ meal, navigation, openMeal, remove, editMeal,
                 borderWidth: 0.5,
                 borderStyle: 'solid',
                 borderRadius: 10,
-                borderColor: GlobalStyles[theme].borderColor,
-                backgroundColor: GlobalStyles[theme].paperColor,
+                borderColor: GlobalStyles[theme]?.borderColor,
+                backgroundColor: GlobalStyles[theme]?.paperColor,
             }}>
 
             <TouchableOpacity
@@ -120,15 +130,15 @@ export default function MealCard({ meal, navigation, openMeal, remove, editMeal,
                 <View>
                     <Text style={{
                         fontSize: 16,
-                        color: GlobalStyles[theme].fontColor,
-                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        color: GlobalStyles[theme]?.fontColor,
+                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                     }}>
                         {meal?.mealName}
                     </Text>
-                    <View style={[{ width: '100%', flexDirection: 'row', fontFamily: GlobalFontStyles[fontStyle].fontStyle }]} >
+                    <View style={[{ width: '100%', flexDirection: 'row', fontFamily: GlobalFontStyles[fontStyle]?.fontStyle }]} >
                         {meal?.tags?.map(item => <Text key={uuid.v4()} style={{
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>{item}, </Text>)}
                     </View>
                 </View>
@@ -136,10 +146,10 @@ export default function MealCard({ meal, navigation, openMeal, remove, editMeal,
 
             <View style={{ height: 60, justifyContent: 'space-between', }}>
                 <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => editMeal(meal)}>
-                    <Feather name="edit-3" size={24} color={GlobalStyles[theme].fontColor} />
+                    <Feather name="edit-3" size={24} color={GlobalStyles[theme]?.fontColor} />
                 </TouchableOpacity>
                 <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => { setModalAlert(true); setMealDelete(meal) }}>
-                    <AntDesign name="delete" size={24} color={GlobalStyles[theme].fontColor} />
+                    <AntDesign name="delete" size={24} color={GlobalStyles[theme]?.fontColor} />
                 </TouchableOpacity>
             </View>
 
@@ -163,45 +173,45 @@ export default function MealCard({ meal, navigation, openMeal, remove, editMeal,
                         borderRadius: 10,
                         elevation: 5,
                     }, {
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].paperColor
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.paperColor
                     }]}>
                         <View>
                             <Text style={{
                                 fontSize: 16,
                                 marginBottom: 10,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
                             }}>
-                                {trans[language].ARE_YOU_SURE}
+                                {trans[language]?.ARE_YOU_SURE}
                             </Text>
                             <Text style={{
                                 fontSize: 16,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
                             }}>
-                                {trans[language].PERMANTLY_DELETING}
+                                {trans[language]?.PERMANTLY_DELETING}
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row', width: "100%", justifyContent: "space-around", marginTop: 20 }}>
                             <TouchableOpacity
                                 onPress={() => delMeal(meal)}>
                                 <Text style={{
-                                    color: GlobalStyles[theme].buttonColor,
+                                    color: GlobalStyles[theme]?.buttonColor,
                                     fontSize: 16,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                    {trans[language].DELETE}
+                                    {trans[language]?.DELETE}
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => { setModalAlert(false); setMealDelete({}) }}>
                                 <Text style={{
-                                    color: GlobalStyles[theme].buttonColor,
+                                    color: GlobalStyles[theme]?.buttonColor,
                                     fontSize: 16,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                    {trans[language].CANCEL}
+                                    {trans[language]?.CANCEL}
                                 </Text>
                             </TouchableOpacity>
 

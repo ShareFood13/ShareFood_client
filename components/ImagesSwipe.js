@@ -14,10 +14,25 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import GlobalStyles from '../GlobalStyles';
 
+import { Context } from '../context/UserContext';
+import { useContext } from 'react';
+import { useEffect } from 'react';
+var theme = ""
+var language = ""
+var fontStyle = ""
+
 const ImagesSwipe = ({ showImage, setShowImage, recipeFormRecipePicture, delIngredient }) => {
     // console.log("ImagesSwipe showImage", showImage)
-    const [theme, setTheme] = useState('stylesLight')
+    // const [theme, setTheme] = useState('stylesLight')
 
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
     return (
         <View style={styles.container}>
             {recipeFormRecipePicture.length !== 0 ?
@@ -61,7 +76,7 @@ const ImagesSwipe = ({ showImage, setShowImage, recipeFormRecipePicture, delIngr
                             }
                         </View>)}
                 </ScrollView>
-                : <View style={{ height: '100%', width: '100%', backgroundColor: GlobalStyles[theme].paperColor }} />}
+                : <View style={{ height: '100%', width: '100%', backgroundColor: GlobalStyles[theme]?.paperColor }} />}
         </View>
 
     )

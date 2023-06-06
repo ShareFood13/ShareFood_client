@@ -72,6 +72,12 @@ const initialMailForm = {
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
+import { Context } from '../../context/UserContext';
+import { useContext } from 'react';
+var theme = ""
+var language = ""
+var fontStyle = ""
+
 const otherUsersList = []
 export default function MyMails({ navigation }) {
     const myRefs = React.useRef([]);
@@ -94,9 +100,9 @@ export default function MyMails({ navigation }) {
     const [userInfo, setUserInfo] = useState()
     const [allSelected, setAllSelected] = useState(false);
 
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -113,6 +119,15 @@ export default function MyMails({ navigation }) {
 
     const [selected, setSelected] = useState('');
     const [checkboxState, setCheckboxState] = useState([])
+
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     useEffect(() => {
         navigation.addListener('focus', () => setListToDelete([]))
@@ -181,7 +196,7 @@ export default function MyMails({ navigation }) {
     };
 
     useEffect(() => {
-        listToDelete.map(item => myRefs.current[item].setNativeProps({ style: { backgroundColor: GlobalStyles[theme].buttonColor, opacity: 1 } }))
+        listToDelete.map(item => myRefs.current[item]?.setNativeProps({ style: { backgroundColor: GlobalStyles[theme]?.buttonColor, opacity: 1 } }))
     }, [listToDelete])
 
     const deleteMails = () => {
@@ -256,7 +271,7 @@ export default function MyMails({ navigation }) {
                 [{
                     flex: 1,
                     padding: 10,
-                }, { backgroundColor: GlobalStyles[theme].background }]}
+                }, { backgroundColor: GlobalStyles[theme]?.background }]}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
             <ScrollView
@@ -268,7 +283,7 @@ export default function MyMails({ navigation }) {
                     />
                 }>
 
-                {/* <Banner title={trans[language].MY_MAILS} /> */}
+                {/* <Banner title={trans[language]?.MY_MAILS} /> */}
 
                 <TouchableOpacity
                     onPress={() => setModalVisible(true)}
@@ -281,17 +296,17 @@ export default function MyMails({ navigation }) {
                         borderWidth: 0.5,
                         borderStyle: 'solid',
                         borderRadius: 10,
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].buttonColor,
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.buttonColor,
                     }}>
                     <Feather name="edit-3" size={24} color="black" />
                     <Text style={{
                         marginLeft: 15,
                         fontSize: 16,
-                        color: GlobalStyles[theme].fontColor,
-                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                        color: GlobalStyles[theme]?.fontColor,
+                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                     }}>
-                        {trans[language].COMPOSE}
+                        {trans[language]?.COMPOSE}
                     </Text>
                 </TouchableOpacity>
 
@@ -306,8 +321,8 @@ export default function MyMails({ navigation }) {
                     borderStyle: 'solid',
                     borderTopLeftRadius: 10,
                     borderTopRightRadius: 10,
-                    borderColor: GlobalStyles[theme].borderColor,
-                    backgroundColor: GlobalStyles[theme].paperColor,
+                    borderColor: GlobalStyles[theme]?.borderColor,
+                    backgroundColor: GlobalStyles[theme]?.paperColor,
                 }}>
                     {/* <BouncyCheckbox
                     size={25}
@@ -323,7 +338,7 @@ export default function MyMails({ navigation }) {
                     style={{ width: '10%', justifyContent: 'center' }}
                 /> */}
                     <TouchableOpacity onPress={deleteMails} style={{ width: '10%', justifyContent: 'center', alignItems: 'center' }}>
-                        <AntDesign name="delete" size={24} color={GlobalStyles[theme].fontColor} />
+                        <AntDesign name="delete" size={24} color={GlobalStyles[theme]?.fontColor} />
                     </TouchableOpacity>
                     <View style={{
                         flexDirection: 'row',
@@ -336,29 +351,29 @@ export default function MyMails({ navigation }) {
                         <Text style={{
                             width: '20%',
                             paddingLeft: 10,
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>
-                            {trans[language].FROM}:
+                            {trans[language]?.FROM}:
                         </Text>
                         <Text style={{
                             width: '50%',
                             paddingLeft: 10,
                             marginLeft: 10,
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>
-                            {trans[language].SUBJECT}
+                            {trans[language]?.SUBJECT}
                         </Text>
                         <Text style={{
                             paddingLeft: 10,
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>
-                            {trans[language].DATE}:
+                            {trans[language]?.DATE}:
                         </Text>
                         <TouchableOpacity onPress={() => setModalAlert(true)}>
-                            <FontAwesome name="question-circle-o" size={25} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                            <FontAwesome name="question-circle-o" size={25} color={GlobalStyles[theme]?.fontColor} style={{ width: 40, textAlign: 'center' }} />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -376,7 +391,7 @@ export default function MyMails({ navigation }) {
                                     borderStyle: 'solid',
                                     borderColor: "black",
                                     borderBottomWidth: 0.5,
-                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                    backgroundColor: GlobalStyles[theme]?.paperColor,
                                 },
                                 (index === myMails?.length - 1) &&
                                 {
@@ -387,16 +402,16 @@ export default function MyMails({ navigation }) {
                                 ]} key={uuid.v4()}>
                                     <TouchableOpacity onPress={() => addToDelList(mail._id)} style={{ width: '10%', justifyContent: 'center', alignItems: 'center' }}>
                                         <View
-                                            style={{ width: 25, height: 25, borderRadius: 20, borderWidth: 2, borderColor: GlobalStyles[theme].buttonColor, alignItems: 'center', justifyContent: 'center' }}>
-                                            <Entypo name="check" size={25} ref={el => myRefs.current[mail._id] = el} color="white" style={{ width: 25, height: 25, textAlign: 'center', opacity: 0, borderRadius: 20, borderWidth: 1, borderColor: GlobalStyles[theme].buttonColor }} />
+                                            style={{ width: 25, height: 25, borderRadius: 20, borderWidth: 2, borderColor: GlobalStyles[theme]?.buttonColor, alignItems: 'center', justifyContent: 'center' }}>
+                                            <Entypo name="check" size={25} ref={el => myRefs.current[mail._id] = el} color="white" style={{ width: 25, height: 25, textAlign: 'center', opacity: 0, borderRadius: 20, borderWidth: 1, borderColor: GlobalStyles[theme]?.buttonColor }} />
                                         </View>
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={() => showMail(mail)} style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', alignSelf: 'center', width: windowWidth * 0.85, height: '100%' }}>
                                         <Text style={[{
                                             marginLeft: 10,
                                             width: '20%',
-                                            color: GlobalStyles[theme].fontColor,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                            color: GlobalStyles[theme]?.fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                         },
                                         mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>
                                             {mail.senderName}
@@ -404,16 +419,16 @@ export default function MyMails({ navigation }) {
                                         <Text style={[{
                                             marginLeft: 10,
                                             width: '50%',
-                                            color: GlobalStyles[theme].fontColor,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                            color: GlobalStyles[theme]?.fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                         },
                                         mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>
                                             {/* // TODO  check how long can be the subject string , to add hidden + ... or scrollView Horizontal*/}
                                             {mail.subject}
                                         </Text>
                                         <Text style={[{
-                                            color: GlobalStyles[theme].fontColor,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                            color: GlobalStyles[theme]?.fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                         },
                                         mail?.isOpen ? { fontWeight: '400' } : { fontWeight: '700' }]}>
                                             {mail.date.split('T')[0]}
@@ -437,7 +452,7 @@ export default function MyMails({ navigation }) {
                         flex: 1,
                         justifyContent: 'center',
                         alignItems: 'center',
-                        backgroundColor: GlobalStyles[theme].background,
+                        backgroundColor: GlobalStyles[theme]?.background,
                         // marginTop: 22,
                     }}>
                         <View style={[{
@@ -459,8 +474,8 @@ export default function MyMails({ navigation }) {
                             alignItems: 'flex-start',
                         },
                         {
-                            backgroundColor: GlobalStyles[theme].background,
-                            borderColor: GlobalStyles[theme].borderColor,
+                            backgroundColor: GlobalStyles[theme]?.background,
+                            borderColor: GlobalStyles[theme]?.borderColor,
                         }
                         ]}>
                             <TouchableOpacity
@@ -487,22 +502,22 @@ export default function MyMails({ navigation }) {
                                 borderRadius: 10,
                                 paddingLeft: 10,
                                 marginBottom: 10,
-                                backgroundColor: GlobalStyles[theme].paperColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor,
                             }}>
                                 <Text style={{
                                     fontSize: 16,
                                     textAlignVertical: 'center',
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                    {trans[language].FROM}:
+                                    {trans[language]?.FROM}:
                                 </Text>
                                 <Text style={{
                                     paddingLeft: 40,
                                     fontSize: 14,
                                     textAlignVertical: 'center',
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
                                     {mailToShow.senderName}
                                 </Text>
@@ -515,22 +530,22 @@ export default function MyMails({ navigation }) {
                                 borderRadius: 10,
                                 paddingLeft: 10,
                                 marginBottom: 10,
-                                backgroundColor: GlobalStyles[theme].paperColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor,
                             }}>
                                 <Text style={{
                                     fontSize: 16,
                                     textAlignVertical: 'center',
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                    {trans[language].SUBJECT}
+                                    {trans[language]?.SUBJECT}
                                 </Text>
                                 <Text style={{
                                     paddingLeft: 24,
                                     fontSize: 14,
                                     textAlignVertical: 'center',
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
                                     {mailToShow.subject}
                                 </Text>
@@ -543,22 +558,22 @@ export default function MyMails({ navigation }) {
                                 borderRadius: 10,
                                 paddingLeft: 10,
                                 marginBottom: 10,
-                                backgroundColor: GlobalStyles[theme].paperColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor,
                             }}>
                                 <Text style={{
                                     fontSize: 16,
                                     textAlignVertical: 'center',
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                    {trans[language].MESSAGE}
+                                    {trans[language]?.MESSAGE}
                                 </Text>
                                 <Text style={{
                                     paddingLeft: 15,
                                     fontSize: 14,
                                     textAlignVertical: 'center',
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
                                     {mailToShow.message}
                                 </Text>
@@ -566,28 +581,30 @@ export default function MyMails({ navigation }) {
                         </View>
                         {/* TODO add button to answer the mail, will open the compose mail with the sender fix */}
                         {/* button or icon with arrow */}
-                        {/* <TouchableOpacity
+                        <TouchableOpacity
                             style={[{
                                 borderRadius: 10,
                                 elevation: 2,
                                 paddingHorizontal: 20,
                                 marginTop: 20,
                                 paddingVertical: 10
-                            }, { backgroundColor: GlobalStyles[theme].buttonColor }]}
+                            }, { backgroundColor: GlobalStyles[theme]?.buttonColor }]}
                             onPress={() => {
                                 setModalVisible2(!modalVisible2)
-                                dispatch(getMyMails(redux?.auth?.authData?.result?._id))
+                                setModalVisible(true)
+                                mailForm.reciverName
+                                setMailForm({...mailForm, reciverName: mailToShow.senderName, reciverId: mailToShow.senderId})
                             }}>
                             <Text style={[{
                                 textAlign: 'center',
                             }, {
-                                borderColor: GlobalStyles[theme].borderColor,
-                                color: GlobalStyles[theme].fontColor,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                borderColor: GlobalStyles[theme]?.borderColor,
+                                color: GlobalStyles[theme]?.fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                             }]}>
-                                {trans[language].CLOSE_MAIL}
+                                {trans[language]?.RESPOND_MAIL}
                             </Text>
-                        </TouchableOpacity> */}
+                        </TouchableOpacity>
                     </View>
                 </Modal>
                 {/* </View> */}
@@ -598,7 +615,7 @@ export default function MyMails({ navigation }) {
                     transparent={true}
                     visible={modalVisible}
                 // onRequestClose={() => {
-                //     Alert.alert(trans[language].MAIL_SENT);
+                //     Alert.alert(trans[language]?.MAIL_SENT);
                 //     setModalVisible(!modalVisible);
                 // }}
                 >
@@ -619,8 +636,8 @@ export default function MyMails({ navigation }) {
                             borderWidth: 0.5,
                             elevation: 5,
                         }, {
-                            borderColor: GlobalStyles[theme].borderColor,
-                            backgroundColor: GlobalStyles[theme].background
+                            borderColor: GlobalStyles[theme]?.borderColor,
+                            backgroundColor: GlobalStyles[theme]?.background
                         }]}>
 
                             <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}
@@ -641,24 +658,24 @@ export default function MyMails({ navigation }) {
                                     width: '100%',
                                     height: 40,
                                     borderRadius: 10,
-                                    backgroundColor: GlobalStyles[theme].paperColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    backgroundColor: GlobalStyles[theme]?.paperColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
                                 <Text style={{
                                     textAlign: 'left',
                                     paddingLeft: 15,
                                     textAlignVertical: 'center',
                                     height: "100%",
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                    color: GlobalStyles[theme].fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor,
                                 }}>
-                                    {mailForm.reciverName ? mailForm.reciverName : trans[language].TO + ":"}
+                                    {mailForm.reciverName ? mailForm.reciverName : trans[language]?.TO + ":"}
                                 </Text>
                             </TouchableOpacity>
 
                             <TextInput
-                                placeholder={trans[language].SUBJECT}
-                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                placeholder={trans[language]?.SUBJECT}
+                                placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                 style={{
                                     width: "100%",
                                     height: 40,
@@ -668,17 +685,17 @@ export default function MyMails({ navigation }) {
                                     borderRadius: 10,
                                     marginVertical: 10,
                                     paddingLeft: 15,
-                                    color: GlobalStyles[theme].fontColor,
-                                    backgroundColor: GlobalStyles[theme].paperColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    backgroundColor: GlobalStyles[theme]?.paperColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}
                                 onChangeText={(text) => onChange('subject', text)}
                                 value={mailForm.subject}
                             />
 
                             <TextInput
-                                placeholder={trans[language].MESSAGE}
-                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                placeholder={trans[language]?.MESSAGE}
+                                placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                 style={{
                                     width: "100%",
                                     height: 250,
@@ -687,9 +704,9 @@ export default function MyMails({ navigation }) {
                                     textAlignVertical: 'top',
                                     paddingTop: 5,
                                     paddingLeft: 15,
-                                    color: GlobalStyles[theme].fontColor,
-                                    backgroundColor: GlobalStyles[theme].paperColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    backgroundColor: GlobalStyles[theme]?.paperColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                     // borderWidth: 1,
                                     // borderStyle: 'solid',
                                     // borderColor: 'black',
@@ -704,14 +721,14 @@ export default function MyMails({ navigation }) {
                             <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-around' }}>
                                 <TouchableOpacity
                                     style={[{
-                                        borderRadius: 20,
+                                        borderRadius: 10,
                                         elevation: 2,
                                         paddingHorizontal: 20,
                                         paddingVertical: 10
                                     }, {
                                         borderWidth: 0.5,
-                                        borderColor: GlobalStyles[theme].borderColor,
-                                        backgroundColor: GlobalStyles[theme].noColor
+                                        borderColor: GlobalStyles[theme]?.borderColor,
+                                        backgroundColor: GlobalStyles[theme]?.noColor
                                     }]}
                                     onPress={() => setMailForm(initialMailForm)}>
                                     <Text style={[{
@@ -719,32 +736,32 @@ export default function MyMails({ navigation }) {
                                         fontWeight: '500',
                                         textAlign: 'center',
                                     }, {
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                     }]}>
-                                        {trans[language].CLEAR_MAIL}
+                                        {trans[language]?.CLEAR_MAIL}
                                     </Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
                                     style={[{
-                                        borderRadius: 20,
+                                        borderRadius: 10,
                                         elevation: 2,
                                         paddingHorizontal: 20,
                                         paddingVertical: 10
                                     }, {
                                         borderWidth: 0.5,
-                                        borderColor: GlobalStyles[theme].borderColor,
-                                        backgroundColor: GlobalStyles[theme].yesColor
+                                        borderColor: GlobalStyles[theme]?.borderColor,
+                                        backgroundColor: GlobalStyles[theme]?.yesColor
                                     }]}
                                     onPress={() => sendMailFunc()}>
                                     <Text style={[{
                                         textAlign: 'center',
                                     }, {
-                                        color: GlobalStyles[theme].fontColor,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        color: GlobalStyles[theme]?.fontColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                     }]}>
-                                        {trans[language].SEND_MAIL}
+                                        {trans[language]?.SEND_MAIL}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
@@ -774,8 +791,8 @@ export default function MyMails({ navigation }) {
                             height: 500,
                             width: 350,
                         }, {
-                            borderColor: GlobalStyles[theme].borderColor,
-                            backgroundColor: GlobalStyles[theme].background
+                            borderColor: GlobalStyles[theme]?.borderColor,
+                            backgroundColor: GlobalStyles[theme]?.background
                         }]}>
                             <TouchableOpacity
                                 style={{
@@ -801,11 +818,11 @@ export default function MyMails({ navigation }) {
                                     marginBottom: 5,
                                     borderRadius: 10,
                                     borderWidth: 0.5,
-                                    borderColor: GlobalStyles[theme].borderColor,
-                                    backgroundColor: GlobalStyles[theme].paperColor,
+                                    borderColor: GlobalStyles[theme]?.borderColor,
+                                    backgroundColor: GlobalStyles[theme]?.paperColor,
                                 }}
-                                placeholder={trans[language].SEARCH}
-                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                placeholder={trans[language]?.SEARCH}
+                                placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                 onChangeText={(text) => modalSearch(text)}
                             />
                             <FlatList
@@ -821,15 +838,15 @@ export default function MyMails({ navigation }) {
                                         borderWidth: 0.5,
                                         elevation: 2,
                                     }, {
-                                        borderColor: GlobalStyles[theme].borderColor,
-                                        backgroundColor: GlobalStyles[theme].buttonColor
+                                        borderColor: GlobalStyles[theme]?.borderColor,
+                                        backgroundColor: GlobalStyles[theme]?.buttonColor
                                     }]}
                                 >
                                     <Text style={[{
                                         textAlign: "center"
                                     }, {
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }]}
                                         onPress={() => onChange('reciverName', item.value)}
                                     >
@@ -864,20 +881,20 @@ export default function MyMails({ navigation }) {
                             borderRadius: 10,
                             elevation: 5,
                         }, {
-                            borderColor: GlobalStyles[theme].borderColor,
-                            backgroundColor: GlobalStyles[theme].paperColor
+                            borderColor: GlobalStyles[theme]?.borderColor,
+                            backgroundColor: GlobalStyles[theme]?.paperColor
                         }]}>
                             <Text style={{
                                 fontSize: 16,
                                 marginBottom: 10,
-                                color: GlobalStyles[theme].fontColor,
+                                color: GlobalStyles[theme]?.fontColor,
                             }}>
-                                {trans[language].DONT_FORGET}
+                                {trans[language]?.DONT_FORGET}
                             </Text><Text style={{
                                 fontSize: 16,
-                                color: GlobalStyles[theme].fontColor,
+                                color: GlobalStyles[theme]?.fontColor,
                             }}>
-                                {trans[language].EMAIL_WILL_DEL}
+                                {trans[language]?.EMAIL_WILL_DEL}
                             </Text>
                             <TouchableOpacity
                                 style={{
@@ -890,7 +907,7 @@ export default function MyMails({ navigation }) {
                                     right: 0,
                                 }}
                                 onPress={() => { setModalAlert(false) }}>
-                                <Text style={{ color: GlobalStyles[theme].buttonColor, fontSize: 16 }}>OK</Text>
+                                <Text style={{ color: GlobalStyles[theme]?.buttonColor, fontSize: 16 }}>OK</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -917,15 +934,15 @@ export default function MyMails({ navigation }) {
                             borderRadius: 10,
                             elevation: 5,
                         }, {
-                            borderColor: GlobalStyles[theme].borderColor,
-                            backgroundColor: GlobalStyles[theme].paperColor
+                            borderColor: GlobalStyles[theme]?.borderColor,
+                            backgroundColor: GlobalStyles[theme]?.paperColor
                         }]}>
                             <Text style={{
                                 fontSize: 16,
                                 marginBottom: 10,
-                                color: GlobalStyles[theme].fontColor,
+                                color: GlobalStyles[theme]?.fontColor,
                             }}>
-                                {trans[language].PLEASE_ADD_THE_RECIPIENT}
+                                {trans[language]?.PLEASE_ADD_THE_RECIPIENT}
                             </Text>
                             <TouchableOpacity
                                 style={{
@@ -938,7 +955,7 @@ export default function MyMails({ navigation }) {
                                     right: 0,
                                 }}
                                 onPress={() => { setModalAlert1(false) }}>
-                                <Text style={{ color: GlobalStyles[theme].buttonColor, fontSize: 16 }}>OK</Text>
+                                <Text style={{ color: GlobalStyles[theme]?.buttonColor, fontSize: 16 }}>OK</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

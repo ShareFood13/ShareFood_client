@@ -19,13 +19,12 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { Context } from "../../context/UserContext";
 
-import PopupModal from '../../components/PopupModal';
 import { CLEAR_MSG } from '../../Redux/constants/constantsTypes';
 
-import GlobalStyles from '../../GlobalStyles';
 import BannerFollowers from '../../components/BannerFollowers';
 import UserAbout from '../../components/UserAbout';
 import UserCarrousel from '../../components/UserCarrousel';
+import PopupModal from '../../components/PopupModal';
 
 import { useFonts } from 'expo-font';
 import {
@@ -42,24 +41,33 @@ import {
     // Karla_400Regular
 } from '@expo-google-fonts/dev';
 import GlobalFontStyles from '../../GlobalFontStyles';
+import GlobalStyles from '../../GlobalStyles';
 import GridList from '../../components/GridList';
 
 import * as SplashScreen from 'expo-splash-screen';
 
+var theme = ""
+var language = ""
+var fontStyle = ""
+
+const windowWidth = Dimensions.get('window').width;
+
 export default function Home({ navigation }) {
     const { userContext, setUserContext } = useContext(Context)
     const dispatch = useDispatch()
-    const [showPictures, setShowPictures] = useState("grid")
-    const windowWidth = Dimensions.get('window').width;
-    var countRecipe = 0
     const isFocused = useIsFocused();
-
+    var countRecipe = 0
+    
     const [userId, setUserId] = useState(null)
     const [popupModal, setPopupModal] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
     const [moreHeight, setMoreHeight] = useState(true)
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    const [showPictures, setShowPictures] = useState("grid")
+
+    const redux = useSelector((state) => state)
+    redux?.recipe?.recipes?.map(recipe => !recipe.isDeleted && countRecipe++)
+    var otherUsersList = redux?.other?.otherUsers
+
     let [fontsLoaded] = useFonts({
         // Roboto_400Regular,
         // Lato_400Regular,
@@ -75,11 +83,14 @@ export default function Home({ navigation }) {
     })
 
     SplashScreen.preventAutoHideAsync();
-
-    const redux = useSelector((state) => state)
-
-    redux?.recipe?.recipes?.map(recipe => !recipe.isDeleted && countRecipe++)
-    var otherUsersList = redux?.other?.otherUsers
+    
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     useEffect(() => {
         if (redux?.auth?.message !== "") {
@@ -93,7 +104,7 @@ export default function Home({ navigation }) {
     }, [redux, isFocused])
 
     useEffect(() => {
-        redux?.auth?.authData?.result?.profile && setUserContext(redux.auth.authData.result.profile)
+        redux?.auth?.authData?.result?.profile && setUserContext(redux.auth.authData.result)
     }, [redux])
 
     useEffect(() => {
@@ -157,10 +168,10 @@ export default function Home({ navigation }) {
             <BannerFollowers
                 countRecipe={countRecipe}
                 userImage={redux?.auth?.authData?.result?.profile?.profilePicture.base64}
-                userContext={userContext}
+                userContext={userContext?.profile}
             />
 
-            <UserAbout userContext={userContext} setMoreHeight={setMoreHeight} moreHeight={moreHeight} />
+            <UserAbout userContext={userContext?.profile} setMoreHeight={setMoreHeight} moreHeight={moreHeight} />
 
             <UserCarrousel otherUsersList={otherUsersList} following={redux?.auth?.authData?.result?.profile?.following} navigation={navigation} userId={userId} />
 
@@ -169,7 +180,7 @@ export default function Home({ navigation }) {
         </>)
     }
 
-    return (<View style={{ backgroundColor: GlobalStyles[theme].background }} onLayout={onLayoutRootView}>
+    return (<View style={{ backgroundColor: GlobalStyles[theme]?.background }} onLayout={onLayoutRootView}>
         {showPictures === "grid" ?
             <FlatList
                 refreshControl={
@@ -214,11 +225,11 @@ export default function Home({ navigation }) {
                                         alignSelf: 'center',
                                         paddingVertical: 10,
                                         textAlign: 'justify',
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        fontSize: GlobalFontStyles[fontStyle].fontSize,
-                                        backgroundColor: GlobalStyles[theme].paperColor,
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        fontSize: GlobalFontStyles[fontStyle]?.fontSize,
+                                        backgroundColor: GlobalStyles[theme]?.paperColor,
                                         paddingHorizontal: 10,
-                                        color: GlobalStyles[theme].fontColor
+                                        color: GlobalStyles[theme]?.fontColor
                                     }}>
                                     {item.freeText}
                                 </Text>

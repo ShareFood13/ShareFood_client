@@ -43,8 +43,6 @@ import { CLEAR_MSG } from "../../Redux/constants/constantsTypes.js"
 
 import SwitchButton from '../../components/SwitchButton'
 
-import { Context } from "../../context/UserContext";
-
 import MealCard from '../../components/MealCard';
 import PopupModal from '../../components/PopupModal';
 import Banner from '../../components/Banner';
@@ -121,6 +119,11 @@ import {
 } from '@expo-google-fonts/dev';
 import GlobalFontStyles from '../../GlobalFontStyles';
 
+import { Context } from '../../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
+
 export default function MyMeals({ navigation }) {
     const [meal, setMeal] = useState()
     const [mealForm, setMealForm] = useState(initialState)
@@ -136,9 +139,9 @@ export default function MyMeals({ navigation }) {
     // const [modalVisible2, setModalVisible2] = useState(false)
     const [popupModal, setPopupModal] = useState(false)
     const [mealList, setMealList] = useState()
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -157,7 +160,6 @@ export default function MyMeals({ navigation }) {
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
 
-    // const { userContext, setUserContext } = useContext(Context)
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
@@ -208,6 +210,14 @@ export default function MyMeals({ navigation }) {
         }
     }, []);
 
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     useEffect(() => {
         setMealForm({ ...mealForm, status: show })
@@ -311,23 +321,23 @@ export default function MyMeals({ navigation }) {
                     alignItems: 'center',
                     borderWidth: 0.5,
                     borderStyle: 'solid',
-                    borderColor: GlobalStyles[theme].borderColor,
-                    backgroundColor: GlobalStyles[theme].buttonColor,
+                    borderColor: GlobalStyles[theme]?.borderColor,
+                    backgroundColor: GlobalStyles[theme]?.buttonColor,
                 }} >
                 <Text style={{
                     color: 'white',
                     fontSize: 20,
-                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                 }}
                     value={mealForm.specialDiet}>
-                    {trans[language].CREATE_A_MEAL}
+                    {trans[language]?.CREATE_A_MEAL}
                 </Text>
             </TouchableOpacity>
         </>
     }
 
     return (
-        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme]?.background }]}>
             {/* <ScrollView
                 style={{ width: windowWidth }}
                 refreshControl={
@@ -338,13 +348,13 @@ export default function MyMeals({ navigation }) {
                     />
                 }
             > */}
-            {/* <Banner title={trans[language].MY_MEALS} /> */}
+            {/* <Banner title={trans[language]?.MY_MEALS} /> */}
 
             <FlatList
                 data={mealList}
                 showsVerticalScrollIndicator={false}
                 style={{ flex: 1 }}
-                contentContainerStyle={{ backgroundColor: GlobalStyles[theme].background }}
+                contentContainerStyle={{ backgroundColor: GlobalStyles[theme]?.background }}
                 renderItem={({ item }) => !item?.isDeleted &&
                     <MealCard
                         meal={item}
@@ -415,8 +425,8 @@ export default function MyMeals({ navigation }) {
                         padding: 10,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].background,
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.background,
                     }}>
                         <TouchableOpacity onPress={() => closeModal()}
                             style={{
@@ -439,13 +449,13 @@ export default function MyMeals({ navigation }) {
                                 paddingLeft: 15,
                                 borderRadius: 10,
                                 borderWidth: 0.5,
-                                borderColor: GlobalStyles[theme].borderColor,
-                                backgroundColor: GlobalStyles[theme].paperColor,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                color: GlobalStyles[theme].fontColor,
+                                borderColor: GlobalStyles[theme]?.borderColor,
+                                backgroundColor: GlobalStyles[theme]?.paperColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
                             }}
-                            placeholder={trans[language].MEAL_NAME}
-                            placeholderTextColor={GlobalStyles[theme].fontColor}
+                            placeholder={trans[language]?.MEAL_NAME}
+                            placeholderTextColor={GlobalStyles[theme]?.fontColor}
                             value={mealForm.mealName}
                             onChangeText={text => handleOnChange('mealName', text)} />
 
@@ -457,11 +467,11 @@ export default function MyMeals({ navigation }) {
                             marginBottom: 10,
                             borderRadius: 10,
                             borderWidth: 0.5,
-                            borderColor: GlobalStyles[theme].borderColor,
-                            backgroundColor: GlobalStyles[theme].paperColor,
+                            borderColor: GlobalStyles[theme]?.borderColor,
+                            backgroundColor: GlobalStyles[theme]?.paperColor,
                         }}>
                             <TouchableOpacity onPress={() => setModalAlert(true)} style={{ paddingLeft: 10 }}>
-                                <FontAwesome5 name="hashtag" size={24} color={GlobalStyles[theme].fontColor} />
+                                <FontAwesome5 name="hashtag" size={24} color={GlobalStyles[theme]?.fontColor} />
                             </TouchableOpacity>
 
                             <TextInput
@@ -470,11 +480,11 @@ export default function MyMeals({ navigation }) {
                                     width: "100%",
                                     paddingLeft: 10,
                                     fontSize: 16,
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                 }}
-                                placeholder={trans[language].ENTER_YOUR_TAGS}
-                                placeholderTextColor={GlobalStyles[theme].fontColor}
+                                placeholder={trans[language]?.ENTER_YOUR_TAGS}
+                                placeholderTextColor={GlobalStyles[theme]?.fontColor}
                                 maxLength={21}
                                 onChangeText={text => handleOnChange('tags', text)} />
                         </View>
@@ -487,8 +497,8 @@ export default function MyMeals({ navigation }) {
                             marginBottom: 10,
                             borderRadius: 10,
                             borderWidth: 0.5,
-                            borderColor: GlobalStyles[theme].borderColor,
-                            backgroundColor: GlobalStyles[theme].paperColor,
+                            borderColor: GlobalStyles[theme]?.borderColor,
+                            backgroundColor: GlobalStyles[theme]?.paperColor,
                         }} >
                             <ScrollView showsHorizontalScrollIndicator={false} horizontal>
                                 {mealForm.tags.map(item =>
@@ -496,14 +506,14 @@ export default function MyMeals({ navigation }) {
                                         style={{
                                             fontSize: 14,
                                             overflow: 'hidden',
-                                            color: GlobalStyles[theme].fontColor,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                            color: GlobalStyles[theme]?.fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                                         }}
                                         onPress={(text) => remove(text, "tags")}>{item}, </Text>)}
                             </ScrollView>
                         </View>
 
-                        <SwitchButton text01={trans[language].PUBLIC} text02={trans[language].PRIVATE} show={show} setShow={setShow} />
+                        <SwitchButton text01={trans[language]?.PUBLIC} text02={trans[language]?.PRIVATE} show={show} setShow={setShow} />
 
                         {update ? <TouchableOpacity
                             style={{
@@ -517,11 +527,11 @@ export default function MyMeals({ navigation }) {
                                 borderRadius: 10,
                                 borderStyle: 'solid',
                                 borderWidth: 0.5,
-                                borderColor: GlobalStyles[theme].borderColor,
-                                backgroundColor: GlobalStyles[theme].buttonColor,
+                                borderColor: GlobalStyles[theme]?.borderColor,
+                                backgroundColor: GlobalStyles[theme]?.buttonColor,
                             }}
                             onPress={() => updateMealFc()}>
-                            <Text style={{ color: GlobalStyles[theme].fontColor, fontFamily: GlobalFontStyles[fontStyle].fontStyle, }}>{trans[language].UPDATE}</Text>
+                            <Text style={{ color: GlobalStyles[theme]?.fontColor, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, }}>{trans[language]?.UPDATE}</Text>
                         </TouchableOpacity>
                             : <TouchableOpacity
                                 style={{
@@ -535,11 +545,11 @@ export default function MyMeals({ navigation }) {
                                     borderRadius: 10,
                                     borderStyle: 'solid',
                                     borderWidth: 0.5,
-                                    borderColor: GlobalStyles[theme].borderColor,
-                                    backgroundColor: GlobalStyles[theme].buttonColor,
+                                    borderColor: GlobalStyles[theme]?.borderColor,
+                                    backgroundColor: GlobalStyles[theme]?.buttonColor,
                                 }}
                                 onPress={() => saveMeal()}>
-                                <Text style={{ color: GlobalStyles[theme].fontColor, fontFamily: GlobalFontStyles[fontStyle].fontStyle, }}>{trans[language].SAVE}</Text>
+                                <Text style={{ color: GlobalStyles[theme]?.fontColor, fontFamily: GlobalFontStyles[fontStyle]?.fontStyle, }}>{trans[language]?.SAVE}</Text>
                             </TouchableOpacity>
                         }
                     </View>
@@ -571,7 +581,7 @@ export default function MyMeals({ navigation }) {
                     flex: 1,
                     justifyContent: "center",
                     alignItems: "center",
-                    backgroundColor: GlobalStyles[theme].background
+                    backgroundColor: GlobalStyles[theme]?.background
                 }}>
                     <View style={[{
                         width: 350,
@@ -583,20 +593,20 @@ export default function MyMeals({ navigation }) {
                         borderRadius: 10,
                         elevation: 5,
                     }, {
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].paperColor
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.paperColor
                     }]}>
                         <Text style={{
                             fontSize: 16,
                             marginBottom: 10,
-                            color: GlobalStyles[theme].fontColor,
+                            color: GlobalStyles[theme]?.fontColor,
                         }}>
-                            {trans[language].HASHTAG}
+                            {trans[language]?.HASHTAG}
                         </Text><Text style={{
                             fontSize: 16,
-                            color: GlobalStyles[theme].fontColor,
+                            color: GlobalStyles[theme]?.fontColor,
                         }}>
-                            {trans[language].HASHTAG_INFO}
+                            {trans[language]?.HASHTAG_INFO}
                         </Text>
                         <TouchableOpacity
                             style={{
@@ -609,7 +619,7 @@ export default function MyMeals({ navigation }) {
                                 right: 0,
                             }}
                             onPress={() => { setModalAlert(false) }}>
-                            <Text style={{ color: GlobalStyles[theme].buttonColor, fontSize: 16 }}>OK</Text>
+                            <Text style={{ color: GlobalStyles[theme]?.buttonColor, fontSize: 16 }}>OK</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

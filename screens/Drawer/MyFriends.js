@@ -37,6 +37,10 @@ import GlobalFontStyles from '../../GlobalFontStyles';
 import trans from '../../Language'
 import GlobalStyles from '../../GlobalStyles';
 
+var theme = ""
+var language = ""
+var fontStyle = ""
+
 export default function MyFriends({ navigation }) {
     const windowWidth = Dimensions.get('window').width;
     const { userContext, setUserContext } = useContext(Context)
@@ -47,9 +51,9 @@ export default function MyFriends({ navigation }) {
     const isFocused = useIsFocused()
     const redux = useSelector((state) => state)
 
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -77,6 +81,14 @@ export default function MyFriends({ navigation }) {
     }, []);
 
     useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
+
+    useEffect(() => {
         var result = []
         otherUsersList.map(user => redux?.auth?.authData?.result?.profile?.following?.includes(user._id) && result.push(user))
         console.log(result)
@@ -92,8 +104,8 @@ export default function MyFriends({ navigation }) {
     }
 
     return (
-        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
-            {/* <Banner title={trans[language].MY_FRIENDS} /> */}
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme]?.background }]}>
+            {/* <Banner title={trans[language]?.MY_FRIENDS} /> */}
             {/* {otherUsersList.map(user => redux?.auth?.authData?.result?.profile?.following?.includes(user._id) &&
                 <TouchableOpacity onPress={() => openOtherUser(user._id)} key={user._id}>
                     <View style={{ width: windowWidth / 3, height: 150, borderRadius: 10, borderWidth: 1, borderColor: 'black', marginHorizontal: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white' }}>
@@ -128,13 +140,13 @@ export default function MyFriends({ navigation }) {
                             justifyContent: 'center',
                             borderRadius: 10,
                             borderWidth: 0.5,
-                            borderColor: GlobalStyles[theme].borderColor,
-                            backgroundColor: GlobalStyles[theme].paperColor,
+                            borderColor: GlobalStyles[theme]?.borderColor,
+                            backgroundColor: GlobalStyles[theme]?.paperColor,
                         }}>
                             <ImageBackground
                                 // source={require('../assets/images/menu-bg.jpeg')}
                                 // source={{ uri: redux?.auth?.authData?.result?.profile?.backgroundPicture }}
-                                source={{ uri: userContext?.backgroundPicture?.base64 }}
+                                source={{ uri: userContext?.profile?.backgroundPicture?.base64 }}
                                 style={{ width: '100%', height: 90, justifyContent: 'center', }}
                             >
                                 <Image
@@ -146,7 +158,7 @@ export default function MyFriends({ navigation }) {
                                         width: 65,
                                         borderRadius: 35,
                                         borderWidth: 0.5,
-                                        borderColor: GlobalStyles[theme].borderColor,
+                                        borderColor: GlobalStyles[theme]?.borderColor,
                                         marginLeft: 5
                                     }}
                                 />
@@ -158,8 +170,8 @@ export default function MyFriends({ navigation }) {
                                 textAlignVertical: 'center',
                                 fontSize: 16,
                                 marginBottom: 5,
-                                color: GlobalStyles[theme].fontColor,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                             }}>
                                 {item.userName}
                             </Text>

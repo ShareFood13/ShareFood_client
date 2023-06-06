@@ -47,17 +47,21 @@ import {
 } from '@expo-google-fonts/dev';
 import GlobalFontStyles from '../GlobalFontStyles';
 import trans from '../Language'
+import { useContext } from 'react';
 
-
+import { Context } from '../context/UserContext';
+var theme = ""
+var language = ""
+var fontStyle = ""
 const TodoList = ({ navigation, answer, openShopListId, title }) => {
     const [shopList, setShopList] = useState({})
     const [newList, setNewList] = useState("")
     const [modalVisible, setModalVisible] = useState(false)
     const [userId, setUserId] = useState("")
     const [toDelete, setToDelete] = useState(false)
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -72,7 +76,14 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
         Karla_400Regular
     })
     const dispatch = useDispatch()
-
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
     // const isFocused = useIsFocused();
 
     useEffect(() => {
@@ -154,16 +165,16 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                         borderStyle: 'solid',
                         borderWidth: 0.5,
                     }, {
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].yesColor
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.yesColor
                     }]}
                         onPress={saveShop}
                     >
                         <Text style={{
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>
-                            {trans[language].SAVE_SHOP_LIST}
+                            {trans[language]?.SAVE_SHOP_LIST}
                         </Text>
                     </TouchableOpacity>
                     {answer?.list?.some(item => item.isDone === true || item.isDone === false) &&
@@ -186,15 +197,15 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                             borderStyle: 'solid',
                             borderWidth: 0.5,
                         }, {
-                            borderColor: GlobalStyles[theme].borderColor,
-                            backgroundColor: GlobalStyles[theme].noColor
+                            borderColor: GlobalStyles[theme]?.borderColor,
+                            backgroundColor: GlobalStyles[theme]?.noColor
                         }]}
                             onPress={openDeleteModal}>
                             <Text style={{
-                                color: GlobalStyles[theme].fontColor,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                color: GlobalStyles[theme]?.fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                             }}>
-                                {trans[language].DELETE_SHOP_LIST}
+                                {trans[language]?.DELETE_SHOP_LIST}
                             </Text>
                         </TouchableOpacity>}
                 </View>
@@ -218,16 +229,16 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                         borderStyle: 'solid',
                         borderWidth: 0.5,
                     }, {
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].buttonColor
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.buttonColor
                     }]}
                         onPress={() => navigation.navigate('MyDrawer', { screen: 'Home' })}
                     >
                         <Text style={{
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>
-                            {trans[language].BACK_HOME}
+                            {trans[language]?.BACK_HOME}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -270,7 +281,7 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                             justifyContent: 'center',
                             alignSelf: 'center',
                             alignItems: 'center',
-                            backgroundColor: GlobalStyles[theme].paperColor
+                            backgroundColor: GlobalStyles[theme]?.paperColor
                         },
                         (index === 0) && {
                             borderTopLeftRadius: 10,
@@ -284,8 +295,8 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                         // onPress={() => setChecked(!checked)}>
                         onPress={() => handleCheck(item._id)}>
                         {item.isDone ?
-                            <MaterialIcons name="check-box" size={30} color={GlobalStyles[theme].yesColor} style={{ justifyContent: 'center', backgroundColor: GlobalStyles[theme].paperColor }} />
-                            : <MaterialIcons name="check-box-outline-blank" size={30} color={GlobalStyles[theme].noColor} style={{ justifyContent: 'center', backgroundColor: GlobalStyles[theme].paperColor }} />}
+                            <MaterialIcons name="check-box" size={30} color={GlobalStyles[theme]?.yesColor} style={{ justifyContent: 'center', backgroundColor: GlobalStyles[theme]?.paperColor }} />
+                            : <MaterialIcons name="check-box-outline-blank" size={30} color={GlobalStyles[theme]?.noColor} style={{ justifyContent: 'center', backgroundColor: GlobalStyles[theme]?.paperColor }} />}
                         <View style={{ flexDirection: 'row', width: "85%", justifyContent: 'center', }}>
                             <Text style={{
                                 width: "100%",
@@ -293,8 +304,8 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                                 paddingLeft: 5,
                                 textAlignVertical: 'center',
                                 textDecorationLine: item.isDone ? 'line-through' : 'none',
-                                color: GlobalStyles[theme].fontColor,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle,
+                                color: GlobalStyles[theme]?.fontColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
                             }}>
                                 {/* Qty: {item.quantity} Un: {item.units} Prod: {item.product} */}
                                 {item.quantity} {item.units} of {item.product}
@@ -304,7 +315,7 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                 keyExtractor={item => item._id}
                 // extraData={selectedId}
                 // ListFooterComponent={<Footer />}
-                ListFooterComponentStyle={{ flex: 1, justifyContent: "flex-end", backgroundColor: GlobalStyles[theme].noColor }}
+                ListFooterComponentStyle={{ flex: 1, justifyContent: "flex-end", backgroundColor: GlobalStyles[theme]?.noColor }}
             />
             <Footer />
             <Modal
@@ -321,8 +332,8 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                         justifyContent: 'center',
                         borderWidth: 0.5,
                         borderRadius: 10,
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].background,
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.background,
                     }}>
 
                         {!toDelete &&
@@ -344,10 +355,10 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                             }}>
                                 <Text style={{
                                     fontSize: 16,
-                                    color: GlobalStyles[theme].fontColor,
-                                    fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                    color: GlobalStyles[theme]?.fontColor,
+                                    fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                 }}>
-                                    {trans[language].ARE_YOU_SURE}
+                                    {trans[language]?.ARE_YOU_SURE}
                                 </Text>
                                 <View style={{
                                     flexDirection: 'row',
@@ -362,17 +373,17 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                                         justifyContent: 'center',
                                         borderWidth: 0.5,
                                         borderRadius: 10,
-                                        borderColor: GlobalStyles[theme].borderColor,
-                                        backgroundColor: GlobalStyles[theme].noColor,
+                                        borderColor: GlobalStyles[theme]?.borderColor,
+                                        backgroundColor: GlobalStyles[theme]?.noColor,
 
                                     }}
                                         onPress={() => { setModalVisible(false), setToDelete(false) }
                                         }>
                                         <Text style={{
-                                            color: GlobalStyles[theme].fontColor,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                            color: GlobalStyles[theme]?.fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                         }}>
-                                            {trans[language].CANCEL}
+                                            {trans[language]?.CANCEL}
                                         </Text>
                                     </TouchableOpacity>
 
@@ -383,16 +394,16 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                                         justifyContent: 'center',
                                         borderWidth: 0.5,
                                         borderRadius: 10,
-                                        borderColor: GlobalStyles[theme].borderColor,
-                                        backgroundColor: GlobalStyles[theme].yesColor,
+                                        borderColor: GlobalStyles[theme]?.borderColor,
+                                        backgroundColor: GlobalStyles[theme]?.yesColor,
 
                                     }}
                                         onPress={deleteShop}>
                                         <Text style={{
-                                            color: GlobalStyles[theme].fontColor,
-                                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                            color: GlobalStyles[theme]?.fontColor,
+                                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                         }}>
-                                            {trans[language].DELETE}
+                                            {trans[language]?.DELETE}
                                         </Text>
                                     </TouchableOpacity>
 
@@ -404,23 +415,23 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                                     <Text style={{
                                         width: "85%",
                                         fontSize: 16,
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle,
-                                        color: GlobalStyles[theme].fontColor
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle,
+                                        color: GlobalStyles[theme]?.fontColor
                                     }}>
-                                        {trans[language].SUBMIT} {trans[language].YOUR_SHOP_PROGRESS}?
+                                        {trans[language]?.SUBMIT} {trans[language]?.YOUR_SHOP_PROGRESS}?
                                     </Text>
                                     <View style={{ height: 50 }} />
                                 </>
                                 : <>
                                     <Text style={{
                                         width: "85%",
-                                        fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                        fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                                     }}>
-                                        {trans[language].ENTER} {trans[language].SHOP_LIST_NAME}:
+                                        {trans[language]?.ENTER} {trans[language]?.SHOP_LIST_NAME}:
                                     </Text>
                                     <TextInput
                                         style={styles.outPuts}
-                                        placeholder={trans[language].SHOP_LIST_NAME}
+                                        placeholder={trans[language]?.SHOP_LIST_NAME}
                                         // value={eventForm.eventName}
                                         onChangeText={text => handleOnChange('shopListName', text)} />
                                 </>
@@ -435,10 +446,10 @@ const TodoList = ({ navigation, answer, openShopListId, title }) => {
                             onPress={submitShopList}>
                             <Text style={{
                                 fontSize: 15,
-                                color: GlobalStyles[theme].buttonColor,
-                                fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                                color: GlobalStyles[theme]?.buttonColor,
+                                fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                             }}>
-                                {trans[language].SUBMIT}
+                                {trans[language]?.SUBMIT}
                             </Text>
                         </TouchableOpacity>}
                     </View>

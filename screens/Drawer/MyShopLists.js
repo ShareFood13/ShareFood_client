@@ -43,6 +43,12 @@ import {
 import GlobalFontStyles from '../../GlobalFontStyles';
 import trans from '../../Language'
 
+import { Context } from '../../context/UserContext';
+import { useContext } from 'react';
+var theme = ""
+var language = ""
+var fontStyle = ""
+
 export default function MyShopLists({ navigation }) {
     const dispatch = useDispatch()
     const redux = useSelector((state) => state)
@@ -50,9 +56,9 @@ export default function MyShopLists({ navigation }) {
 
     const [userId, setUserId] = useState("")
     const [popupModal, setPopupModal] = useState(false)
-    const [language, setLanguage] = useState("en")
-    const [theme, setTheme] = useState("stylesLight")
-    const [fontStyle, setFontStyle] = useState("Montserrat")
+    // const [language, setLanguage] = useState("en")
+    // const [theme, setTheme] = useState("stylesLight")
+    // const [fontStyle, setFontStyle] = useState("Montserrat")
     let [fontsLoaded] = useFonts({
         Roboto_400Regular,
         Lato_400Regular,
@@ -67,6 +73,14 @@ export default function MyShopLists({ navigation }) {
         Karla_400Regular
     })
 
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
     useEffect(() => {
         if (redux?.shopList.message !== "") {
             setPopupModal(true)
@@ -98,7 +112,7 @@ export default function MyShopLists({ navigation }) {
                 style={{
                     height: 2,
                     width: '100%',
-                    backgroundColor: GlobalStyles[theme].fontColor,
+                    backgroundColor: GlobalStyles[theme]?.fontColor,
                     alignSelf: 'center'
                 }}
             />
@@ -106,9 +120,9 @@ export default function MyShopLists({ navigation }) {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: GlobalStyles[theme].background }]}>
+        <View style={[styles.container, { backgroundColor: GlobalStyles[theme]?.background }]}>
 
-            {/* <Banner title={trans[language].MY_SHOP_LIST} /> */}
+            {/* <Banner title={trans[language]?.MY_SHOP_LIST} /> */}
 
             <FlatList
                 data={redux.shopList.shopLists}
@@ -126,8 +140,8 @@ export default function MyShopLists({ navigation }) {
                         alignSelf: 'center',
                         alignItems: 'center',
                         borderWidth: 0.5,
-                        borderColor: GlobalStyles[theme].borderColor,
-                        backgroundColor: GlobalStyles[theme].paperColor,
+                        borderColor: GlobalStyles[theme]?.borderColor,
+                        backgroundColor: GlobalStyles[theme]?.paperColor,
                         // {index} === 0)&& borderTopLeftRadius:  10,
                         // borderTopRightRadius: ({index} === 0) && 10,
                         // borderBottomLeftRadius:({index} === redux.shopList.shopLists.lenght -1) &&  10,
@@ -146,8 +160,8 @@ export default function MyShopLists({ navigation }) {
                         // onPress={() => setChecked(!checked)}>
                         onPress={() => openShopList(item)}>
                         <Text style={{
-                            color: GlobalStyles[theme].fontColor,
-                            fontFamily: GlobalFontStyles[fontStyle].fontStyle
+                            color: GlobalStyles[theme]?.fontColor,
+                            fontFamily: GlobalFontStyles[fontStyle]?.fontStyle
                         }}>
                             {item.shopListName}
                         </Text>

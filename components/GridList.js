@@ -6,10 +6,24 @@ import {
 } from 'react-native'
 import { MaterialIcons, Foundation } from '@expo/vector-icons';
 import GlobalStyles from '../GlobalStyles';
-
+import { useContext } from 'react';
+import { Context } from '../context/UserContext';
+import { useEffect } from 'react';
+var theme = ""
+var language = ""
+var fontStyle = ""
 
 const GridList = ({ showPictures, setShowPictures }) => {
-    const [theme, setTheme] = useState("stylesLight")
+    // const [theme, setTheme] = useState("stylesLight")
+
+    const { userContext, setUserContext } = useContext(Context)
+    useEffect(() => {
+        if (userContext) {
+            theme = userContext?.settings?.theme
+            language = userContext?.settings?.language?.value
+            fontStyle = userContext?.settings?.fontStyle
+        }
+    }, [userContext])
 
     return (
         <View
@@ -29,11 +43,11 @@ const GridList = ({ showPictures, setShowPictures }) => {
                 height: '100%',
                 width: '50%',
                 borderBottomWidth: showPictures === "grid" ? 2 : 0,
-                borderBottomColor: GlobalStyles[theme].fontColor,
+                borderBottomColor: GlobalStyles[theme]?.fontColor,
                 marginBottom: 10,
             }}>
                 <TouchableOpacity onPress={() => setShowPictures("grid")}>
-                    <MaterialIcons name="grid-on" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                    <MaterialIcons name="grid-on" size={24} color={GlobalStyles[theme]?.fontColor} style={{ width: 40, textAlign: 'center' }} />
                 </TouchableOpacity>
             </View>
             <View style={{
@@ -43,11 +57,11 @@ const GridList = ({ showPictures, setShowPictures }) => {
                 height: '100%',
                 width: '50%',
                 borderBottomWidth: showPictures === "grid" ? 0 : 2,
-                borderBottomColor: GlobalStyles[theme].fontColor,
+                borderBottomColor: GlobalStyles[theme]?.fontColor,
                 marginBottom: 10,
             }}>
                 <TouchableOpacity onPress={() => setShowPictures("list")}>
-                    <Foundation name="list" size={24} color={GlobalStyles[theme].fontColor} style={{ width: 40, textAlign: 'center' }} />
+                    <Foundation name="list" size={24} color={GlobalStyles[theme]?.fontColor} style={{ width: 40, textAlign: 'center' }} />
                 </TouchableOpacity>
             </View>
         </View>

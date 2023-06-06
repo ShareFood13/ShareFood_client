@@ -12,7 +12,7 @@ import {
     EvilIcons,
 } from '@expo/vector-icons';
 
-import products from '../../assets/arrays/data'
+import products from '../../../assets/arrays/data'
 
 
 // const products = [
